@@ -1,20 +1,5 @@
 #!/usr/bin/env bash
-
 set -e
-
-if [ -z "$SKIP_PROMPT" ]; then
-  echo "---------------   macOS support   ---------------"
-  echo "Running openpilot natively on macOS is not officially supported."
-  echo "It might build, some parts of it might work, but it's not fully tested, so there might be some issues."
-  echo 
-  echo "Check out devcontainers for a seamless experience (see tools/README.md)."
-  echo "-------------------------------------------------"
-  echo -n "Are you sure you want to continue? [y/N] "
-  read -r response
-  if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
-    exit 1
-  fi
-fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 ROOT="$(cd $DIR/../ && pwd)"
@@ -28,27 +13,14 @@ fi
 
 # Install brew if required
 if [[ $(command -v brew) == "" ]]; then
-  echo "Installing Hombrew"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  echo "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   echo "[ ] installed brew t=$SECONDS"
 
-  # make brew available now
-  if [[ $ARCH == "x86_64" ]]; then
-      echo 'eval "$(/usr/local/homebrew/bin/brew shellenv)"' >> $RC_FILE
-      eval "$(/usr/local/homebrew/bin/brew shellenv)"
-  else
-      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $RC_FILE
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
-fi
-
 brew bundle --file=- <<-EOS
-brew "catch2"
-brew "cmake"
 brew "cppcheck"
 brew "git-lfs"
 brew "zlib"
-brew "bzip2"
 brew "capnp"
 brew "coreutils"
 brew "eigen"
@@ -59,13 +31,44 @@ brew "libusb"
 brew "libtool"
 brew "llvm"
 brew "openssl@3.0"
-brew "pyenv"
-brew "pyenv-virtualenv"
 brew "qt@5"
 brew "zeromq"
-brew "gcc@13"
 cask "gcc-arm-embedded"
 brew "portaudio"
+brew "gcc@13"
+
+# other tools
+brew "zsh"
+brew "tmux"
+brew "curl"
+brew "wget"
+brew "openvpn"
+brew "jq"
+brew "ripgrep"
+brew "fzf"
+brew "parallel"
+brew "pigz"
+
+# applications
+cask "1password"
+cask "google-chrome"
+cask "discord"
+cask "xquartz"
+cask "ubiquiti-unifi-controller"
+cask "alacritty"
+cask "zed"
+cask "font-hack-nerd-font"
+cask "docker"
+cask "rectangle"
+cask "flux"
+cask "balenaetcher"
+cask "zotero"
+cask "netron"
+brew "speedtest-cli"
+cask "spotify"
+cask "kindle"
+cask "obs"
+cask "zoom"
 EOS
 
 echo "[ ] finished brew install t=$SECONDS"
@@ -109,7 +112,12 @@ else
   brew link qt@5
 fi
 
+# setup zsh for interactive shell
+chsh -s $(which zsh)
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
 echo
-echo "----   OPENPILOT SETUP DONE   ----"
+echo "----   MAC SETUP DONE   ----"
 echo "Open a new shell or configure your active shell env by running:"
 echo "source $RC_FILE"
