@@ -1,6 +1,4 @@
 Host *
-  ForwardX11 yes
-  ForwardX11Trusted yes
   IgnoreUnknown UseKeychain
   UseKeychain yes
   AddKeysToAgent yes

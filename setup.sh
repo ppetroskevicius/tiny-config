@@ -1,117 +1,223 @@
-#!/bin/bash
+#/bin/bash
+set -e
+set -x
 
-# Bootstrap for the new Ubuntu or Mac machine
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-# Customizable variables
-OP_ACCOUNT="my" # account shorthand in case signing in into multiple accounts
-OP_SSH_KEY_NAME="build/my-ssh-key/id_ed25519"
-GIT_USERNAME="ppetroskevicius"
-GIT_EMAIL="p.petroskevicius@gmail.com"
-GIT_REPO="tiny-config"
+update_packages() {
+  sudo apt update && sudo apt upgrade -y
+}
 
-# Install Homebrew for macOS
-if [ "$OSTYPE" == "darwin"* ] && ! command -v brew >/dev/null; then
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+setup_git() {
+  GIT_USERNAME="ppetroskevicius"
+  GIT_EMAIL="p.petroskevicius@gmail.com"
 
-# Install essential packages and tools
-if [ "$OSTYPE" == "linux"* ]; then
-	sudo apt update
-	sudo apt install -y curl unzip openssh-client git software-properties-common
-elif [ "$OSTYPE" == "darwin"* ]; then
-	brew install git
-fi
+  sudo apt install -y git tmux htop vim
+  git config --global user.name "$GIT_USERNAME"
+  git config --global user.email "$GIT_EMAIL"
+}
 
-# Install 1Password CLI if not installed
-if ! command -v op >/dev/null; then
-	echo "1Password CLI (op) is not installed. Installing..."
-	if [ "$OSTYPE" == "linux"* ]; then
+install_1password_cli() {
+  if ! command -v op >/dev/null; then
+    curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
+    sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+    curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+    sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+    curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+    sudo apt update && sudo apt install -y 1password-cli
+  fi
+}
 
-		# Add the key for the 1Password apt repository:
-		curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-			sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+setup_credentials() {
+  OP_ACCOUNT="my"
+  OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
 
-		# Add the 1Password apt repository:
-		echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" |
-			sudo tee /etc/apt/sources.list.d/1password.list
+  eval "$(op signin --account $OP_ACCOUNT)"
 
-		# Add the debsig-verify policy:
-		sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
-		curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
-			sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
-		sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
-		curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-			sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+  mkdir -p ~/.ssh && chmod 700 ~/.ssh
 
-		# Install 1Password CLI:
-		sudo apt update && sudo apt install -y 1password-cli
+  op read --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
+  echo "Successfully retrieved SSH key."
+  chmod 600 ~/.ssh/id_ed25519
+  ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+  cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+  chmod 600 ~/.ssh/authorized_keys
 
-	elif [ "$OSTYPE" == "darwin"* ]; then
-		brew install 1password-cli
-	fi
-	echo "1Password CLI installed successfully."
-fi
+  ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-# Check that 1Password CLI installed successfully
-op --version
+  systemctl --user enable ssh-agent.service
+  systemctl --user restart ssh-agent.service
+}
 
-# Sign in to 1Password
-# Use the eval to save the session token to an environment variable automatically
-eval $(op signin --account $OP_ACCOUNT)
+install_dotfiles() {
+  DIR=$(dirname $(realpath $0))   # Get absolute path of script directory
+  cd $DIR
 
-# List accounts added to 1Password on this machine
-op account list
+  mkdir -p $HOME/.config/
 
-# Create the .ssh directory if it doesn't exist
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
+  rm -f $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc
 
-# Temporary file to store the SSH key
-temp_key=$(mktemp)
+  ln -sf $DIR/.sshconfig $HOME/.ssh/config
+  ln -sf $DIR/.bash_profile $HOME
+  ln -sf $DIR/.bashrc $HOME
+  ln -sf $DIR/.zprofile $HOME
+  ln -sf $DIR/.zshrc $HOME
+  ln -sf $DIR/.tmux.conf $HOME
+  ln -sf $DIR/.vimrc $HOME
+  ln -sf $DIR/.gitconfig $HOME
+  ln -sf $DIR/.alacritty.toml $HOME
+  ln -sf $DIR/.i3 $HOME
+  ln -sf $DIR/.xinitrc $HOME
+  ln -sf $DIR/.xinputrc $HOME
+  ln -sf $DIR/start_i3.sh $HOME
+  ln -sf $DIR/start_gnome.sh $HOME
 
-# Attempt to retrieve the SSH key
-if op read -o "$temp_key" op://$OP_SSH_KEY_NAME; then
-	# Check if the temporary file is empty or not
-	if [ -s "$temp_key" ]; then
-		echo "Successfully retrieved the SSH key."
-		# Overwrite the old key
-		mv "$temp_key" ~/.ssh/id_ed25519
-		chmod 600 ~/.ssh/id_ed25519
-		# Generate corresponding public key
-		ssh-keygen -y -f ~/.ssh/id_ed25519 >~/.ssh/id_ed25519.pub
-	else
-		echo "SSH key is empty. Not overwriting the existing key."
-		rm -f "$temp_key"
-	fi
-else
-	echo "Failed to retrieve the SSH key."
-	rm -f "$temp_key"
-fi
+  mkdir -p $HOME/.config/zed/
+  ln -sf $DIR/zed/keymap.json $HOME/.config/zed/
+  ln -sf $DIR/zed/settings.json $HOME/.config/zed/
 
-# Add the key to the SSH agent
-if command -v ssh-add >/dev/null; then
-	eval "$(ssh-agent -s)"
-	ssh-add -l
-	ssh-add ~/.ssh/id_ed25519
-	ssh-add -l
-	echo "ssh-add is available; added key to the agent succesfully."
-else
-	echo "ssh-add is not available; skipping addition to SSH agent."
-fi
+  rm -rf $HOME/.config/alacritty
+  mkdir -p $HOME/.config/alacritty/themes
+  git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
+}
 
-# Git Configuration
-git config --global user.name $GIT_USERNAME
-git config --global user.email $GIT_EMAIL
+install_gnome() {
+  # sudo apt-mark hold firefox
+  # sudo DEBIAN_FRONTEND=noninteractive apt install -y gnome-core
+  sudo apt install -y gnome-session
+  # sudo apt install -y gnome-extensions-app
+  # sudo apt install -y gnome-tweaks
+  # sudo apt install -y gnome-desktop
+  #startx /usr/bin/gnome-session
+}
 
-# Manually add GitHub's SSH key to the known_hosts file, so that it does not ask when accesing for the first time.
-ssh-keyscan github.com >> ~/.ssh/known_hosts
+setup_network_manager() {
+  # this is not required as we use network manager, or otheriwise it causes timeout at the boot
+  sudo systemctl disable systemd-networkd-wait-online.service
+}
 
-# Run the setup script from private GitHub repository
-# git clone git@github.com:$GIT_USERNAME/$GIT_REPO.git
-# cd $GIT_REPO
-# chmod +x setup.sh
-# ./setup_mac.sh
-# or
-# ./setup_ubuntu.sh
+setup_wifi() {
+  echo "TBD"
+}
 
-echo "You are all set."
+setup_bluetooth() {
+  sudo systemctl enable bluetooth.service
+  sudo systemctl restart bluetooth.service
+}
+
+setup_japanese() {
+  # IBus is for GNOME and Fcitx is for i3
+  sudo apt install -y ibus ibus-mozc mozc-utils-gui fonts-noto-cjk fonts-noto-cjk-extra language-pack-ja language-pack-gnome-ja fcitx fcitx-mozc
+  sudo locale-gen ja_JP.UTF-8
+  sudo update-locale LANG=ja_JP.UTF-8
+  # To troubleshoot Japanese input run:
+  # ibus-setup  # For IBus
+  # gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'mozc')]"
+  # fcitx-configtool  # For Fcitx
+}
+
+setup_i3() {
+  sudo apt install -y i3 i3status i3lock dmenu xinit
+  # startx /usr/bin/i3
+}
+
+install_zsh() {
+  sudo apt install -y zsh
+  chsh -s /usr/bin/zsh
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+}
+
+remove_snap() {
+  snap list
+  # purge snaps that do not have dependencies
+  sudo snap remove cups gnome-42-2204 gtk-common-themes
+  # remove base snaps and snapd
+  sudo snap remove bare
+  sudo snap remove core22
+  sudo snap remove snapd
+  # purge snapd and cleanup
+  sudo apt purge snapd
+  sudo rm -rf /var/cache/snapd
+  sudo rm -rf /snap
+  # prevent snapd from being reinstalled
+  echo -e "Package: snapd\nPin: release a=*\nPin-Priority: -10" | sudo tee /etc/apt/preferences.d/nosnap.pref
+  # stop snapd services and prevent from being restarted
+  sudo systemctl stop snapd.socket
+  sudo systemctl stop snapd.service snapd.seeded.service
+  sudo systemctl mask snapd.socket snapd.service snapd.seeded.service
+  # TODO: Below removed a lot of packages including gdm
+  # sudo apt purge snapd libsnapd-glib-2-1
+}
+
+install_uv() {
+  echo "TBD"
+}
+
+# install applications
+
+install_1password_app() {
+  sudo apt install -y 1password
+}
+
+install_alacritty_app() {
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  rustup override set stable
+  rustup update stable
+  sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
+  rm -rf /tmp/alacritty
+  git clone https://github.com/alacritty/alacritty.git /tmp/alacritty
+  cd /tmp/alacritty
+  cargo install alacritty
+  cd $DIR
+}
+
+install_zed_app() {
+  curl -f https://zed.dev/install.sh | sh
+}
+
+install_chrome_app() {
+  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo apt install -y fonts-liberation xdg-utils
+  sudo dpkg -i ./google-chrome-stable_current_amd64.deb
+  rm ./google-chrome-stable_current_amd64.deb
+}
+
+install_discord_app() {
+  wget -O /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
+  sudo dpkg -i /tmp/discord.deb
+  rm /tmp/discord.deb
+}
+
+install_spotify_app() {
+  curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+  echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+  sudo apt update && sudo apt install -y spotify-client
+}
+
+
+
+# update_packages
+# setup_git
+install_1password_cli
+setup_credentials
+install_dotfiles
+
+# install_gnome
+# setup_network_manager
+# setup_wifi
+# setup_bluetooth
+setup_japanese
+# setup_i3
+install_zsh
+# remove_snap
+
+# install_uv
+
+# install_1password_app
+# install_alacrity_app
+# install_zed_app
+# install_chrome_app
+# install_discord_app
+# install_spotify_app

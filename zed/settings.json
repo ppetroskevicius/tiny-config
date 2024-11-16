@@ -16,10 +16,10 @@
   },
   "languages": {
     "Markdown-Inline": {
-      "show_inline_completions": false
+      "show_inline_completions": true
     },
     "Markdown": {
-      "show_inline_completions": false
+      "show_inline_completions": true
     }
   },
   "inline_completions": {
@@ -27,8 +27,8 @@
   },
   "theme": "Andromeda",
   "vim_mode": true,
-  "ui_font_size": 16,
-  "buffer_font_size": 16,
+  "ui_font_size": 14,
+  "buffer_font_size": 14,
   "format_on_save": "off",
   "restore_on_startup": "none",
   "tab_size": 2

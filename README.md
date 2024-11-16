@@ -2,8 +2,8 @@
 
 ## Overview
 
-This repository contains scripts to automate the setup of a new Ubuntu or Mac
-machine or VM. The script installs essential packages, sets up SSH keys, Git, and
+This repository contains scripts to automate the setup of a new Ubuntu machine
+or VM. The script installs essential packages, sets up SSH keys, Git, and
 1Password CLI. Other setup scripts from the private GitHub repositories could
 be run later. This setup aims to have least dependencies and be *tiny*.
 

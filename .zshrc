@@ -1,20 +1,18 @@
-# runs for each tmux session, window and pane
+# runs for each non-login interactive shells like alacritty, or terminal in gnome
 
 PS1=$'%n@%m:\e[0;36m%~\e[0m$ '
 export EDITOR='vim'
 export CLICOLOR=1
 
-# fix brew on mac
-[[ $(uname -s) == "Darwin" ]] && { [[ $(uname -m) == "arm64" ]] && eval "$(/opt/homebrew/bin/brew shellenv)" || eval "$(/usr/local/bin/brew shellenv)"; }
+export PATH=$HOME/.local/bin:$PATH
+. "$HOME/.cargo/env"
 
 # oh-my-zsh configuration
+export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
 setopt histignorealldups
+plugins=(git z zsh-autosuggestions)
 source $ZSH/oh-my-zsh.sh
-
-# sign-in into 1password
-export OP_ACCOUNT=my.1password.com
-eval $(op signin)
 
 alias ll='ls -la'
 alias alias la='ls -A'           # Show hidden, but not . and ..
