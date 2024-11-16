@@ -109,6 +109,7 @@ setup_wifi() {
 }
 
 setup_bluetooth() {
+  sudo apt install blueman
   sudo systemctl enable bluetooth.service
   sudo systemctl restart bluetooth.service
 }
