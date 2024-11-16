@@ -67,11 +67,14 @@ install_dotfiles() {
   ln -sf $DIR/.vimrc $HOME
   ln -sf $DIR/.gitconfig $HOME
   ln -sf $DIR/.alacritty.toml $HOME
-  ln -sf $DIR/.i3 $HOME
   ln -sf $DIR/.xinitrc $HOME
   ln -sf $DIR/.xinputrc $HOME
   ln -sf $DIR/start_i3.sh $HOME
   ln -sf $DIR/start_gnome.sh $HOME
+
+  mkdir -p $HOME/.config/i3/
+  ln -sf $DIR/.i3 $HOME/.config/i3/config
+  ln -sf $DIR/status.toml $HOME/.config/i3/status.toml
 
   mkdir -p $HOME/.config/zed/
   ln -sf $DIR/zed/keymap.json $HOME/.config/zed/
@@ -85,7 +88,11 @@ install_dotfiles() {
 install_gnome() {
   # sudo apt-mark hold firefox
   # sudo DEBIAN_FRONTEND=noninteractive apt install -y gnome-core
-  sudo apt install -y gnome-session
+  sudo apt install -y gnome-session gnome-screenshot
+
+  # to make a screenshot:
+  # gnome-screenshot --area -c
+
   # sudo apt install -y gnome-extensions-app
   # sudo apt install -y gnome-tweaks
   # sudo apt install -y gnome-desktop
@@ -107,6 +114,10 @@ setup_bluetooth() {
 }
 
 setup_japanese() {
+  # https://www.ubuntulinux.jp/News/ubuntu2404-ja-remix
+  sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
+  sudo apt -U upgrade
+  sudo apt install ubuntu-defaults-ja
   # IBus is for GNOME and Fcitx is for i3
   sudo apt install -y ibus ibus-mozc mozc-utils-gui fonts-noto-cjk fonts-noto-cjk-extra language-pack-ja language-pack-gnome-ja fcitx fcitx-mozc
   sudo locale-gen ja_JP.UTF-8
@@ -200,17 +211,17 @@ install_spotify_app() {
 
 # update_packages
 # setup_git
-install_1password_cli
-setup_credentials
+# install_1password_cli
+# setup_credentials
 install_dotfiles
 
 # install_gnome
 # setup_network_manager
 # setup_wifi
 # setup_bluetooth
-setup_japanese
+# setup_japanese
 # setup_i3
-install_zsh
+# install_zsh
 # remove_snap
 
 # install_uv

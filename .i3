@@ -103,7 +103,7 @@ bindsym $mod+e layout toggle split
 # bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+# bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
@@ -216,8 +216,8 @@ bindsym $mod+Shift+space exec ibus engine xkb:us::eng
 # bindsym $mod+space exec fcitx-remote -t
 
 # open default applications
-workspace 1
-exec --no-startup-id alacritty
+# workspace 1
+# exec --no-startup-id alacritty
 # workspace 2
 # exec --no-startup-id zed
 # workspace 3
