@@ -1,6 +1,7 @@
 #/bin/bash
 set -e
 set -x
+SECONDS=0
 
 # run this script with:
 # wget https://raw.githubusercontent.com/ppetroskevicius/tiny-config/dev/setup.sh
@@ -52,6 +53,8 @@ setup_credentials() {
 
   systemctl --user enable ssh-agent.service
   systemctl --user restart ssh-agent.service
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_ed25519
 }
 
 install_dotfiles() {
@@ -86,7 +89,6 @@ install_dotfiles() {
   ln -sf $TARGET_DIR/zed/settings.json $HOME/.config/zed/
 
   rm -rf $HOME/.config/alacritty
-  mkdir -p $HOME/.config/alacritty/themes
   git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
 }
 
@@ -151,8 +153,10 @@ setup_japanese() {
 install_zsh() {
   sudo apt install -y zsh
   chsh -s /usr/bin/zsh
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+  ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+  [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ] && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
 }
 
 remove_snap() {
@@ -236,28 +240,39 @@ install_spotify_app() {
 }
 
 
+setup_server() {
+  update_packages
+  setup_git
+  install_1password_cli
+  setup_credentials
+  install_dotfiles
+}
 
-update_packages
-setup_git
-install_1password_cli
-setup_credentials
-install_dotfiles
+setup_desktop() {
+  setup_i3
+  install_gnome
+  setup_network_manager
+  setup_wifi
+  setup_bluetooth
+  setup_japanese
+  install_zsh
+  remove_snap
+}
 
-setup_i3
-install_gnome
-setup_network_manager
-setup_wifi
-setup_bluetooth
-setup_japanese
-install_zsh
-remove_snap
+setup_apps() {
+  install_kvm
+  install_uv
 
-# install_kvm
-# install_uv
+  install_1password_app
+  install_alacrity_app
+  install_zed_app
+  install_chrome_app
+  install_discord_app
+  install_spotify_app
+}
 
-# install_1password_app
-# install_alacrity_app
-# install_zed_app
-# install_chrome_app
-# install_discord_app
-# install_spotify_app
+time setup_server
+time setup_desktop
+# time setup_apps
+
+echo "[ ] completed in t=$SECONDS"
