@@ -99,7 +99,7 @@ setup_network_manager() {
   # sudo mkdir -p /etc/netplan/backup
   # sudo mv /etc/netplan/*.yaml /etc/netplan/backup/
   # sudo netplan apply
-  sudo systemctl stop systemd-networkd
+  # sudo systemctl stop systemd-networkd
   sudo systemctl disable systemd-networkd
   sudo systemctl mask systemd-networkd
   # this is not required as we use network manager, or otheriwise it causes timeout at the boot
@@ -129,7 +129,7 @@ setup_i3() {
 }
 
 install_gnome() {
-  sudo apt install -y gnome-session gnome-screenshot
+  sudo apt install -y gnome-session
 
   # to make a screenshot:
   # gnome-screenshot --area -c
@@ -243,11 +243,11 @@ install_1password_cli
 setup_credentials
 install_dotfiles
 
+setup_i3
+install_gnome
 setup_network_manager
 setup_wifi
 setup_bluetooth
-setup_i3
-install_gnome
 setup_japanese
 install_zsh
 remove_snap
