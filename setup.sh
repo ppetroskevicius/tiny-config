@@ -2,7 +2,11 @@
 set -e
 set -x
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# run this script with:
+# wget https://raw.githubusercontent.com/ppetroskevicius/tiny-config/dev/setup.sh
+
+SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
+TARGET_DIR="$HOME/fun/tiny-config"
 
 update_packages() {
   sudo apt update && sudo apt upgrade -y
@@ -51,34 +55,34 @@ setup_credentials() {
 }
 
 install_dotfiles() {
-  DIR=$(dirname $(realpath $0))   # Get absolute path of script directory
-  cd $DIR
+  git clone "$SOURCE_REPO" "$TARGET_DIR"
+  cd $TARGET_DIR
 
   mkdir -p $HOME/.config/
 
   rm -f $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc
 
-  ln -sf $DIR/.sshconfig $HOME/.ssh/config
-  ln -sf $DIR/.bash_profile $HOME
-  ln -sf $DIR/.bashrc $HOME
-  ln -sf $DIR/.zprofile $HOME
-  ln -sf $DIR/.zshrc $HOME
-  ln -sf $DIR/.tmux.conf $HOME
-  ln -sf $DIR/.vimrc $HOME
-  ln -sf $DIR/.gitconfig $HOME
-  ln -sf $DIR/.alacritty.toml $HOME
-  ln -sf $DIR/.xinitrc $HOME
-  ln -sf $DIR/.xinputrc $HOME
-  ln -sf $DIR/start_i3.sh $HOME
-  ln -sf $DIR/start_gnome.sh $HOME
+  ln -sf $TARGET_DIR/.sshconfig $HOME/.ssh/config
+  ln -sf $TARGET_DIR/.bash_profile $HOME
+  ln -sf $TARGET_DIR/.bashrc $HOME
+  ln -sf $TARGET_DIR/.zprofile $HOME
+  ln -sf $TARGET_DIR/.zshrc $HOME
+  ln -sf $TARGET_DIR/.tmux.conf $HOME
+  ln -sf $TARGET_DIR/.vimrc $HOME
+  ln -sf $TARGET_DIR/.gitconfig $HOME
+  ln -sf $TARGET_DIR/.alacritty.toml $HOME
+  ln -sf $TARGET_DIR/.xinitrc $HOME
+  ln -sf $TARGET_DIR/.xinputrc $HOME
+  ln -sf $TARGET_DIR/start_i3.sh $HOME
+  ln -sf $TARGET_DIR/start_gnome.sh $HOME
 
   mkdir -p $HOME/.config/i3/
-  ln -sf $DIR/.i3 $HOME/.config/i3/config
-  ln -sf $DIR/status.toml $HOME/.config/i3/status.toml
+  ln -sf $TARGET_DIR/.i3 $HOME/.config/i3/config
+  ln -sf $TARGET_DIR/status.toml $HOME/.config/i3/status.toml
 
   mkdir -p $HOME/.config/zed/
-  ln -sf $DIR/zed/keymap.json $HOME/.config/zed/
-  ln -sf $DIR/zed/settings.json $HOME/.config/zed/
+  ln -sf $TARGET_DIR/zed/keymap.json $HOME/.config/zed/
+  ln -sf $TARGET_DIR/zed/settings.json $HOME/.config/zed/
 
   rm -rf $HOME/.config/alacritty
   mkdir -p $HOME/.config/alacritty/themes
@@ -99,34 +103,43 @@ install_gnome() {
   #startx /usr/bin/gnome-session
 }
 
+setup_wifi() {
+  nmcli device wifi list
+  OP_WIFI_SSID="op://build/wifi/ssid"
+  OP_WIFI_PASS="op://build/wifi/pass"
+  export WIFI_SSID=$(op read "$OP_WIFI_SSID")
+  export WIFI_PASS=$(op read "$OP_WIFI_PASS")
+  nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
+}
+
 setup_network_manager() {
+  # enable NetworkManager to be used with gnome, as it has more functionality, like LAN, VPN, WiFi
+  sudo sed -i 's/managed=false/managed=true/' /etc/NetworkManager/NetworkManager.conf
+  sudo systemctl enable NetworkManager
+  sudo systemctl restart NetworkManager
+  # disable netplan
+  sudo mkdir -p /etc/netplan/backup
+  sudo mv /etc/netplan/*.yaml /etc/netplan/backup/
+  sudo netplan apply
+  sudo systemctl stop systemd-networkd
+  sudo systemctl disable systemd-networkd
+  sudo systemctl mask systemd-networkd
   # this is not required as we use network manager, or otheriwise it causes timeout at the boot
   sudo systemctl disable systemd-networkd-wait-online.service
 }
 
-setup_wifi() {
-  echo "TBD"
-}
-
 setup_bluetooth() {
-  sudo apt install blueman
-  sudo systemctl enable bluetooth.service
-  sudo systemctl restart bluetooth.service
+  sudo systemctl enable bluetooth
+  sudo systemctl restart bluetooth
+  sudo apt install -y blueman
 }
 
 setup_japanese() {
   # https://www.ubuntulinux.jp/News/ubuntu2404-ja-remix
   sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
   sudo apt -U upgrade
-  sudo apt install ubuntu-defaults-ja
-  # IBus is for GNOME and Fcitx is for i3
-  sudo apt install -y ibus ibus-mozc mozc-utils-gui fonts-noto-cjk fonts-noto-cjk-extra language-pack-ja language-pack-gnome-ja fcitx fcitx-mozc
-  sudo locale-gen ja_JP.UTF-8
-  sudo update-locale LANG=ja_JP.UTF-8
-  # To troubleshoot Japanese input run:
-  # ibus-setup  # For IBus
-  # gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'mozc')]"
-  # fcitx-configtool  # For Fcitx
+  sudo apt install -y ubuntu-defaults-ja
+  sudo apt install -y ibus
 }
 
 setup_i3() {
@@ -163,8 +176,21 @@ remove_snap() {
   # sudo apt purge snapd libsnapd-glib-2-1
 }
 
+install_kvm() {
+  sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-viewer
+  sudo kvm-ok
+  # sudo systemctl enble libvirtd
+  # sudo systemctl restart libvirtd
+  # sudo systemctl status libvirtd
+  sudo usermod -aG libvirt $(whoami)
+  newgrp libvirt
+  # virt-manager
+}
+
 install_uv() {
-  echo "TBD"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.cargo/env
+  uv self update
 }
 
 # install applications
@@ -182,7 +208,7 @@ install_alacritty_app() {
   git clone https://github.com/alacritty/alacritty.git /tmp/alacritty
   cd /tmp/alacritty
   cargo install alacritty
-  cd $DIR
+  cd $TARGET_DIR
 }
 
 install_zed_app() {
@@ -210,13 +236,13 @@ install_spotify_app() {
 
 
 
-# update_packages
-# setup_git
-# install_1password_cli
-# setup_credentials
+update_packages
+setup_git
+install_1password_cli
+setup_credentials
 install_dotfiles
 
-# install_gnome
+install_gnome
 # setup_network_manager
 # setup_wifi
 # setup_bluetooth
@@ -225,6 +251,7 @@ install_dotfiles
 # install_zsh
 # remove_snap
 
+# install_kvm
 # install_uv
 
 # install_1password_app
