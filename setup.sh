@@ -154,9 +154,16 @@ install_zsh() {
   sudo apt install -y zsh
   chsh -s /usr/bin/zsh
 
-  ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-  [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ] && \
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  fi
+
+  ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+
+  # Only clone the zsh-autosuggestions plugin if the directory does not exist
+  if [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
+  fi
 }
 
 remove_snap() {
