@@ -96,9 +96,9 @@ setup_network_manager() {
   sudo systemctl enable NetworkManager
   sudo systemctl restart NetworkManager
   # disable netplan
-  sudo mkdir -p /etc/netplan/backup
-  sudo mv /etc/netplan/*.yaml /etc/netplan/backup/
-  sudo netplan apply
+  # sudo mkdir -p /etc/netplan/backup
+  # sudo mv /etc/netplan/*.yaml /etc/netplan/backup/
+  # sudo netplan apply
   sudo systemctl stop systemd-networkd
   sudo systemctl disable systemd-networkd
   sudo systemctl mask systemd-networkd
