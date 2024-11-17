@@ -21,10 +21,7 @@ export QT_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
 # ibus-daemon -drx
 
-# for fcitx
-# export GTK_IM_MODULE=fcitx
-# export QT_IM_MODULE=fcitx
-# export XMODIFIERS=@im=fcitx
-# fcitx-autostart
+# for KVM
+export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 source ~/.zshrc

@@ -4,7 +4,7 @@ set -x
 SECONDS=0
 
 # run this script with:
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ppetroskevicius/tiny-config/dev/setup.sh)"
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/PPetroskevicius/tiny-config/dev/setup.sh)"
 
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
@@ -214,6 +214,7 @@ install_1password_app() {
 
 install_alacritty_app() {
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  . "$HOME/.cargo/env"
   rustup override set stable
   rustup update stable
   sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
@@ -272,7 +273,7 @@ setup_apps() {
   install_uv
 
   install_1password_app
-  install_alacrity_app
+  install_alacritty_app
   install_zed_app
   install_chrome_app
   install_discord_app
@@ -281,6 +282,6 @@ setup_apps() {
 
 setup_server
 setup_desktop
-# time setup_apps
+# setup_apps
 
 echo "[ ] completed in t=$SECONDS"
