@@ -55,9 +55,10 @@ setup_credentials() {
 }
 
 install_dotfiles() {
+  rm -rf $TARGET_DIR
   git clone "$SOURCE_REPO" "$TARGET_DIR"
   cd $TARGET_DIR
-
+  git switch dev
   mkdir -p $HOME/.config/
 
   rm -f $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc
@@ -106,12 +107,14 @@ setup_network_manager() {
 }
 
 setup_wifi() {
-  nmcli device wifi list
-  OP_WIFI_SSID="op://build/wifi/ssid"
-  OP_WIFI_PASS="op://build/wifi/pass"
-  export WIFI_SSID=$(op read "$OP_WIFI_SSID")
-  export WIFI_PASS=$(op read "$OP_WIFI_PASS")
-  nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
+  if nmcli device status | grep -q "wifi"; then
+    nmcli device wifi list
+    OP_WIFI_SSID="op://build/wifi/ssid"
+    OP_WIFI_PASS="op://build/wifi/pass"
+    export WIFI_SSID=$(op read "$OP_WIFI_SSID")
+    export WIFI_PASS=$(op read "$OP_WIFI_PASS")
+    nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
+  fi
 }
 
 setup_bluetooth() {
