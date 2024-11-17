@@ -89,29 +89,6 @@ install_dotfiles() {
   git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
 }
 
-install_gnome() {
-  # sudo apt-mark hold firefox
-  # sudo DEBIAN_FRONTEND=noninteractive apt install -y gnome-core
-  sudo apt install -y gnome-session gnome-screenshot
-
-  # to make a screenshot:
-  # gnome-screenshot --area -c
-
-  # sudo apt install -y gnome-extensions-app
-  # sudo apt install -y gnome-tweaks
-  # sudo apt install -y gnome-desktop
-  #startx /usr/bin/gnome-session
-}
-
-setup_wifi() {
-  nmcli device wifi list
-  OP_WIFI_SSID="op://build/wifi/ssid"
-  OP_WIFI_PASS="op://build/wifi/pass"
-  export WIFI_SSID=$(op read "$OP_WIFI_SSID")
-  export WIFI_PASS=$(op read "$OP_WIFI_PASS")
-  nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
-}
-
 setup_network_manager() {
   # enable NetworkManager to be used with gnome, as it has more functionality, like LAN, VPN, WiFi
   sudo sed -i 's/managed=false/managed=true/' /etc/NetworkManager/NetworkManager.conf
@@ -128,10 +105,36 @@ setup_network_manager() {
   sudo systemctl disable systemd-networkd-wait-online.service
 }
 
+setup_wifi() {
+  nmcli device wifi list
+  OP_WIFI_SSID="op://build/wifi/ssid"
+  OP_WIFI_PASS="op://build/wifi/pass"
+  export WIFI_SSID=$(op read "$OP_WIFI_SSID")
+  export WIFI_PASS=$(op read "$OP_WIFI_PASS")
+  nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
+}
+
 setup_bluetooth() {
   sudo systemctl enable bluetooth
   sudo systemctl restart bluetooth
   sudo apt install -y blueman
+}
+
+setup_i3() {
+  sudo apt install -y i3 i3status i3lock dmenu xinit
+  # startx /usr/bin/i3
+}
+
+install_gnome() {
+  sudo apt install -y gnome-session gnome-screenshot
+
+  # to make a screenshot:
+  # gnome-screenshot --area -c
+
+  # sudo apt install -y gnome-extensions-app
+  # sudo apt install -y gnome-tweaks
+  # sudo apt install -y gnome-desktop
+  #startx /usr/bin/gnome-session
 }
 
 setup_japanese() {
@@ -140,11 +143,6 @@ setup_japanese() {
   sudo apt -U upgrade
   sudo apt install -y ubuntu-defaults-ja
   sudo apt install -y ibus
-}
-
-setup_i3() {
-  sudo apt install -y i3 i3status i3lock dmenu xinit
-  # startx /usr/bin/i3
 }
 
 install_zsh() {
@@ -242,14 +240,14 @@ install_1password_cli
 setup_credentials
 install_dotfiles
 
+setup_network_manager
+setup_wifi
+setup_bluetooth
+setup_i3
 install_gnome
-# setup_network_manager
-# setup_wifi
-# setup_bluetooth
-# setup_japanese
-# setup_i3
-# install_zsh
-# remove_snap
+setup_japanese
+install_zsh
+remove_snap
 
 # install_kvm
 # install_uv
