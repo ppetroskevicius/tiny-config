@@ -4,7 +4,7 @@ set -x
 SECONDS=0
 
 # run this script with:
-# wget https://raw.githubusercontent.com/ppetroskevicius/tiny-config/dev/setup.sh
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ppetroskevicius/tiny-config/dev/setup.sh)"
 
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
@@ -58,8 +58,9 @@ setup_credentials() {
 }
 
 install_dotfiles() {
-  rm -rf $TARGET_DIR
-  git clone "$SOURCE_REPO" "$TARGET_DIR"
+  if [ ! -d "$TARGET_DIR" ]; then
+    git clone "$SOURCE_REPO" "$TARGET_DIR"
+  fi
   cd $TARGET_DIR
   git switch dev
   mkdir -p $HOME/.config/
@@ -278,8 +279,8 @@ setup_apps() {
   install_spotify_app
 }
 
-time setup_server
-time setup_desktop
+setup_server
+setup_desktop
 # time setup_apps
 
 echo "[ ] completed in t=$SECONDS"
