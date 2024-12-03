@@ -54,3 +54,5 @@ nuke() {
     git submodule foreach git reset --hard     # Discard all local changes in submodule
     git submodule foreach git clean -df        # Remove untracked directories and files
 }
+
+. "$HOME/.local/bin/env"

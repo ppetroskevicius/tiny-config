@@ -48,7 +48,7 @@ floating_modifier $mod
 
 # move tiling windows via drag & drop by left-clicking into the title bar,
 # or left-clicking anywhere into the window while holding the floating modifier.
-tiling_drag modifier titlebar
+###### tiling_drag modifier titlebar
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -203,17 +203,20 @@ bindsym $mod+Return exec ~/.cargo/bin/alacritty
 
 
 # for Japanese input
-# to troubleshoot run: `ibus-setup` or `fcitx-configtool` from command line
+# to troubleshoot run: `ibus-setup`
 # for IBus
-exec --no-startup-id ibus-daemon -drx
+# exec --no-startup-id ibus-daemon -drx
 # switches to Japanese input (mozc)
-bindsym $mod+space exec ibus engine mozc
+# bindsym $mod+space exec ibus engine mozc
 # switches back to US English
-bindsym $mod+Shift+space exec ibus engine xkb:us::eng
+# bindsym $mod+Shift+space exec ibus engine xkb:us::eng
 
-# or for Fcitx
-# exec --no-startup-id fcitx -d
-# bindsym $mod+space exec fcitx-remote -t
+exec --no-startup-id fcitx -d
+
+
+# For audio
+exec --no-startup-id pulseaudio --start
+# exec --no-startup-id pasystray
 
 # open default applications
 # workspace 1

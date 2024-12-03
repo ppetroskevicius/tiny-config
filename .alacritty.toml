@@ -1,7 +1,7 @@
 general.import = ["~/.config/alacritty/themes/themes/ashes_dark.toml"]
 
 [font]
-size = 6.0
+size = 10.0
 normal.family = "monospace"
 
 [window]

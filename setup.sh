@@ -8,6 +8,7 @@ SECONDS=0
 
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
+NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
 
 update_packages() {
   sudo apt update && sudo apt upgrade -y
@@ -17,7 +18,7 @@ setup_git() {
   GIT_USERNAME="ppetroskevicius"
   GIT_EMAIL="p.petroskevicius@gmail.com"
 
-  sudo apt install -y git tmux htop vim
+  sudo apt install -y git tmux htop vim unzip
   git config --global user.name "$GIT_USERNAME"
   git config --global user.email "$GIT_EMAIL"
 }
@@ -51,8 +52,7 @@ setup_credentials() {
 
   ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-  systemctl --user enable ssh-agent.service
-  systemctl --user restart ssh-agent.service
+  systemctl --user enable --now ssh-agent.service
   eval "$(ssh-agent -s)"
   ssh-add ~/.ssh/id_ed25519
 }
@@ -81,11 +81,21 @@ install_dotfiles() {
   ln -sf $TARGET_DIR/start_i3.sh $HOME
   ln -sf $TARGET_DIR/start_gnome.sh $HOME
 
-  mkdir -p $HOME/.config/i3/
-  ln -sf $TARGET_DIR/.i3 $HOME/.config/i3/config
-  ln -sf $TARGET_DIR/status.toml $HOME/.config/i3/status.toml
+  mkdir -p $HOME/.config/i3
+  # ln -sf $TARGET_DIR/.i3 $HOME/.config/i3/config
+  # ln -sf $TARGET_DIR/status.toml $HOME/.config/i3/status.toml
 
-  mkdir -p $HOME/.config/zed/
+  mkdir -p $HOME/.config/sway
+  ln -sf $TARGET_DIR/.sway $HOME/.config/sway/config
+
+  mkdir -p $HOME/.config/mako
+  ln -sf $TARGET_DIR/.mako $HOME/.config/mako/config
+
+  mkdir -p $HOME/.config/waybar
+  ln -sf $TARGET_DIR/.waybar $HOME/.config/waybar/config
+  ln -sf $TARGET_DIR/.waybar_style.css $HOME/.config/waybar/style.css
+
+  mkdir -p $HOME/.config/zed
   ln -sf $TARGET_DIR/zed/keymap.json $HOME/.config/zed/
   ln -sf $TARGET_DIR/zed/settings.json $HOME/.config/zed/
 
@@ -93,23 +103,7 @@ install_dotfiles() {
   git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
 }
 
-setup_network_manager() {
-  # enable NetworkManager to be used with gnome, as it has more functionality, like LAN, VPN, WiFi
-  sudo sed -i 's/managed=false/managed=true/' /etc/NetworkManager/NetworkManager.conf
-  sudo systemctl enable NetworkManager
-  sudo systemctl restart NetworkManager
-  # disable netplan
-  # sudo mkdir -p /etc/netplan/backup
-  # sudo mv /etc/netplan/*.yaml /etc/netplan/backup/
-  # sudo netplan apply
-  # sudo systemctl stop systemd-networkd
-  sudo systemctl disable systemd-networkd
-  sudo systemctl mask systemd-networkd
-  # this is not required as we use network manager, or otheriwise it causes timeout at the boot
-  sudo systemctl disable systemd-networkd-wait-online.service
-}
-
-setup_wifi() {
+setup_wifi_in_networkmanager() {
   if nmcli device status | grep -q "wifi"; then
     nmcli device wifi list
     OP_WIFI_SSID="op://build/wifi/ssid"
@@ -120,27 +114,147 @@ setup_wifi() {
   fi
 }
 
-setup_bluetooth() {
-  sudo systemctl enable bluetooth
-  sudo systemctl restart bluetooth
-  sudo apt install -y blueman
+setup_wifi_in_netplan() {
+  # setup for netplan
+  if ip link | grep -q "wl"; then
+    OP_WIFI_SSID="op://build/wifi/ssid"
+    OP_WIFI_PASS="op://build/wifi/pass"
+    WIFI_SSID=$(op read "$OP_WIFI_SSID")
+    WIFI_PASS=$(op read "$OP_WIFI_PASS")
+    WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
+    sudo tee "$NETPLAN_CONFIG" > /dev/null <<EOL
+network:
+  version: 2
+  renderer: networkd
+  wifis:
+    $WIFI_INTERFACE:
+      dhcp4: true
+      access-points:
+        "$WIFI_SSID":
+          password: "$WIFI_PASS"
+EOL
+    # apply the netplan configuration
+    sudo netplan apply
+  fi
+}
+
+# Example usage:
+# setup_netplan "networkd"
+# setup_netplan "NetworkManager"
+
+setup_netplan() {
+  # Argument to specify the renderer: either "networkd" or "NetworkManager"
+  RENDERER="$1"
+
+  # Install NetworkManager
+  sudo apt install -y network-manager
+
+  if [ "$RENDERER" == "networkd" ]; then
+    # Disable NetworkManager and enable systemd-networkd
+    if systemctl is-enabled --quiet NetworkManager; then
+      sudo systemctl stop NetworkManager
+    fi
+    sudo systemctl disable NetworkManager
+    sudo systemctl enable --now systemd-networkd
+
+    # Configure Netplan to use networkd
+    sudo sed -i 's/renderer: NetworkManager/renderer: networkd/' "$NETPLAN_CONFIG"
+    setup_wifi_in_netplan
+    echo "Configured Netplan to use networkd."
+
+  elif [ "$RENDERER" == "NetworkManager" ]; then
+
+    # Disable systemd-networkd and enable NetworkManager
+    if systemctl is-active --quiet systemd-networkd; then
+      sudo systemctl stop systemd-networkd
+    fi
+    sudo systemctl restart wpa_supplicant
+    sudo systemctl disable systemd-networkd
+    sudo systemctl enable --now NetworkManager
+
+    # Configure Netplan to use NetworkManager
+    sudo sed -i 's/renderer: networkd/renderer: NetworkManager/' "$NETPLAN_CONFIG"
+
+    echo "Configured Netplan to use NetworkManager."
+    setup_wifi_in_networkmanager
+  else
+    echo "Invalid argument. Please specify either 'networkd' or 'NetworkManager'."
+    return 1
+  fi
+
+  # Apply the Netplan configuration
+  sudo netplan apply
+  echo "Netplan configuration applied."
+}
+
+setup_bluetooth_audio() {
+  echo "Setting up Bluetooth and audio..."
+
+  # essential Bluetooth packages
+  sudo apt install -y bluez blueman bluetooth
+
+  # PulseAudio and its Bluetooth module for audio handling
+  sudo apt install -y pulseaudio pulseaudio-module-bluetooth
+
+  # start the Bluetooth service
+  sudo systemctl enable --now bluetooth
+
+  # start PulseAudio as a user service
+  systemctl --user enable --now pulseaudio
+
+  # Install GUI and CLI tools for audio and device configuration
+  sudo apt install -y pavucontrol alsa-utils
+
+  # for controlling audio hardware buttons in Sway
+  sudo apt install -y pactl playerctl
+
+  echo "Setup complete! You can now configure Bluetooth devices and audio settings."
+  echo "Use 'blueman-manager' (GUI) or 'bluetoothctl' (CLI) for managing Bluetooth devices."
+  echo "For audio management:"
+  echo "- Run 'pavucontrol' for a graphical audio control panel."
+  echo "- Use 'alsamixer' to unmute and adjust hardware audio settings in the terminal."
 }
 
 setup_i3() {
-  sudo apt install -y i3 i3status i3lock dmenu xinit
+  sudo apt install -y i3 i3status i3lock dmenu xinit polybar
   # startx /usr/bin/i3
 }
 
-install_gnome() {
-  sudo apt install -y gnome-session
+setup_sway_wayland() {
+  sudo apt install -y sway wayland-protocols waybar xwayland swayidle swaylock
+  # run chrome in wayland mode:
+  # google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+  # check platform to be wayland: chrome://gpu/
+}
 
-  # to make a screenshot:
-  # gnome-screenshot --area -c
+install_screenshots() {
+  rm -rf /tmp/shotman
+  git clone https://git.sr.ht/~whynothugo/shotman /tmp/shotman
+  cd /tmp/shotman
+  cargo build --release
+  sudo make install
+  rm -Rf /tmp/shotman
+  sudo apt install -y slurp
+  # grim - grab images from a wayland compositor
+  # gimp - runs on Wayland using XWayland, edit images
+  # slurp - select a region in a Wayland compositor
+  # swappy - snapshot and editor
+}
 
-  # sudo apt install -y gnome-extensions-app
-  # sudo apt install -y gnome-tweaks
-  # sudo apt install -y gnome-desktop
-  #startx /usr/bin/gnome-session
+install_notifications() {
+  pkill dunst
+  sudo apt remove dunst
+  sudo apt install -y mako-notifier
+}
+
+install_nerd_font() {
+   echo "TBD"
+}
+
+setup_timezone() {
+  sudo timedatectl set-timezone Asia/Tokyo
+  # sudo timedatectl set-timezone Europe/London
+  timedatectl
 }
 
 setup_japanese() {
@@ -148,7 +262,12 @@ setup_japanese() {
   sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
   sudo apt -U upgrade
   sudo apt install -y ubuntu-defaults-ja
-  sudo apt install -y ibus
+  # install fcitx with Mozc
+  # https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
+  sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt
+  # add Mozc as input method:
+  # fcxitx5-configtool
+  # press Shift to switch between Japanese and English
 }
 
 install_zsh() {
@@ -167,14 +286,30 @@ install_zsh() {
   fi
 }
 
+setup_power() {
+  # sudo apt install -y power-profiles-daemon
+  # sudo systemctl enable --now power-profiles-daemon
+  # powerprofilesctl list
+  sudo apt install -y tlp tlp-rdw
+  sudo systemctl enable --now tlp
+  sudo rm -f /etc/tlp.conf
+  sudo ln -sf $TARGET_DIR/.tlp.conf /etc/tlp.conf
+  # print default configuration:
+  tlp-stat -c
+  # check the difference with default configuration
+  tlp-stat --cdiff
+}
+
+setup_brightness() {
+# this is required for brightness buttons to work in sway
+  sudo apt install brightnessctl
+  sudo usermod -aG video $USER
+  # need to logoff after edding user to the group
+  # sudo brightnessctl set 10%-
+}
+
 remove_snap() {
   snap list
-  # purge snaps that do not have dependencies
-  sudo snap remove cups gnome-42-2204 gtk-common-themes
-  # remove base snaps and snapd
-  sudo snap remove bare
-  sudo snap remove core22
-  sudo snap remove snapd
   # purge snapd and cleanup
   sudo apt purge snapd
   sudo rm -rf /var/cache/snapd
@@ -185,8 +320,10 @@ remove_snap() {
   sudo systemctl stop snapd.socket
   sudo systemctl stop snapd.service snapd.seeded.service
   sudo systemctl mask snapd.socket snapd.service snapd.seeded.service
-  # TODO: Below removed a lot of packages including gdm
-  # sudo apt purge snapd libsnapd-glib-2-1
+}
+
+install_other() {
+  sudo apt install -y neofetch btop
 }
 
 install_kvm() {
@@ -255,16 +392,17 @@ setup_server() {
   install_1password_cli
   setup_credentials
   install_dotfiles
+  setup_timezone
 }
 
 setup_desktop() {
   setup_i3
-  install_gnome
-  setup_network_manager
-  setup_wifi
-  setup_bluetooth
+  # setup_wifi
+  setup_bluetooth_audio
   setup_japanese
   install_zsh
+  install_power_profiles
+  setup_brightness
   remove_snap
 }
 
@@ -280,8 +418,16 @@ setup_apps() {
   install_spotify_app
 }
 
-setup_server
-setup_desktop
+
+# setup_server
+
+# setup_netplan "networkd"
+### setup_netplan "NetworkManager"
+
+# setup_desktop
 # setup_apps
+
+# install_dotfiles
+setup_power
 
 echo "[ ] completed in t=$SECONDS"

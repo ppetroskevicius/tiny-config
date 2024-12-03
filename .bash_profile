@@ -1,4 +1,4 @@
-# Runs only for login session
+# Runs for login sessions
 
 if command -v op >/dev/null; then
   eval "$(op signin --account my)"
@@ -15,13 +15,16 @@ fi
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 
-# for ibus
-export GTK_IM_MODULE=ibus
-export QT_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-# ibus-daemon -drx
+# for fcitx5
+# export XMODIFIERS=@im=fcitx
+# export GTK_IM_MODULE=fcitx
+# export QT_IM_MODULE=fcitx
+export INPUT_METHOD=fcitx
 
 # for KVM
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 source ~/.bashrc
+. "$HOME/.cargo/env"
+
+. "$HOME/.local/bin/env"
