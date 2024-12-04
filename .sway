@@ -261,3 +261,6 @@ bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
 # execute notifyer
 exec mako
+
+# run to display bluetooth applet in a waybar
+exec blueman-applet

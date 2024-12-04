@@ -1,5 +1,5 @@
-#/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail   # exit on error, unset variable or pipe fail
 set -x
 SECONDS=0
 
@@ -61,46 +61,46 @@ install_dotfiles() {
   if [ ! -d "$TARGET_DIR" ]; then
     git clone "$SOURCE_REPO" "$TARGET_DIR"
   fi
-  cd $TARGET_DIR
+  cd "$TARGET_DIR"
   git switch dev
-  mkdir -p $HOME/.config/
+  mkdir -p "$HOME"/.config/
 
-  rm -f $HOME/.bash_profile $HOME/.bashrc $HOME/.zprofile $HOME/.zshrc
+  rm -f "$HOME"/.bash_profile "$HOME"/.bashrc "$HOME"/.zprofile "$HOME"/.zshrc
 
-  ln -sf $TARGET_DIR/.sshconfig $HOME/.ssh/config
-  ln -sf $TARGET_DIR/.bash_profile $HOME
-  ln -sf $TARGET_DIR/.bashrc $HOME
-  ln -sf $TARGET_DIR/.zprofile $HOME
-  ln -sf $TARGET_DIR/.zshrc $HOME
-  ln -sf $TARGET_DIR/.tmux.conf $HOME
-  ln -sf $TARGET_DIR/.vimrc $HOME
-  ln -sf $TARGET_DIR/.gitconfig $HOME
-  ln -sf $TARGET_DIR/.alacritty.toml $HOME
-  ln -sf $TARGET_DIR/.xinitrc $HOME
-  ln -sf $TARGET_DIR/.xinputrc $HOME
-  ln -sf $TARGET_DIR/start_i3.sh $HOME
-  ln -sf $TARGET_DIR/start_gnome.sh $HOME
+  ln -sf "$TARGET_DIR"/.sshconfig "$HOME"/.ssh/config
+  ln -sf "$TARGET_DIR"/.bash_profile "$HOME"
+  ln -sf "$TARGET_DIR"/.bashrc "$HOME"
+  ln -sf "$TARGET_DIR"/.zprofile "$HOME"
+  ln -sf "$TARGET_DIR"/.zshrc "$HOME"
+  ln -sf "$TARGET_DIR"/.tmux.conf "$HOME"
+  ln -sf "$TARGET_DIR"/.vimrc "$HOME"
+  ln -sf "$TARGET_DIR"/.gitconfig "$HOME"
+  ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
+  ln -sf "$TARGET_DIR"/.xinitrc "$HOME"
+  ln -sf "$TARGET_DIR"/.xinputrc "$HOME"
+  ln -sf "$TARGET_DIR"/start_i3.sh "$HOME"
+  ln -sf "$TARGET_DIR"/start_gnome.sh "$HOME"
 
-  mkdir -p $HOME/.config/i3
-  # ln -sf $TARGET_DIR/.i3 $HOME/.config/i3/config
-  # ln -sf $TARGET_DIR/status.toml $HOME/.config/i3/status.toml
+  mkdir -p "$HOME"/.config/i3
+  # ln -sf "$TARGET_DIR"/.i3 "$HOME"/.config/i3/config
+  # ln -sf "$TARGET_DIR"/status.toml "$HOME"/.config/i3/status.toml
 
-  mkdir -p $HOME/.config/sway
-  ln -sf $TARGET_DIR/.sway $HOME/.config/sway/config
+  mkdir -p "$HOME"/.config/sway
+  ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
 
-  mkdir -p $HOME/.config/mako
-  ln -sf $TARGET_DIR/.mako $HOME/.config/mako/config
+  mkdir -p "$HOME"/.config/mako
+  ln -sf "$TARGET_DIR"/.mako "$HOME"/.config/mako/config
 
-  mkdir -p $HOME/.config/waybar
-  ln -sf $TARGET_DIR/.waybar $HOME/.config/waybar/config
-  ln -sf $TARGET_DIR/.waybar_style.css $HOME/.config/waybar/style.css
+  mkdir -p "$HOME"/.config/waybar
+  ln -sf "$TARGET_DIR"/.waybar.jsonc "$HOME"/.config/waybar/config
+  ln -sf "$TARGET_DIR"/.waybar_style.css "$HOME"/.config/waybar/style.css
 
-  mkdir -p $HOME/.config/zed
-  ln -sf $TARGET_DIR/zed/keymap.json $HOME/.config/zed/
-  ln -sf $TARGET_DIR/zed/settings.json $HOME/.config/zed/
+  mkdir -p "$HOME"/.config/zed
+  ln -sf "$TARGET_DIR"/zed/keymap.json "$HOME"/.config/zed/
+  ln -sf "$TARGET_DIR"/zed/settings.json "$HOME"/.config/zed/
 
-  rm -rf $HOME/.config/alacritty
-  git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
+  rm -rf "$HOME"/.config/alacritty
+  git clone https://github.com/alacritty/alacritty-theme "$HOME"/.config/alacritty/themes
 }
 
 setup_wifi_in_networkmanager() {
@@ -108,9 +108,11 @@ setup_wifi_in_networkmanager() {
     nmcli device wifi list
     OP_WIFI_SSID="op://build/wifi/ssid"
     OP_WIFI_PASS="op://build/wifi/pass"
-    export WIFI_SSID=$(op read "$OP_WIFI_SSID")
-    export WIFI_PASS=$(op read "$OP_WIFI_PASS")
-    nmcli device wifi connect $WIFI_SSID password $WIFI_PASS
+    WIFI_SSID=$(op read "$OP_WIFI_SSID")
+    export WIFI_SSID
+    WIFI_PASS=$(op read "$OP_WIFI_PASS")
+    export WIFI_PASS
+    nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASS"
   fi
 }
 
@@ -227,13 +229,47 @@ setup_sway_wayland() {
   # check platform to be wayland: chrome://gpu/
 }
 
+build_waybar() {
+  sudo apt remove waybar
+  hash -r
+  sudo apt install -y \
+    cava \
+    clang-tidy \
+    gobject-introspection \
+    libdbusmenu-gtk3-dev \
+    libevdev-dev \
+    libfmt-dev \
+    libgirepository1.0-dev \
+    libgtk-3-dev \
+    libgtkmm-3.0-dev \
+    libinput-dev \
+    libjsoncpp-dev \
+    libmpdclient-dev \
+    libnl-3-dev \
+    libnl-genl-3-dev \
+    libpulse-dev \
+    libsigc++-2.0-dev \
+    libspdlog-dev \
+    libwayland-dev \
+    scdoc \
+    upower \
+    libxkbregistry-dev
+  rm -rf /tmp/waybar
+  git clone https://github.com/Alexays/Waybar /tmp/waybar
+  cd /tmp/waybar
+  meson setup build
+  sudo ninja -C build install
+  which -a waybar
+  waybar --version
+}
+
 install_screenshots() {
-  rm -rf /tmp/shotman
-  git clone https://git.sr.ht/~whynothugo/shotman /tmp/shotman
-  cd /tmp/shotman
+  tempdir=$(mktemp -d)
+  trap 'rm -rf $tempdir' EXIT
+  git clone https://git.sr.ht/~whynothugo/shotman "$tempdir"
+  cd "$tempdir"
   cargo build --release
   sudo make install
-  rm -Rf /tmp/shotman
   sudo apt install -y slurp
   # grim - grab images from a wayland compositor
   # gimp - runs on Wayland using XWayland, edit images
@@ -248,7 +284,8 @@ install_notifications() {
 }
 
 install_nerd_font() {
-   echo "TBD"
+  mkdir -p "$HOME"/.local/share/fonts
+  rm -rf "$HOME"/.local/share/fonts/*
 }
 
 setup_timezone() {
@@ -286,6 +323,8 @@ install_zsh() {
   fi
 }
 
+
+
 setup_power() {
   # sudo apt install -y power-profiles-daemon
   # sudo systemctl enable --now power-profiles-daemon
@@ -293,7 +332,7 @@ setup_power() {
   sudo apt install -y tlp tlp-rdw
   sudo systemctl enable --now tlp
   sudo rm -f /etc/tlp.conf
-  sudo ln -sf $TARGET_DIR/.tlp.conf /etc/tlp.conf
+  sudo ln -sf "$TARGET_DIR"/.tlp.conf /etc/tlp.conf
   # print default configuration:
   tlp-stat -c
   # check the difference with default configuration
@@ -303,7 +342,7 @@ setup_power() {
 setup_brightness() {
 # this is required for brightness buttons to work in sway
   sudo apt install brightnessctl
-  sudo usermod -aG video $USER
+  sudo usermod -aG video "$USER"
   # need to logoff after edding user to the group
   # sudo brightnessctl set 10%-
 }
@@ -332,14 +371,14 @@ install_kvm() {
   # sudo systemctl enble libvirtd
   # sudo systemctl restart libvirtd
   # sudo systemctl status libvirtd
-  sudo usermod -aG libvirt $(whoami)
+  sudo usermod -aG libvirt "$(whoami)"
   newgrp libvirt
   # virt-manager
 }
 
 install_uv() {
   curl -LsSf https://astral.sh/uv/install.sh | sh
-  source $HOME/.cargo/env
+  source "$HOME"/.cargo/env
   uv self update
 }
 
@@ -355,11 +394,12 @@ install_alacritty_app() {
   rustup override set stable
   rustup update stable
   sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
-  rm -rf /tmp/alacritty
-  git clone https://github.com/alacritty/alacritty.git /tmp/alacritty
-  cd /tmp/alacritty
+  tempdir=$(mktemp -d)
+  trap 'rm -rf $tempdir' EXIT
+  git clone https://github.com/alacritty/alacritty.git "$tempdir"
+  cd "$tempdir"
   cargo install alacritty
-  cd $TARGET_DIR
+  cd "$TARGET_DIR"
 }
 
 install_zed_app() {
@@ -427,7 +467,7 @@ setup_apps() {
 # setup_desktop
 # setup_apps
 
-# install_dotfiles
-setup_power
+install_dotfiles
+# setup_power
 
 echo "[ ] completed in t=$SECONDS"
