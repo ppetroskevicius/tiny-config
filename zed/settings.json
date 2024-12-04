@@ -20,6 +20,15 @@
     },
     "Markdown": {
       "show_inline_completions": true
+    },
+    "Shell Script": {
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "shfmt",
+          "arguments": ["-bn", "-ci", "-sr", "-i", "2"]
+        }
+      }
     }
   },
   "inline_completions": {

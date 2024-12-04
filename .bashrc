@@ -5,6 +5,7 @@ export EDITOR='vim'
 export CLICOLOR=1
 
 export PATH=$HOME/.local/bin:$PATH
+
 . "$HOME/.cargo/env"
 
 . "$HOME/.local/bin/env"

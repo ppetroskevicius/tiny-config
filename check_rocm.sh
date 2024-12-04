@@ -15,4 +15,3 @@ dkms status
 # Verify package installation
 sudo apt list --installed | grep amdgpu-dkms
 sudo apt list --installed | grep rocm-hip-libraries
-

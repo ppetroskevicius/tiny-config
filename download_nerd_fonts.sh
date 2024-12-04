@@ -113,11 +113,14 @@ choose_distro() {
   read -rp "Enter the number of your base distribution: " distro_choice
 
   case "$distro_choice" in
-    1) distro="debian";;
-    2) distro="fedora";;
-    3) distro="arch";;
-    4) distro="osx";;
-    *) echo "Invalid choice. Exiting."; exit 1 ;;
+    1) distro="debian" ;;
+    2) distro="fedora" ;;
+    3) distro="arch" ;;
+    4) distro="osx" ;;
+    *)
+      echo "Invalid choice. Exiting."
+      exit 1
+      ;;
   esac
 }
 
@@ -126,7 +129,7 @@ choose_font() {
   echo "Choose the font to install or select 'All' to download all fonts:"
 
   for i in "${!fonts[@]}"; do
-    echo "[$((i+1))] - ${fonts[$i]}"
+    echo "[$((i + 1))] - ${fonts[$i]}"
   done
 
   echo "[$((${#fonts[@]} + 1))] - All Fonts"
@@ -143,9 +146,12 @@ choose_extension() {
   read -rp "Enter the number of the desired extension: " extension_choice
 
   case "$extension_choice" in
-    1) extension=".zip";;
-    2) extension=".tar.xz";;
-    *) echo "Invalid extension choice. Exiting."; exit 1 ;;
+    1) extension=".zip" ;;
+    2) extension=".tar.xz" ;;
+    *)
+      echo "Invalid extension choice. Exiting."
+      exit 1
+      ;;
   esac
 }
 
@@ -167,18 +173,30 @@ download_and_install_font() {
   local font_dir=""
 
   case $distro in
-    "osx") font_dir="/Library/Fonts";;
-    *) font_dir="${HOME}/.local/share/fonts"; mkdir -p "$font_dir";;
+    "osx") font_dir="/Library/Fonts" ;;
+    *)
+      font_dir="${HOME}/.local/share/fonts"
+      mkdir -p "$font_dir"
+      ;;
   esac
 
   echo "Downloading and installing '$selected_font'..."
 
-  wget --quiet "$download_url" -O "$zip_file" || { echo "Error: Unable to download '$selected_font'."; return 1; }
+  wget --quiet "$download_url" -O "$zip_file" || {
+    echo "Error: Unable to download '$selected_font'."
+    return 1
+  }
 
   if [[ "$extension" == ".zip" ]]; then
-    unzip -qo "$zip_file" -d "$font_dir" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    unzip -qo "$zip_file" -d "$font_dir" || {
+      echo "Error: Unable to extract '$selected_font'."
+      return 1
+    }
   else
-    tar -xf "$zip_file" -C "$font_dir" || { echo "Error: Unable to extract '$selected_font'."; return 1; }
+    tar -xf "$zip_file" -C "$font_dir" || {
+      echo "Error: Unable to extract '$selected_font'."
+      return 1
+    }
   fi
 
   rm "$zip_file"
@@ -197,12 +215,15 @@ if [ "$font_choice" -eq "$((${#fonts[@]} + 1))" ]; then
     download_and_install_font "$font"
   done
 else
-  selected_font="${fonts[$((font_choice-1))]}"
+  selected_font="${fonts[$((font_choice - 1))]}"
   download_and_install_font "$selected_font"
 fi
 
 if command -v fc-cache &> /dev/null; then
-  fc-cache -f > /dev/null || { echo "Error: Unable to update font cache. Exiting."; exit 1; }
+  fc-cache -f > /dev/null || {
+    echo "Error: Unable to update font cache. Exiting."
+    exit 1
+  }
   echo "Font cache updated."
 else
   echo "Command 'fc-cache' not found. Make sure to have the necessary dependencies installed to update the font cache."

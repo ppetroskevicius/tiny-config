@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail   # exit on error, unset variable or pipe fail
+set -euo pipefail
 set -x
+
 SECONDS=0
-
-# run this script with:
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/PPetroskevicius/tiny-config/dev/setup.sh)"
-
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
 NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
@@ -17,14 +14,13 @@ update_packages() {
 setup_git() {
   GIT_USERNAME="ppetroskevicius"
   GIT_EMAIL="p.petroskevicius@gmail.com"
-
   sudo apt install -y git tmux htop vim unzip
   git config --global user.name "$GIT_USERNAME"
   git config --global user.email "$GIT_EMAIL"
 }
 
 install_1password_cli() {
-  if ! command -v op >/dev/null; then
+  if ! command -v op > /dev/null; then
     curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
     sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
@@ -38,20 +34,15 @@ install_1password_cli() {
 setup_credentials() {
   OP_ACCOUNT="my"
   OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
-
   eval "$(op signin --account $OP_ACCOUNT)"
-
   mkdir -p ~/.ssh && chmod 700 ~/.ssh
-
   op read --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
   echo "Successfully retrieved SSH key."
   chmod 600 ~/.ssh/id_ed25519
   ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
   cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
   chmod 600 ~/.ssh/authorized_keys
-
   ssh-keyscan github.com >> ~/.ssh/known_hosts
-
   systemctl --user enable --now ssh-agent.service
   eval "$(ssh-agent -s)"
   ssh-add ~/.ssh/id_ed25519
@@ -64,9 +55,7 @@ install_dotfiles() {
   cd "$TARGET_DIR"
   git switch dev
   mkdir -p "$HOME"/.config/
-
   rm -f "$HOME"/.bash_profile "$HOME"/.bashrc "$HOME"/.zprofile "$HOME"/.zshrc
-
   ln -sf "$TARGET_DIR"/.sshconfig "$HOME"/.ssh/config
   ln -sf "$TARGET_DIR"/.bash_profile "$HOME"
   ln -sf "$TARGET_DIR"/.bashrc "$HOME"
@@ -80,25 +69,17 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.xinputrc "$HOME"
   ln -sf "$TARGET_DIR"/start_i3.sh "$HOME"
   ln -sf "$TARGET_DIR"/start_gnome.sh "$HOME"
-
   mkdir -p "$HOME"/.config/i3
-  # ln -sf "$TARGET_DIR"/.i3 "$HOME"/.config/i3/config
-  # ln -sf "$TARGET_DIR"/status.toml "$HOME"/.config/i3/status.toml
-
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
-
   mkdir -p "$HOME"/.config/mako
   ln -sf "$TARGET_DIR"/.mako "$HOME"/.config/mako/config
-
   mkdir -p "$HOME"/.config/waybar
   ln -sf "$TARGET_DIR"/.waybar.jsonc "$HOME"/.config/waybar/config
   ln -sf "$TARGET_DIR"/.waybar_style.css "$HOME"/.config/waybar/style.css
-
   mkdir -p "$HOME"/.config/zed
   ln -sf "$TARGET_DIR"/zed/keymap.json "$HOME"/.config/zed/
   ln -sf "$TARGET_DIR"/zed/settings.json "$HOME"/.config/zed/
-
   rm -rf "$HOME"/.config/alacritty
   git clone https://github.com/alacritty/alacritty-theme "$HOME"/.config/alacritty/themes
 }
@@ -117,14 +98,13 @@ setup_wifi_in_networkmanager() {
 }
 
 setup_wifi_in_netplan() {
-  # setup for netplan
   if ip link | grep -q "wl"; then
     OP_WIFI_SSID="op://build/wifi/ssid"
     OP_WIFI_PASS="op://build/wifi/pass"
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
     WIFI_PASS=$(op read "$OP_WIFI_PASS")
     WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
-    sudo tee "$NETPLAN_CONFIG" > /dev/null <<EOL
+    sudo tee "$NETPLAN_CONFIG" > /dev/null << EOL
 network:
   version: 2
   renderer: networkd
@@ -135,81 +115,48 @@ network:
         "$WIFI_SSID":
           password: "$WIFI_PASS"
 EOL
-    # apply the netplan configuration
     sudo netplan apply
   fi
 }
 
-# Example usage:
-# setup_netplan "networkd"
-# setup_netplan "NetworkManager"
-
 setup_netplan() {
-  # Argument to specify the renderer: either "networkd" or "NetworkManager"
   RENDERER="$1"
-
-  # Install NetworkManager
   sudo apt install -y network-manager
-
   if [ "$RENDERER" == "networkd" ]; then
-    # Disable NetworkManager and enable systemd-networkd
     if systemctl is-enabled --quiet NetworkManager; then
       sudo systemctl stop NetworkManager
     fi
     sudo systemctl disable NetworkManager
     sudo systemctl enable --now systemd-networkd
-
-    # Configure Netplan to use networkd
     sudo sed -i 's/renderer: NetworkManager/renderer: networkd/' "$NETPLAN_CONFIG"
     setup_wifi_in_netplan
     echo "Configured Netplan to use networkd."
-
   elif [ "$RENDERER" == "NetworkManager" ]; then
-
-    # Disable systemd-networkd and enable NetworkManager
     if systemctl is-active --quiet systemd-networkd; then
       sudo systemctl stop systemd-networkd
     fi
     sudo systemctl restart wpa_supplicant
     sudo systemctl disable systemd-networkd
     sudo systemctl enable --now NetworkManager
-
-    # Configure Netplan to use NetworkManager
     sudo sed -i 's/renderer: networkd/renderer: NetworkManager/' "$NETPLAN_CONFIG"
-
     echo "Configured Netplan to use NetworkManager."
     setup_wifi_in_networkmanager
   else
     echo "Invalid argument. Please specify either 'networkd' or 'NetworkManager'."
     return 1
   fi
-
-  # Apply the Netplan configuration
   sudo netplan apply
   echo "Netplan configuration applied."
 }
 
 setup_bluetooth_audio() {
   echo "Setting up Bluetooth and audio..."
-
-  # essential Bluetooth packages
   sudo apt install -y bluez blueman bluetooth
-
-  # PulseAudio and its Bluetooth module for audio handling
   sudo apt install -y pulseaudio pulseaudio-module-bluetooth
-
-  # start the Bluetooth service
   sudo systemctl enable --now bluetooth
-
-  # start PulseAudio as a user service
   systemctl --user enable --now pulseaudio
-
-  # Install GUI and CLI tools for audio and device configuration
   sudo apt install -y pavucontrol alsa-utils
-
-  # for controlling audio hardware buttons in Sway
   sudo apt install -y pactl playerctl
-
   echo "Setup complete! You can now configure Bluetooth devices and audio settings."
   echo "Use 'blueman-manager' (GUI) or 'bluetoothctl' (CLI) for managing Bluetooth devices."
   echo "For audio management:"
@@ -219,14 +166,10 @@ setup_bluetooth_audio() {
 
 setup_i3() {
   sudo apt install -y i3 i3status i3lock dmenu xinit polybar
-  # startx /usr/bin/i3
 }
 
 setup_sway_wayland() {
   sudo apt install -y sway wayland-protocols waybar xwayland swayidle swaylock
-  # run chrome in wayland mode:
-  # google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
-  # check platform to be wayland: chrome://gpu/
 }
 
 build_waybar() {
@@ -271,10 +214,6 @@ install_screenshots() {
   cargo build --release
   sudo make install
   sudo apt install -y slurp
-  # grim - grab images from a wayland compositor
-  # gimp - runs on Wayland using XWayland, edit images
-  # slurp - select a region in a Wayland compositor
-  # swappy - snapshot and editor
 }
 
 install_notifications() {
@@ -290,72 +229,48 @@ install_nerd_font() {
 
 setup_timezone() {
   sudo timedatectl set-timezone Asia/Tokyo
-  # sudo timedatectl set-timezone Europe/London
   timedatectl
 }
 
 setup_japanese() {
-  # https://www.ubuntulinux.jp/News/ubuntu2404-ja-remix
   sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
   sudo apt -U upgrade
   sudo apt install -y ubuntu-defaults-ja
-  # install fcitx with Mozc
-  # https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
   sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt
-  # add Mozc as input method:
-  # fcxitx5-configtool
-  # press Shift to switch between Japanese and English
 }
 
 install_zsh() {
   sudo apt install -y zsh
   chsh -s /usr/bin/zsh
-
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   fi
-
   ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-
-  # Only clone the zsh-autosuggestions plugin if the directory does not exist
   if [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
   fi
 }
 
-
-
 setup_power() {
-  # sudo apt install -y power-profiles-daemon
-  # sudo systemctl enable --now power-profiles-daemon
-  # powerprofilesctl list
   sudo apt install -y tlp tlp-rdw
   sudo systemctl enable --now tlp
   sudo rm -f /etc/tlp.conf
   sudo ln -sf "$TARGET_DIR"/.tlp.conf /etc/tlp.conf
-  # print default configuration:
   tlp-stat -c
-  # check the difference with default configuration
   tlp-stat --cdiff
 }
 
 setup_brightness() {
-# this is required for brightness buttons to work in sway
   sudo apt install brightnessctl
   sudo usermod -aG video "$USER"
-  # need to logoff after edding user to the group
-  # sudo brightnessctl set 10%-
 }
 
 remove_snap() {
   snap list
-  # purge snapd and cleanup
   sudo apt purge snapd
   sudo rm -rf /var/cache/snapd
   sudo rm -rf /snap
-  # prevent snapd from being reinstalled
   echo -e "Package: snapd\nPin: release a=*\nPin-Priority: -10" | sudo tee /etc/apt/preferences.d/nosnap.pref
-  # stop snapd services and prevent from being restarted
   sudo systemctl stop snapd.socket
   sudo systemctl stop snapd.service snapd.seeded.service
   sudo systemctl mask snapd.socket snapd.service snapd.seeded.service
@@ -368,12 +283,8 @@ install_other() {
 install_kvm() {
   sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-viewer
   sudo kvm-ok
-  # sudo systemctl enble libvirtd
-  # sudo systemctl restart libvirtd
-  # sudo systemctl status libvirtd
   sudo usermod -aG libvirt "$(whoami)"
   newgrp libvirt
-  # virt-manager
 }
 
 install_uv() {
@@ -381,8 +292,6 @@ install_uv() {
   source "$HOME"/.cargo/env
   uv self update
 }
-
-# install applications
 
 install_1password_app() {
   sudo apt install -y 1password
@@ -403,6 +312,7 @@ install_alacritty_app() {
 }
 
 install_zed_app() {
+  sudo apt install -y shellcheck shfmt
   curl -f https://zed.dev/install.sh | sh
 }
 
@@ -425,7 +335,6 @@ install_spotify_app() {
   sudo apt update && sudo apt install -y spotify-client
 }
 
-
 setup_server() {
   update_packages
   setup_git
@@ -437,7 +346,6 @@ setup_server() {
 
 setup_desktop() {
   setup_i3
-  # setup_wifi
   setup_bluetooth_audio
   setup_japanese
   install_zsh
@@ -449,7 +357,6 @@ setup_desktop() {
 setup_apps() {
   install_kvm
   install_uv
-
   install_1password_app
   install_alacritty_app
   install_zed_app
@@ -458,16 +365,5 @@ setup_apps() {
   install_spotify_app
 }
 
-
-# setup_server
-
-# setup_netplan "networkd"
-### setup_netplan "NetworkManager"
-
-# setup_desktop
-# setup_apps
-
 install_dotfiles
-# setup_power
-
 echo "[ ] completed in t=$SECONDS"
