@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null && pwd)"
 ROOT=$DIR/../
 cd $ROOT
 
@@ -18,7 +18,7 @@ fi
 
 if [ -z "$PYENV_SHELL" ] || [ -n "$PYENV_PATH_SETUP" ]; then
   echo "pyenvrc setup ..."
-  cat <<EOF > "${HOME}/.pyenvrc"
+  cat << EOF > "${HOME}/.pyenvrc"
 if [ -z "\$PYENV_ROOT" ]; then
   $PYENV_PATH_SETUP
   export PYENV_ROOT="\$HOME/.pyenv"

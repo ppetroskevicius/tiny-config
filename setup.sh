@@ -67,19 +67,26 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
   ln -sf "$TARGET_DIR"/.xinitrc "$HOME"
   ln -sf "$TARGET_DIR"/.xinputrc "$HOME"
-  ln -sf "$TARGET_DIR"/start_i3.sh "$HOME"
-  ln -sf "$TARGET_DIR"/start_gnome.sh "$HOME"
+
   mkdir -p "$HOME"/.config/i3
+
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
+
   mkdir -p "$HOME"/.config/mako
   ln -sf "$TARGET_DIR"/.mako "$HOME"/.config/mako/config
-  mkdir -p "$HOME"/.config/waybar
-  ln -sf "$TARGET_DIR"/.waybar.jsonc "$HOME"/.config/waybar/config
-  ln -sf "$TARGET_DIR"/.waybar_style.css "$HOME"/.config/waybar/style.css
+
+  # mkdir -p "$HOME"/.config/waybar
+  # ln -sf "$TARGET_DIR"/.waybar.jsonc "$HOME"/.config/waybar/config
+  # ln -sf "$TARGET_DIR"/.waybar_style.css "$HOME"/.config/waybar/style.css
+
+  mkdir -p "$HOME"/.config/i3status-rust
+  ln -sf "$TARGET_DIR"/.i3status-rust.toml "$HOME"/.config/i3status-rust/config.toml
+
   mkdir -p "$HOME"/.config/zed
   ln -sf "$TARGET_DIR"/zed/keymap.json "$HOME"/.config/zed/
   ln -sf "$TARGET_DIR"/zed/settings.json "$HOME"/.config/zed/
+
   rm -rf "$HOME"/.config/alacritty
   git clone https://github.com/alacritty/alacritty-theme "$HOME"/.config/alacritty/themes
 }
@@ -149,6 +156,10 @@ setup_netplan() {
   echo "Netplan configuration applied."
 }
 
+setup_vpn() {
+  sudo apt install -y openvpn
+}
+
 setup_bluetooth_audio() {
   echo "Setting up Bluetooth and audio..."
   sudo apt install -y bluez blueman bluetooth
@@ -164,46 +175,21 @@ setup_bluetooth_audio() {
   echo "- Use 'alsamixer' to unmute and adjust hardware audio settings in the terminal."
 }
 
-setup_i3() {
-  sudo apt install -y i3 i3status i3lock dmenu xinit polybar
-}
-
 setup_sway_wayland() {
-  sudo apt install -y sway wayland-protocols waybar xwayland swayidle swaylock
+  sudo apt install -y sway wayland-protocols xwayland swayidle swaylock
 }
 
-build_waybar() {
-  sudo apt remove waybar
-  hash -r
-  sudo apt install -y \
-    cava \
-    clang-tidy \
-    gobject-introspection \
-    libdbusmenu-gtk3-dev \
-    libevdev-dev \
-    libfmt-dev \
-    libgirepository1.0-dev \
-    libgtk-3-dev \
-    libgtkmm-3.0-dev \
-    libinput-dev \
-    libjsoncpp-dev \
-    libmpdclient-dev \
-    libnl-3-dev \
-    libnl-genl-3-dev \
-    libpulse-dev \
-    libsigc++-2.0-dev \
-    libspdlog-dev \
-    libwayland-dev \
-    scdoc \
-    upower \
-    libxkbregistry-dev
-  rm -rf /tmp/waybar
-  git clone https://github.com/Alexays/Waybar /tmp/waybar
-  cd /tmp/waybar
-  meson setup build
-  sudo ninja -C build install
-  which -a waybar
-  waybar --version
+install_i3status-rs() {
+  # https://greshake.github.io/i3status-rust/i3status_rs/blocks/index.html
+
+  sudo apt install -y libssl-dev libsensors-dev libpulse-dev libnotmuch-dev pandoc
+  tempdir=$(mktemp -d)
+  trap 'rm -rf $tempdir' EXIT
+
+  git clone https://github.com/greshake/i3status-rust "$tempdir"
+  cd "$tempdir"
+  cargo install --path . --locked
+  ./install.sh
 }
 
 install_screenshots() {
@@ -225,6 +211,7 @@ install_notifications() {
 install_nerd_font() {
   mkdir -p "$HOME"/.local/share/fonts
   rm -rf "$HOME"/.local/share/fonts/*
+  # TODO
 }
 
 setup_timezone() {
@@ -333,6 +320,11 @@ install_spotify_app() {
   curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
   echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
   sudo apt update && sudo apt install -y spotify-client
+}
+
+install_spotify_player() {
+  sudo apt install libssl-dev libasound2-dev libdbus-1-dev
+  cargo install spotify_player --locked
 }
 
 setup_server() {

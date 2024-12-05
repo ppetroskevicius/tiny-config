@@ -4,14 +4,13 @@ set -e
 # Increase the pip timeout to handle TimeoutError
 export PIP_DEFAULT_TIMEOUT=200
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null && pwd)"
 ROOT="$DIR"/../
 cd "$ROOT"
 
 # updating uv on macOS results in 403 sometimes
 function update_uv() {
-  for i in $(seq 1 5);
-  do
+  for i in $(seq 1 5); do
     if uv self update; then
       return 0
     else

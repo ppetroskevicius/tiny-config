@@ -1,0 +1,116 @@
+icons_format = "{icon}"
+
+[theme]
+# theme = "solarized-dark"
+theme = "space-villain"
+
+[icons]
+# icons = "awesome4"
+icons = "material-nf" # for any of nerd fonts
+
+[[block]]
+block = "battery"
+format = " $icon $percentage {$time_remaining.dur(hms:true, min_unit:m) }"
+# driver = "sysfs"
+interval = 60
+
+# TODO
+[[block]]
+block = "toggle"
+format = " $icon OpenVPN "
+command_state = "pgrep openvpn"
+command_on = "echo `ON`"
+command_off = "echo `OFF`"
+state_on = "good"
+state_off = "warning"
+interval = 120
+merge_with_next = true
+
+[[block]]
+block = "net"
+format = " $icon {$signal_strength $ssid} "
+format_alt = " $icon $ip $ipv6 $nameserver {$signal_strength $ssid $frequency|Wired connection} via $device"
+interval = 10
+
+[[block]]
+block = "memory"
+format = " $icon $mem_used.eng(w:3,u:B,p:Mi)"
+interval = 10
+warning_mem = 15
+critical_mem = 40
+
+[[block]]
+block = "disk_space"
+info_type = "used"
+format = " $icon $used.eng(w:3,u:B,p:Mi)"
+format_alt = " $icon $used.eng(w:3,u:B,p:Mi)/$total"
+interval = 300
+
+# [[block]]
+# block = "nvidia_gpu"
+# interval = 1
+# format = " $icon GT 1030 $utilization $temperature $clocks "
+
+[[block]]
+block = "temperature"
+format = " $icon $average"
+chip = "*-isa-*"
+interval = 50
+
+[[block]]
+block = "sound"
+format = " $icon $output_name{ $volume|}"
+headphones_indicator = true
+[block.mappings]
+"alsa_output.pci-0000_00_1f.3.analog-stereo" = "Speakers"
+"bluez_sink.04_52_C7_F4_55_2A.a2dp_sink" = "Headset"
+[[block.click]]
+button = "left"
+cmd = "pavucontrol"
+
+[[block]]
+block = "music"
+player = "spotify"
+format = " $icon $volume_icon  $play $next |"
+format_alt = " $icon $volume_icon {$combo.str(max_w:20) $play $next |}"
+seek_step_secs = 10
+[[block.click]]
+button = "up"
+action = "volume_up"
+[[block.click]]
+button = "down"
+action = "volume_down"
+[[block.click]]
+button = "forward"
+action = "seek_forward"
+[[block.click]]
+button = "back"
+action = "seek_backward"
+
+[[block]]
+block = "bluetooth"
+mac = "04:52:C7:F4:55:2A"
+disconnected_format = ""
+format = " $icon{ $percentage|}"
+[[block.click]]
+button = "left"
+cmd = "blueman-manager"
+
+[[block]]
+block = "bluetooth"
+mac = "C0:EB:D0:FB:A3:A6"
+disconnected_format = ""
+format = " $icon{ $percentage|} "
+[[block.click]]
+button = "left"
+cmd = "blueman-manager"
+
+[[block]]
+block = "hueshift"
+hue_shifter = "wl_gammarelay_rs"
+step = 50
+
+[[block]]
+block = "time"
+interval = 60
+format = " $timestamp.datetime(f:'%a %m/%d %R') "
