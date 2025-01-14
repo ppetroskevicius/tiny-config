@@ -37,13 +37,13 @@ include /etc/sway/config-vars.d/*
 #
 bindsym $mod+q exec swaylock -c 000000
 exec swayidle -w \
-  timeout 300 'swaylock -f -c 000000' \
-  timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  timeout 3000 'swaylock -f -c 000000' \
+  timeout 3500 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
   before-sleep 'playerctl pause' \
   before-sleep 'swaylock -f -c 000000'
 #
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
+# This will lock your screen after 3000 seconds of inactivity, then turn off
+# your displays after another 3500 seconds, and turn your screens back on when
 # resumed. It will also lock your screen before your computer goes to sleep.
 
 ### Input configuration
@@ -241,8 +241,11 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# start chrome in wayland mode
+# [ ] start chrome in X11 mode for Japanese input to work. Stop all wayland chrome sessions before that.
+bindsym $mod+c+j exec google-chrome
+# [ ] or run chrome in Wayland mode
 bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+
 
 # configure notebook touchscreen
 set $builtin_display "eDP-1"
@@ -250,7 +253,7 @@ set $external_display "DP-1"
 set $touch_input "1386:18575:Wacom_HID_488F_Finger"
 input $touch_input map_to_output $builtin_display
 
-# setup screen shoting
+# setup screen shotting
 bindsym $mod+p       exec shotman --capture window --copy
 bindsym $mod+Shift+p exec shotman --capture region --copy
 bindsym $mod+Ctrl+p  exec shotman --capture output --copy
@@ -280,7 +283,23 @@ assign [instance="spotify"] workspace 4
 
 # start apps in assigned workspaces
 exec zed
-exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+
+# This will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,
+# because google-chrome only supports wayland text-input-v1 and sway only supports text-input-v3
+# exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+
+# [ ] The workaround to input Japanese in google-chrome in sway is to run google-chrome in X11 mode:
+# exec google-chrome
+
+# [ ] this will switch chrome to wayland text-input-v1 but sway only supports text-input-v3, so it will not work:
+# exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime
+
+# [ ] this will allow Japanese input under sway, but will run chrome in X11 mode
+exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --wayland-text-input-version=3
+
+# [ ] these flags are mutually exclusive, so would still run chrome in X11 mode
+# exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3
+
 exec alacritty
 exec discord
 exec spotify

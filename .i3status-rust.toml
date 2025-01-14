@@ -28,8 +28,18 @@ merge_with_next = true
 
 [[block]]
 block = "net"
-format = " $icon {$signal_strength $ssid} "
-format_alt = " $icon $ip $ipv6 $nameserver {$signal_strength $ssid $frequency|Wired connection} via $device"
+device = "^wlp.*$"
+format = " $icon {$signal_strength $ssid}"
+format_alt = " $icon {$signal_strength $ssid $frequency} $ip $ipv6 $speed_down $speed_up via $device"
+missing_format = "No Wireless"
+interval = 10
+
+[[block]]
+block = "net"
+device = "^enx.*$"
+format = " $icon $device"
+format_alt = " $icon $ip $ipv6 $speed_down $speed_up via $device"
+missing_format = "No Ethernet"
 interval = 10
 
 [[block]]

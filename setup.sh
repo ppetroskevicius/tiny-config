@@ -6,6 +6,10 @@ SECONDS=0
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
 NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
+OP_ACCOUNT="my"
+OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
+
+eval "$(op signin --account $OP_ACCOUNT)"
 
 update_packages() {
   sudo apt update && sudo apt upgrade -y
@@ -32,9 +36,6 @@ install_1password_cli() {
 }
 
 setup_credentials() {
-  OP_ACCOUNT="my"
-  OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
-  eval "$(op signin --account $OP_ACCOUNT)"
   mkdir -p ~/.ssh && chmod 700 ~/.ssh
   op read --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
   echo "Successfully retrieved SSH key."
@@ -111,19 +112,30 @@ setup_wifi_in_netplan() {
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
     WIFI_PASS=$(op read "$OP_WIFI_PASS")
     WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
-    sudo tee "$NETPLAN_CONFIG" > /dev/null << EOL
+  fi
+
+  if ip link | grep -q "en"; then
+    ETHERNET_INTERFACE=$(ip link | grep "en" | awk '{print $2}' | grep "en" | sed 's/://')
+  fi
+
+  sudo tee "$NETPLAN_CONFIG" > /dev/null << EOL
 network:
   version: 2
   renderer: networkd
   wifis:
-    $WIFI_INTERFACE:
+    ${WIFI_INTERFACE:-""}:
       dhcp4: true
+      dhcp6: true
       access-points:
-        "$WIFI_SSID":
-          password: "$WIFI_PASS"
+        "${WIFI_SSID:-""}":
+          password: "${WIFI_PASS:-""}"
+  ethernets:
+    ${ETHERNET_INTERFACE:-""}:
+      dhcp4: true
+      dhcp6: true
 EOL
-    sudo netplan apply
-  fi
+
+  sudo netplan apply
 }
 
 setup_netplan() {
@@ -204,7 +216,7 @@ install_screenshots() {
 
 install_notifications() {
   pkill dunst
-  sudo apt remove dunst
+  sudo apt purge dunst
   sudo apt install -y mako-notifier
 }
 
@@ -223,7 +235,19 @@ setup_japanese() {
   sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
   sudo apt -U upgrade
   sudo apt install -y ubuntu-defaults-ja
-  sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt
+  # https://fcitx-im.org/wiki/Setup_Fcitx_5
+  # https://fcitx-im.org/wiki/Configtool_(Fcitx_5)
+  # https://fcitx-im.org/wiki/Compiling_fcitx5
+  # https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
+  #
+  # Sway supports Wayland text-input-v3, but google-chrome only supports wayland text-input-v1 in the Wayland mode:
+  #    (https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland#Chromium_.2F_Electron)
+  # Google Chrome Japanese input only works when google-chrome is run in X11 mode for now.
+  #    (this patch might be fixing it: https://github.com/swaywm/sway/pull/7226)
+  sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5
+  # to configure (add Mozc, configure keys): fcitx5-configtool
+  # to diagnose: fcitx5-diagnose
+  # setup the IM framework as default at the session level
 }
 
 install_zsh() {
@@ -323,8 +347,14 @@ install_spotify_app() {
 }
 
 install_spotify_player() {
+  # https://github.com/aome510/spotify-player?tab=readme-ov-file#examples
   sudo apt install libssl-dev libasound2-dev libdbus-1-dev
   cargo install spotify_player --locked
+}
+
+cleanup_all() {
+  sudo apt autoremove -y
+  sudo apt clean -y
 }
 
 setup_server() {
@@ -355,7 +385,11 @@ setup_apps() {
   install_chrome_app
   install_discord_app
   install_spotify_app
+  install_spotify_player
+  cleanup_all
 }
 
-install_dotfiles
+setup_netplan "networkd"
+
+# install_dotfiles
 echo "[ ] completed in t=$SECONDS"

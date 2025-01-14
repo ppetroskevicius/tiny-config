@@ -20,13 +20,15 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 
 # for fcitx5
-# export XMODIFIERS=@im=fcitx
-# export GTK_IM_MODULE=fcitx
-# export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
 export INPUT_METHOD=fcitx
 
 # for KVM
 export LIBVIRT_DEFAULT_URI="qemu:///system"
+
+alias find='find 2>/dev/null'
 
 source "$HOME"/.bashrc
 

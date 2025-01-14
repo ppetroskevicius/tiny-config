@@ -28,4 +28,6 @@ export INPUT_METHOD=fcitx
 # for KVM
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
+alias find='find 2>/dev/null'
+
 source ~/.zshrc
