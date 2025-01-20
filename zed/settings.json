@@ -18,9 +18,6 @@
     "Markdown-Inline": {
       "show_inline_completions": true
     },
-    "Markdown": {
-      "show_inline_completions": true
-    },
     "Shell Script": {
       "format_on_save": "on",
       "formatter": {

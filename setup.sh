@@ -77,10 +77,6 @@ install_dotfiles() {
   mkdir -p "$HOME"/.config/mako
   ln -sf "$TARGET_DIR"/.mako "$HOME"/.config/mako/config
 
-  # mkdir -p "$HOME"/.config/waybar
-  # ln -sf "$TARGET_DIR"/.waybar.jsonc "$HOME"/.config/waybar/config
-  # ln -sf "$TARGET_DIR"/.waybar_style.css "$HOME"/.config/waybar/style.css
-
   mkdir -p "$HOME"/.config/i3status-rust
   ln -sf "$TARGET_DIR"/.i3status-rust.toml "$HOME"/.config/i3status-rust/config.toml
 
@@ -90,6 +86,11 @@ install_dotfiles() {
 
   rm -rf "$HOME"/.config/alacritty
   git clone https://github.com/alacritty/alacritty-theme "$HOME"/.config/alacritty/themes
+
+  mkdir -p "$HOME"/.config/ruff
+  ln -sf "$TARGET_DIR"/.ruff.toml "$HOME"/.config/ruff/ruff.toml
+
+  ln -sf "$TARGET_DIR"/.pylintrc "$HOME"/.config/pylintrc
 }
 
 setup_wifi_in_networkmanager() {
@@ -302,6 +303,7 @@ install_uv() {
   curl -LsSf https://astral.sh/uv/install.sh | sh
   source "$HOME"/.cargo/env
   uv self update
+  uv tool install ruff
 }
 
 install_1password_app() {
@@ -389,7 +391,7 @@ setup_apps() {
   cleanup_all
 }
 
-setup_netplan "networkd"
+# setup_netplan "networkd"
 
-# install_dotfiles
+install_dotfiles
 echo "[ ] completed in t=$SECONDS"
