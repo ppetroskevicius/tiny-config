@@ -32,6 +32,5 @@ alias find='find 2>/dev/null'
 
 source "$HOME"/.bashrc
 
-. "$HOME"/.cargo/env
-
-. "$HOME"/.local/bin/env
+. "$HOME/.local/bin/env"
+. "$HOME/.cargo/env"

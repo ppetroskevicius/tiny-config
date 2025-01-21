@@ -1,6 +1,6 @@
 [user]
-  name = Petras Petroskevicius
-  email = p.petroskevicius@gmail.com
+	name = ppetroskevicius
+	email = p.petroskevicius@gmail.com
 [pull]
   rebase = false
 [push]
