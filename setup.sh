@@ -8,23 +8,23 @@ TARGET_DIR="$HOME/fun/tiny-config"
 NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
 OP_ACCOUNT="my"
 OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
+OP_WIFI_SSID="op://wifi/wifi/ssid"
+OP_WIFI_PASS="op://wifi/wifi/pass"
 
-eval "$(op signin --account $OP_ACCOUNT)"
+tempdir=$(mktemp -d)
+trap 'rm -rf $tempdir' EXIT
 
 update_packages() {
   sudo apt update && sudo apt upgrade -y
 }
 
 setup_git() {
-  GIT_USERNAME="ppetroskevicius"
-  GIT_EMAIL="p.petroskevicius@gmail.com"
-  sudo apt install -y git tmux htop vim unzip
-  git config --global user.name "$GIT_USERNAME"
-  git config --global user.email "$GIT_EMAIL"
+  sudo apt install -y git vim tmux htop unzip
 }
 
-install_1password_cli() {
+setup_1password_cli() {
   if ! command -v op > /dev/null; then
+    # install
     curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
     sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
@@ -32,21 +32,25 @@ install_1password_cli() {
     sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
     curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
     sudo apt update && sudo apt install -y 1password-cli
+  else
+    # login
+    eval "$(op signin --account $OP_ACCOUNT)"
   fi
 }
 
 setup_credentials() {
-  mkdir -p ~/.ssh && chmod 700 ~/.ssh
-  op read --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
-  echo "Successfully retrieved SSH key."
-  chmod 600 ~/.ssh/id_ed25519
-  ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
-  cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
-  chmod 600 ~/.ssh/authorized_keys
-  ssh-keyscan github.com >> ~/.ssh/known_hosts
-  systemctl --user enable --now ssh-agent.service
-  eval "$(ssh-agent -s)"
-  ssh-add ~/.ssh/id_ed25519
+  if ! [ -f $HOME/.ssh/id_ed25519 ]; then
+    mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    op read -f --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
+    chmod 600 ~/.ssh/id_ed25519
+    ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+    cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/authorized_keys
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+    systemctl --user enable --now ssh-agent.service
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_ed25519
+  fi
 }
 
 install_dotfiles() {
@@ -54,7 +58,10 @@ install_dotfiles() {
     git clone "$SOURCE_REPO" "$TARGET_DIR"
   fi
   cd "$TARGET_DIR"
+
+  #TODO
   git switch dev
+
   mkdir -p "$HOME"/.config/
   rm -f "$HOME"/.bash_profile "$HOME"/.bashrc "$HOME"/.zprofile "$HOME"/.zshrc
   ln -sf "$TARGET_DIR"/.sshconfig "$HOME"/.ssh/config
@@ -69,7 +76,7 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.xinitrc "$HOME"
   ln -sf "$TARGET_DIR"/.xinputrc "$HOME"
 
-  mkdir -p "$HOME"/.config/i3
+  # mkdir -p "$HOME"/.config/i3
 
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
@@ -96,8 +103,6 @@ install_dotfiles() {
 setup_wifi_in_networkmanager() {
   if nmcli device status | grep -q "wifi"; then
     nmcli device wifi list
-    OP_WIFI_SSID="op://build/wifi/ssid"
-    OP_WIFI_PASS="op://build/wifi/pass"
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
     export WIFI_SSID
     WIFI_PASS=$(op read "$OP_WIFI_PASS")
@@ -108,8 +113,6 @@ setup_wifi_in_networkmanager() {
 
 setup_wifi_in_netplan() {
   if ip link | grep -q "wl"; then
-    OP_WIFI_SSID="op://build/wifi/ssid"
-    OP_WIFI_PASS="op://build/wifi/pass"
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
     WIFI_PASS=$(op read "$OP_WIFI_PASS")
     WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
@@ -173,14 +176,26 @@ setup_vpn() {
   sudo apt install -y openvpn
 }
 
+setup_timezone() {
+  sudo timedatectl set-timezone Asia/Tokyo
+  timedatectl
+}
+
+install_python3() {
+  sudo apt install -y python3
+}
+
+# install_rust() {
+# 
+# }
+
 setup_bluetooth_audio() {
-  echo "Setting up Bluetooth and audio..."
   sudo apt install -y bluez blueman bluetooth
   sudo apt install -y pulseaudio pulseaudio-module-bluetooth
   sudo systemctl enable --now bluetooth
   systemctl --user enable --now pulseaudio
   sudo apt install -y pavucontrol alsa-utils
-  sudo apt install -y pactl playerctl
+  sudo apt install -y playerctl
   echo "Setup complete! You can now configure Bluetooth devices and audio settings."
   echo "Use 'blueman-manager' (GUI) or 'bluetoothctl' (CLI) for managing Bluetooth devices."
   echo "For audio management:"
@@ -194,48 +209,61 @@ setup_sway_wayland() {
 
 install_i3status-rs() {
   # https://greshake.github.io/i3status-rust/i3status_rs/blocks/index.html
-
-  sudo apt install -y libssl-dev libsensors-dev libpulse-dev libnotmuch-dev pandoc
-  tempdir=$(mktemp -d)
-  trap 'rm -rf $tempdir' EXIT
-
-  git clone https://github.com/greshake/i3status-rust "$tempdir"
-  cd "$tempdir"
-  cargo install --path . --locked
-  ./install.sh
+  if ! [ -f $HOME/.cargo/bin/i3status-rs ]; then
+    sudo apt install -y libssl-dev libsensors-dev libpulse-dev libnotmuch-dev pandoc
+    git clone https://github.com/greshake/i3status-rust "$tempdir/i3status-rust"
+    cd "$tempdir/i3status-rust"
+    cargo install --path . --locked
+    ./install.sh
+  fi
 }
 
 install_screenshots() {
-  tempdir=$(mktemp -d)
-  trap 'rm -rf $tempdir' EXIT
-  git clone https://git.sr.ht/~whynothugo/shotman "$tempdir"
-  cd "$tempdir"
-  cargo build --release
-  sudo make install
-  sudo apt install -y slurp
+  if ! command -v shotman > /dev/null; then
+    sudo apt install -y slurp scdoc
+    git clone https://git.sr.ht/~whynothugo/shotman "$tempdir/shotman"
+    cd "$tempdir/shotman"
+    cargo build --release
+    sudo make install
+  fi
 }
 
 install_notifications() {
-  pkill dunst
+  pkill dunst || true
   sudo apt purge dunst
   sudo apt install -y mako-notifier
+}
+
+setup_power_management() {
+  sudo apt install -y tlp tlp-rdw
+  sudo systemctl enable --now tlp
+  sudo rm -f /etc/tlp.conf
+  sudo ln -sf "$TARGET_DIR"/.tlp.conf /etc/tlp.conf
+  tlp-stat -c
+  tlp-stat --cdiff
+}
+
+setup_brightness() {
+  sudo apt install -y brightnessctl
+  sudo usermod -aG video "$USER"
 }
 
 install_nerd_font() {
   mkdir -p "$HOME"/.local/share/fonts
   rm -rf "$HOME"/.local/share/fonts/*
+  wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip \
+&& cd ~/.local/share/fonts \
+&& unzip JetBrainsMono.zip \
+&& rm JetBrainsMono.zip \
+&& fc-cache -fv
   # TODO
 }
 
-setup_timezone() {
-  sudo timedatectl set-timezone Asia/Tokyo
-  timedatectl
-}
-
 setup_japanese() {
-  sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
-  sudo apt -U upgrade
-  sudo apt install -y ubuntu-defaults-ja
+  # sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
+  # sudo apt -U upgrade
+  # sudo apt install -y ubuntu-defaults-ja
+
   # https://fcitx-im.org/wiki/Setup_Fcitx_5
   # https://fcitx-im.org/wiki/Configtool_(Fcitx_5)
   # https://fcitx-im.org/wiki/Compiling_fcitx5
@@ -251,6 +279,19 @@ setup_japanese() {
   # setup the IM framework as default at the session level
 }
 
+remove_snap() {
+  if command -v snap > /dev/null; then
+    snap list || true
+    sudo apt purge -y snapd
+    sudo rm -rf /var/cache/snapd
+    sudo rm -rf /snap
+    echo -e "Package: snapd\nPin: release a=*\nPin-Priority: -10" | sudo tee /etc/apt/preferences.d/nosnap.pref
+    sudo systemctl stop snapd.socket || true
+    sudo systemctl stop snapd.service snapd.seeded.service || true
+    sudo systemctl mask snapd.socket snapd.service snapd.seeded.service
+  fi
+}
+
 install_zsh() {
   sudo apt install -y zsh
   chsh -s /usr/bin/zsh
@@ -263,47 +304,22 @@ install_zsh() {
   fi
 }
 
-setup_power() {
-  sudo apt install -y tlp tlp-rdw
-  sudo systemctl enable --now tlp
-  sudo rm -f /etc/tlp.conf
-  sudo ln -sf "$TARGET_DIR"/.tlp.conf /etc/tlp.conf
-  tlp-stat -c
-  tlp-stat --cdiff
-}
-
-setup_brightness() {
-  sudo apt install brightnessctl
-  sudo usermod -aG video "$USER"
-}
-
-remove_snap() {
-  snap list
-  sudo apt purge snapd
-  sudo rm -rf /var/cache/snapd
-  sudo rm -rf /snap
-  echo -e "Package: snapd\nPin: release a=*\nPin-Priority: -10" | sudo tee /etc/apt/preferences.d/nosnap.pref
-  sudo systemctl stop snapd.socket
-  sudo systemctl stop snapd.service snapd.seeded.service
-  sudo systemctl mask snapd.socket snapd.service snapd.seeded.service
-}
-
 install_other() {
   sudo apt install -y neofetch btop
 }
 
-install_kvm() {
-  sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-viewer
-  sudo kvm-ok
-  sudo usermod -aG libvirt "$(whoami)"
-  newgrp libvirt
-}
-
 install_uv() {
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  source "$HOME"/.cargo/env
-  uv self update
-  uv tool install ruff
+  if ! command -v uv > /dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    source "$HOME"/.cargo/env
+    uv self update
+    uv tool install ruff
+    uv tool install mypy
+    uv tool install pylint
+    uv tool install pytest
+    uv tool install pre-commit
+    # uv pip3 install torch torchvision torchaudio
+  fi
 }
 
 install_1password_app() {
@@ -311,35 +327,43 @@ install_1password_app() {
 }
 
 install_alacritty_app() {
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  . "$HOME/.cargo/env"
-  rustup override set stable
-  rustup update stable
-  sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
-  tempdir=$(mktemp -d)
-  trap 'rm -rf $tempdir' EXIT
-  git clone https://github.com/alacritty/alacritty.git "$tempdir"
-  cd "$tempdir"
-  cargo install alacritty
-  cd "$TARGET_DIR"
+  if ! [ -f $HOME/.cargo/bin/alacritty ]; then
+    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    . "$HOME/.cargo/env"
+    rustup override set stable
+    rustup update stable
+    sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
+    git clone https://github.com/alacritty/alacritty.git "$tempdir/alacritty"
+    cd "$tempdir/alacritty"
+    cargo install alacritty
+    cd "$TARGET_DIR"
+  fi
 }
 
 install_zed_app() {
-  sudo apt install -y shellcheck shfmt
-  curl -f https://zed.dev/install.sh | sh
+  if ! command -v zed > /dev/null; then
+    sudo apt install -y shellcheck shfmt
+    curl -f https://zed.dev/install.sh | sh
+  fi
 }
 
 install_chrome_app() {
-  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  sudo apt install -y fonts-liberation xdg-utils
-  sudo dpkg -i ./google-chrome-stable_current_amd64.deb
-  rm ./google-chrome-stable_current_amd64.deb
+  if ! command -v google-chrome > /dev/null; then
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo apt install -y fonts-liberation xdg-utils
+    sudo dpkg -i ./google-chrome-stable_current_amd64.deb
+    rm ./google-chrome-stable_current_amd64.deb
+  fi
 }
 
 install_discord_app() {
-  wget -O /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
-  sudo dpkg -i /tmp/discord.deb
-  rm /tmp/discord.deb
+  if ! command -v discord > /dev/null; then
+    wget -O /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
+    sudo dpkg -i /tmp/discord.deb
+    rm /tmp/discord.deb
+  fi
 }
 
 install_spotify_app() {
@@ -350,7 +374,8 @@ install_spotify_app() {
 
 install_spotify_player() {
   # https://github.com/aome510/spotify-player?tab=readme-ov-file#examples
-  sudo apt install libssl-dev libasound2-dev libdbus-1-dev
+  sudo apt install -y libssl-dev libasound2-dev libdbus-1-dev
+  source "$HOME"/.cargo/env
   cargo install spotify_player --locked
 }
 
@@ -359,39 +384,61 @@ cleanup_all() {
   sudo apt clean -y
 }
 
+install_nvidia_gpu() {
+  # install nvidia driveros
+  # https://linuxconfig.org/how-to-install-nvidia-drivers-on-ubuntu-24-04
+  ubuntu-drivers devices # check what drivers are installed (see recommended one)
+  sudo apt install -y nvidia-driver-550 # install the above recommended driver
+  sudo reboot # reboot is required
+}
+
 setup_server() {
   update_packages
   setup_git
-  install_1password_cli
+  setup_1password_cli
   setup_credentials
   install_dotfiles
+  setup_netplan "networkd"
   setup_timezone
 }
 
 setup_desktop() {
-  setup_i3
+  # install_python3
+  # install_rust
+  install_alacritty_app
   setup_bluetooth_audio
-  setup_japanese
-  install_zsh
-  install_power_profiles
+  setup_sway_wayland
+  install_i3status-rs
+  install_screenshots
+  install_notifications
+  setup_power_management
   setup_brightness
+  setup_japanese
   remove_snap
+  # install_zsh
+  install_other
 }
 
 setup_apps() {
-  install_kvm
   install_uv
   install_1password_app
-  install_alacritty_app
   install_zed_app
   install_chrome_app
   install_discord_app
-  install_spotify_app
+  # install_spotify_app
   install_spotify_player
   cleanup_all
 }
 
-# setup_netplan "networkd"
+require_reboot() {
+  # run this the last
+  install_nvidia_gpu
+}
 
-install_dotfiles
+
+setup_server
+setup_desktop
+setup_apps
+require_reboot
+
 echo "[ ] completed in t=$SECONDS"
