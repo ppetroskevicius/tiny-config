@@ -6,15 +6,48 @@
 // To see all of Zed's default settings without changing your
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
+
+// Default: https://github.com/zed-industries/zed/blob/main/assets/settings/default.json
+
 {
+  "auto_install_extensions": {
+    "html": true,
+    "basher": true,
+    "dockerfile": true,
+    "docker-compose": true,
+    "make": true,
+    "ruff": true,
+    "toml": true
+  },
   "assistant": {
     "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-5-sonnet-latest"
+      "provider": "openai",
+      "model": "gpt-4o"
     },
     "version": "2"
   },
   "languages": {
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      // "language_servers": ["ruff"],
+      "format_on_save": "on",
+      "formatter": [
+        {
+          "code_actions": {
+            "source.organizeImports.ruff": true,
+            "source.fixAll.ruff": true
+          }
+        },
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ]
+    },
+    "Markdown": {
+      "format_on_save": "on"
+    },
     "Markdown-Inline": {
       "show_inline_completions": true
     },

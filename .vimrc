@@ -17,6 +17,9 @@ set mouse=a
 set backspace=2
 
 colorscheme desert
+set hlsearch
+hi Search ctermbg=LightYellow
+hi Search ctermfg=Red
 
 " highlight trailing whitespace
 highlight ExtraWhitespace ctermbg=red guibg=red

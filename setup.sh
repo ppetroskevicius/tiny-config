@@ -19,7 +19,7 @@ update_packages() {
 }
 
 setup_git() {
-  sudo apt install -y git vim tmux htop unzip
+  sudo apt install -y git vim tmux htop unzip jq
 }
 
 setup_1password_cli() {
@@ -39,7 +39,7 @@ setup_1password_cli() {
 }
 
 setup_credentials() {
-  if ! [ -f $HOME/.ssh/id_ed25519 ]; then
+  if ! [ -f "$HOME/.ssh/id_ed25519" ]; then
     mkdir -p ~/.ssh && chmod 700 ~/.ssh
     op read -f --out-file ~/.ssh/id_ed25519 $OP_SSH_KEY_NAME
     chmod 600 ~/.ssh/id_ed25519
@@ -186,7 +186,7 @@ install_python3() {
 }
 
 # install_rust() {
-# 
+#
 # }
 
 setup_bluetooth_audio() {
@@ -209,7 +209,7 @@ setup_sway_wayland() {
 
 install_i3status-rs() {
   # https://greshake.github.io/i3status-rust/i3status_rs/blocks/index.html
-  if ! [ -f $HOME/.cargo/bin/i3status-rs ]; then
+  if ! [ -f "$HOME/.cargo/bin/i3status-rs" ]; then
     sudo apt install -y libssl-dev libsensors-dev libpulse-dev libnotmuch-dev pandoc
     git clone https://github.com/greshake/i3status-rust "$tempdir/i3status-rust"
     cd "$tempdir/i3status-rust"
@@ -248,15 +248,29 @@ setup_brightness() {
   sudo usermod -aG video "$USER"
 }
 
-install_nerd_font() {
-  mkdir -p "$HOME"/.local/share/fonts
-  rm -rf "$HOME"/.local/share/fonts/*
-  wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip \
-&& cd ~/.local/share/fonts \
-&& unzip JetBrainsMono.zip \
-&& rm JetBrainsMono.zip \
-&& fc-cache -fv
-  # TODO
+setup_gamma() {
+  cargo install wl-gammarelay-rs --locked
+}
+
+install_nerd_fonts() {
+  # https://github.com/ryanoasis/nerd-fonts
+
+  declare -a fonts=("0xProto" "Hack" "Meslo" "AnonymousPro" "IntelOneMono")
+  font_dir="${HOME}/.local/share/fonts"
+  mkdir -p "$font_dir"
+  rm -rf "${font_dir}*"
+  version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
+
+  for font in "${fonts[@]}"; do
+    zip_file="$font.zip"
+    download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
+    wget --quiet "$download_url" -O "$zip_file"
+    unzip -qo "$zip_file" -d "$font_dir"
+    rm "$zip_file"
+    echo "'$font' installed successfully."
+  done
+
+  fc-cache -f
 }
 
 setup_japanese() {
@@ -311,10 +325,11 @@ install_other() {
 install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    source "$HOME"/.cargo/env
+    source "$HOME/.cargo/env"
     uv self update
     uv tool install ruff
     uv tool install mypy
+    uv tool install pyright
     uv tool install pylint
     uv tool install pytest
     uv tool install pre-commit
@@ -327,11 +342,11 @@ install_1password_app() {
 }
 
 install_alacritty_app() {
-  if ! [ -f $HOME/.cargo/bin/alacritty ]; then
+  if ! [ -f "$HOME/.cargo/bin/alacritty" ]; then
     # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    . "$HOME/.cargo/env"
+    source "$HOME/.cargo/env"
     rustup override set stable
     rustup update stable
     sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
@@ -367,7 +382,8 @@ install_discord_app() {
 }
 
 install_spotify_app() {
-  curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+  # https://www.spotify.com/us/download/linux/
+  curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
   echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
   sudo apt update && sudo apt install -y spotify-client
 }
@@ -375,7 +391,7 @@ install_spotify_app() {
 install_spotify_player() {
   # https://github.com/aome510/spotify-player?tab=readme-ov-file#examples
   sudo apt install -y libssl-dev libasound2-dev libdbus-1-dev
-  source "$HOME"/.cargo/env
+  source "$HOME/.cargo/env"
   cargo install spotify_player --locked
 }
 
@@ -387,9 +403,9 @@ cleanup_all() {
 install_nvidia_gpu() {
   # install nvidia driveros
   # https://linuxconfig.org/how-to-install-nvidia-drivers-on-ubuntu-24-04
-  ubuntu-drivers devices # check what drivers are installed (see recommended one)
+  ubuntu-drivers devices                # check what drivers are installed (see recommended one)
   sudo apt install -y nvidia-driver-550 # install the above recommended driver
-  sudo reboot # reboot is required
+  sudo reboot                           # reboot is required
 }
 
 setup_server() {
@@ -408,11 +424,13 @@ setup_desktop() {
   install_alacritty_app
   setup_bluetooth_audio
   setup_sway_wayland
+  install_nerd_fonts
   install_i3status-rs
   install_screenshots
   install_notifications
   setup_power_management
   setup_brightness
+  setup_gamma
   setup_japanese
   remove_snap
   # install_zsh
@@ -434,7 +452,6 @@ require_reboot() {
   # run this the last
   install_nvidia_gpu
 }
-
 
 setup_server
 setup_desktop
