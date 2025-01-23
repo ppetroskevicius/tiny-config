@@ -235,6 +235,11 @@ install_notifications() {
   sudo apt install -y mako-notifier
 }
 
+install_kickoff() {
+  # dmenu did not display properly with nvidia drivers
+  cargo install kickoff
+}
+
 setup_power_management() {
   sudo apt install -y tlp tlp-rdw
   sudo systemctl enable --now tlp
@@ -276,19 +281,15 @@ install_nerd_fonts() {
 
 setup_japanese() {
   # According to the official Fcitx5 documentation (https://fcitx-im.org/wiki/Fcitx_5) we should be:
-  # 1. Installing:
+  # 1. Install:
   #    `fcitx5` - main program
   #    `fcitx5-configtool` - the GUI configuration program
   #    `fcitx5-mozc` - the input method engine for Japanese
-  # 2. Configuring:
-  #    Run: `fcitx5-configuration`, search for `Mozc` and add it.
+  # 2. Configure:
+  #    Run: `fcitx5-configtool`, search for `Mozc` and add it.
+  # 3. Diagnose (if any issues):
+  #    Run: `fcitx5-diagnose`
   #
-  # https://fcitx-im.org/wiki/Setup_Fcitx_5
-  # run this after install on ubuntu: `im-config`  (select fcitx5 there).
-
-  # https://fcitx-im.org/wiki/Configtool_(Fcitx_5)
-  # https://fcitx-im.org/wiki/Compiling_fcitx5
-  # https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
   # https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
   #
   # Sway supports Wayland text-input-v3, but google-chrome only supports wayland text-input-v1 in the Wayland mode:
@@ -298,8 +299,6 @@ setup_japanese() {
 
   # sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5
   sudo apt install -y fcitx5 fcitx5-mozc fcitx5-configtool
-  # to configure (add Mozc, configure keys): fcitx5-configtool
-  # to diagnose: fcitx5-diagnose
 }
 
 remove_snap() {
@@ -320,6 +319,7 @@ install_zsh() {
   chsh -s /usr/bin/zsh
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
     git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
   fi
 }
 
@@ -355,6 +355,10 @@ install_alacritty_app() {
     cargo install alacritty
     cd "$TARGET_DIR"
   fi
+}
+
+install_starship() {
+  curl -sS https://starship.rs/install.sh | sh
 }
 
 install_zed_app() {
@@ -434,6 +438,7 @@ setup_desktop() {
   install_i3status-rs
   install_screenshots
   install_notifications
+  install_kickoff
   setup_power_management
   setup_brightness
   setup_gamma

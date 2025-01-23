@@ -5,3 +5,6 @@ export EDITOR='vim'
 export CLICOLOR=1
 
 export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
+. "$HOME/.cargo/env"
+
+eval "$(starship init bash)"

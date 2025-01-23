@@ -28,3 +28,4 @@ export QT_IM_MODULE=fcitx
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 source "$HOME"/.bashrc
+. "$HOME/.cargo/env"
