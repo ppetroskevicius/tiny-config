@@ -259,7 +259,7 @@ bindsym $mod+Shift+p exec shotman --capture region --copy
 bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
 # run Japanese IME
-exec fcitx5 -d
+exec fcitx5 -dr
 
 # run bluetooth applet to be displayed in a bar tray
 exec blueman-applet

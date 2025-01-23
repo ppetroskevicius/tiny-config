@@ -73,10 +73,6 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.vimrc "$HOME"
   ln -sf "$TARGET_DIR"/.gitconfig "$HOME"
   ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
-  ln -sf "$TARGET_DIR"/.xinitrc "$HOME"
-  ln -sf "$TARGET_DIR"/.xinputrc "$HOME"
-
-  # mkdir -p "$HOME"/.config/i3
 
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
@@ -185,9 +181,14 @@ install_python3() {
   sudo apt install -y python3
 }
 
-# install_rust() {
-#
-# }
+install_rust() {
+  if ! [ -f "$HOME/.cargo/bin/cargo" ]; then
+    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+  fi
+}
 
 setup_bluetooth_audio() {
   sudo apt install -y bluez blueman bluetooth
@@ -255,7 +256,7 @@ setup_gamma() {
 install_nerd_fonts() {
   # https://github.com/ryanoasis/nerd-fonts
 
-  declare -a fonts=("0xProto" "Hack" "Meslo" "AnonymousPro" "IntelOneMono")
+  declare -a fonts=("0xProto" "FiraCode" "Hack" "Meslo" "AnonymousPro" "IntelOneMono")
   font_dir="${HOME}/.local/share/fonts"
   mkdir -p "$font_dir"
   rm -rf "${font_dir}*"
@@ -274,23 +275,31 @@ install_nerd_fonts() {
 }
 
 setup_japanese() {
-  # sudo wget https://www.ubuntulinux.jp/sources.list.d/noble.sources -O /etc/apt/sources.list.d/ubuntu-ja.sources
-  # sudo apt -U upgrade
-  # sudo apt install -y ubuntu-defaults-ja
-
+  # According to the official Fcitx5 documentation (https://fcitx-im.org/wiki/Fcitx_5) we should be:
+  # 1. Installing:
+  #    `fcitx5` - main program
+  #    `fcitx5-configtool` - the GUI configuration program
+  #    `fcitx5-mozc` - the input method engine for Japanese
+  # 2. Configuring:
+  #    Run: `fcitx5-configuration`, search for `Mozc` and add it.
+  #
   # https://fcitx-im.org/wiki/Setup_Fcitx_5
+  # run this after install on ubuntu: `im-config`  (select fcitx5 there).
+
   # https://fcitx-im.org/wiki/Configtool_(Fcitx_5)
   # https://fcitx-im.org/wiki/Compiling_fcitx5
+  # https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
   # https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
   #
   # Sway supports Wayland text-input-v3, but google-chrome only supports wayland text-input-v1 in the Wayland mode:
   #    (https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland#Chromium_.2F_Electron)
   # Google Chrome Japanese input only works when google-chrome is run in X11 mode for now.
   #    (this patch might be fixing it: https://github.com/swaywm/sway/pull/7226)
-  sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5
+
+  # sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5
+  sudo apt install -y fcitx5 fcitx5-mozc fcitx5-configtool
   # to configure (add Mozc, configure keys): fcitx5-configtool
   # to diagnose: fcitx5-diagnose
-  # setup the IM framework as default at the session level
 }
 
 remove_snap() {
@@ -310,11 +319,7 @@ install_zsh() {
   sudo apt install -y zsh
   chsh -s /usr/bin/zsh
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  fi
-  ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-  if [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
+    git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
   fi
 }
 
@@ -325,7 +330,6 @@ install_other() {
 install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    source "$HOME/.cargo/env"
     uv self update
     uv tool install ruff
     uv tool install mypy
@@ -343,10 +347,6 @@ install_1password_app() {
 
 install_alacritty_app() {
   if ! [ -f "$HOME/.cargo/bin/alacritty" ]; then
-    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
     rustup override set stable
     rustup update stable
     sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
@@ -381,8 +381,15 @@ install_discord_app() {
   fi
 }
 
+install_zotero_app() {
+  wget -qO- https://raw.githubusercontent.com/retorquere/zotero-deb/master/install.sh | sudo bash
+  sudo apt update
+  sudo apt install zotero
+}
+
 install_spotify_app() {
   # https://www.spotify.com/us/download/linux/
+  # If it stops working, update the link below from the above url
   curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
   echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
   sudo apt update && sudo apt install -y spotify-client
@@ -391,7 +398,6 @@ install_spotify_app() {
 install_spotify_player() {
   # https://github.com/aome510/spotify-player?tab=readme-ov-file#examples
   sudo apt install -y libssl-dev libasound2-dev libdbus-1-dev
-  source "$HOME/.cargo/env"
   cargo install spotify_player --locked
 }
 
@@ -401,7 +407,7 @@ cleanup_all() {
 }
 
 install_nvidia_gpu() {
-  # install nvidia driveros
+  # install nvidia drivers
   # https://linuxconfig.org/how-to-install-nvidia-drivers-on-ubuntu-24-04
   ubuntu-drivers devices                # check what drivers are installed (see recommended one)
   sudo apt install -y nvidia-driver-550 # install the above recommended driver
@@ -416,11 +422,11 @@ setup_server() {
   install_dotfiles
   setup_netplan "networkd"
   setup_timezone
+  install_python3
 }
 
 setup_desktop() {
-  # install_python3
-  # install_rust
+  install_rust
   install_alacritty_app
   setup_bluetooth_audio
   setup_sway_wayland
@@ -433,7 +439,7 @@ setup_desktop() {
   setup_gamma
   setup_japanese
   remove_snap
-  # install_zsh
+  install_zsh
   install_other
 }
 
@@ -443,7 +449,8 @@ setup_apps() {
   install_zed_app
   install_chrome_app
   install_discord_app
-  # install_spotify_app
+  install_zotero_app
+  install_spotify_app
   install_spotify_player
   cleanup_all
 }
