@@ -1,7 +1,6 @@
 # Runs only for login session
 
 if command -v op > /dev/null; then
-
   eval "$(op signin --account my)"
 
   OP_OPENAI_KEY="op://build/openai-api-key/api key"
@@ -17,8 +16,8 @@ if command -v op > /dev/null; then
   export GH_TOKEN
 fi
 
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
+# Load keychain and add SSH key if not already added
+eval "$(keychain --eval --quiet id_ed25519)"
 
 # for fcitx5
 export XMODIFIERS=@im=fcitx

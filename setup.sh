@@ -19,7 +19,7 @@ update_packages() {
 }
 
 setup_git() {
-  sudo apt install -y git vim tmux htop unzip jq
+  sudo apt install -y git vim tmux htop unzip jq keychain
 }
 
 setup_1password_cli() {
