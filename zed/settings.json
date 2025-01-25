@@ -1,0 +1,81 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
+
+// Default: https://github.com/zed-industries/zed/blob/main/assets/settings/default.json
+
+{
+  "auto_install_extensions": {
+    "html": true,
+    "basher": true,
+    "dockerfile": true,
+    "docker-compose": true,
+    "make": true,
+    "ruff": true,
+    "toml": true
+  },
+  "assistant": {
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-latest"
+    },
+    "version": "2"
+  },
+  "languages": {
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      "format_on_save": "on",
+      "formatter": [
+        {
+          "code_actions": {
+            "source.organizeImports.ruff": true,
+            "source.fixAll.ruff": true
+          }
+        },
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ]
+    },
+    "Markdown": {
+      "format_on_save": "on"
+    },
+    "Markdown-Inline": {
+      "show_inline_completions": true
+    },
+    "Shell Script": {
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "shfmt",
+          "arguments": ["-bn", "-ci", "-sr", "-i", "2"]
+        }
+      }
+    },
+    "TOML": {
+      "format_on_save": "on"
+    }
+  },
+  "inline_completions": {
+    "disabled_globs": [".env"]
+  },
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+  "theme": "Andromeda",
+  "vim_mode": true,
+  "ui_font_size": 14,
+  "buffer_font_size": 14,
+  "restore_on_startup": "none",
+  "tab_size": 2
+}

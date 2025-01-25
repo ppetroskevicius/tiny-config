@@ -1,0 +1,19 @@
+general.import = ["~/.config/alacritty/themes/themes/ashes_dark.toml"]
+
+[font]
+size = 10.0
+normal.family = "FiraCode Nerd Font"
+bold.family = "FiraCode Nerd Font"
+italic.family = "FiraCode Nerd Font"
+bold_italic.family = "FiraCode Nerd Font"
+
+[window]
+opacity = 0.93
+blur = true
+
+[keyboard]
+bindings = [
+  { key = "N", mods = "Super", action = "CreateNewWindow" },
+  { key = "C", mods = "Super", action = "Copy" },
+  { key = "P", mods = "Super", action = "Paste" },
+]

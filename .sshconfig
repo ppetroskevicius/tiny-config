@@ -1,0 +1,31 @@
+Host *
+  IgnoreUnknown UseKeychain
+  UseKeychain yes
+  AddKeysToAgent yes
+  User fastctl
+  IdentityFile ~/.ssh/id_ed25519
+
+Host spacex
+  HostName 192.168.21.20
+
+Host oslo
+  HostName 192.168.21.21
+
+Host oslo1
+  HostName 192.168.21.22
+
+Host oslo2
+  HostName 192.168.21.23
+
+Host canarywharf
+  HostName 192.168.21.33
+
+Host kafka
+  HostName 192.168.21.34
+
+Host comma-petras
+  Hostname comma-0ca1a658939c7345
+  Port 22
+  User comma
+  IdentityFile ~/.ssh/id_ed25519
+  ProxyCommand ssh %h@ssh.comma.ai -W %h:%p
