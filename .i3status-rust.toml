@@ -56,10 +56,10 @@ format = " $icon $used.eng(w:3,u:B,p:Mi)"
 format_alt = " $icon $used.eng(w:3,u:B,p:Mi)/$total"
 interval = 300
 
-# [[block]]
-# block = "nvidia_gpu"
-# interval = 1
-# format = " $icon GT 1030 $utilization $temperature $clocks "
+[[block]]
+block = "nvidia_gpu"
+interval = 50
+format = " $icon GTX 1050 $utilization $temperature $clocks "
 
 [[block]]
 block = "temperature"

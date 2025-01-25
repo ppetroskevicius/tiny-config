@@ -59,9 +59,6 @@ install_dotfiles() {
   fi
   cd "$TARGET_DIR"
 
-  #TODO
-  git switch dev
-
   mkdir -p "$HOME"/.config/
   rm -f "$HOME"/.bash_profile "$HOME"/.bashrc "$HOME"/.zprofile "$HOME"/.zshrc
   ln -sf "$TARGET_DIR"/.sshconfig "$HOME"/.ssh/config
@@ -73,7 +70,6 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.vimrc "$HOME"
   ln -sf "$TARGET_DIR"/.gitconfig "$HOME"
   ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
-  ln -sf "$TARGET_DIR"/.starship.toml "$HOME"/.config/starship.toml
 
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
@@ -277,7 +273,7 @@ install_nerd_fonts() {
     echo "'$font' installed successfully."
   done
 
-  fc-cache -f
+  fc-cache -fv
   # fc-list | grep "Nerd"
 }
 
@@ -351,17 +347,13 @@ install_alacritty_app() {
   if ! [ -f "$HOME/.cargo/bin/alacritty" ]; then
     rustup override set stable
     rustup update stable
-    sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
+    sudo apt install -y cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev
     git clone https://github.com/alacritty/alacritty.git "$tempdir/alacritty"
     cd "$tempdir/alacritty"
     cargo install alacritty
     cd "$TARGET_DIR"
     # But, alacritty does not use Nerd fonts: https://github.com/alacritty/alacritty/issues/8050#issuecomment-2559262078
   fi
-}
-
-install_starship() {
-  curl -sS https://starship.rs/install.sh | sh
 }
 
 install_zed_app() {

@@ -29,7 +29,6 @@
   "languages": {
     "Python": {
       "language_servers": ["pyright", "ruff"],
-      // "language_servers": ["ruff"],
       "format_on_save": "on",
       "formatter": [
         {

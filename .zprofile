@@ -1,6 +1,7 @@
 # Runs only for login session
 
 if command -v op > /dev/null; then
+
   eval "$(op signin --account my)"
 
   OP_OPENAI_KEY="op://build/openai-api-key/api key"
