@@ -73,6 +73,7 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.vimrc "$HOME"
   ln -sf "$TARGET_DIR"/.gitconfig "$HOME"
   ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
+  ln -sf "$TARGET_DIR"/.starship.toml "$HOME"/.config/starship.toml
 
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
@@ -277,6 +278,7 @@ install_nerd_fonts() {
   done
 
   fc-cache -f
+  # fc-list | grep "Nerd"
 }
 
 setup_japanese() {
@@ -354,6 +356,7 @@ install_alacritty_app() {
     cd "$tempdir/alacritty"
     cargo install alacritty
     cd "$TARGET_DIR"
+    # But, alacritty does not use Nerd fonts: https://github.com/alacritty/alacritty/issues/8050#issuecomment-2559262078
   fi
 }
 

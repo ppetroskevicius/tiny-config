@@ -2,7 +2,9 @@ general.import = ["~/.config/alacritty/themes/themes/ashes_dark.toml"]
 
 [font]
 size = 10.0
-normal.family = "monospace"
+# normal.family = "FiraCode Nerd Font"
+normal.family = "Hack Nerd Font Mono"
+# normal.family = "monospace"
 
 [window]
 opacity = 0.93

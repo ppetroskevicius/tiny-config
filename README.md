@@ -1,67 +1,111 @@
-# Automated Machine Setup
+# Minimal and Efficient Ubuntu Server Setup with Sway on Wayland
 
 ## Overview
 
-This repository contains scripts to automate the setup of a new Ubuntu machine
-The script installs essential packages, sets up SSH keys, Git, and
-1Password CLI. Other setup scripts from the private GitHub repositories could
-be run later. This setup aims to have least dependencies and be _tiny_.
+This script provides a minimal and resource-efficient setup for a development machine running Ubuntu Server with Sway on Wayland. It automates system configuration, package installation, dotfiles setup, and various enhancements to create a streamlined, productive development environment.
 
-Use `zsh` for interactive shell, and `bash` for scripts.
+## Features
 
-## Prerequisites
+- **Base System Setup**: Updates system packages and installs essential tools.
+- **Credential Management**: Uses 1Password CLI for SSH key and Wi-Fi credential retrieval.
+- **Network Configuration**: Supports both `systemd-networkd` and `NetworkManager` with Wi-Fi and Ethernet auto-configuration.
+- **Development Environment**: Installs Git, Rust, Python, and various development utilities.
+- **Dotfiles Installation**: Clones and links personal configuration files for terminal, shell, editor, and system utilities.
+- **Desktop Environment**: Sets up Sway as a Wayland compositor, installs essential graphical tools, and configures fonts.
+- **Power Management**: Includes power-saving configurations and brightness adjustments.
+- **Audio & Bluetooth**: Installs and configures PulseAudio, Bluetooth utilities, and media control tools.
+- **Japanese Input Support**: Installs and configures Fcitx5 with Mozc for Japanese input.
+- **NVIDIA GPU Support**: Installs and configures NVIDIA drivers if applicable.
+- **Additional Applications**: Installs Chrome, Discord, Spotify, Zotero, Zed, and other useful applications.
+- **Cleanup & Optimization**: Removes unnecessary packages and ensures a clean system setup.
 
-- Fresh installation of Ubuntu or macOS on a VM or physical machine.
+## Requirements
+
+- Ubuntu Server (latest version recommended)
 - Internet connection
-- GitHub account
+- An active 1Password account (for credentials management)
 
-## Create a new VM
+## Installation
 
-1. Create a VM backup.
+### 1. Clone the Repository
 
-   `101` - is the VM ID.
+```bash
+git clone https://github.com/ppetroskevicius/tiny-config.git ~/fun/tiny-config
+cd ~/fun/tiny-config
+```
 
-   ```bash
-   cd /var/lib/vz/dump
-   vzdump 101
-   ```
+### 2. Run the Setup Script
 
-2. Restore a VM backup
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-   `102` - is the new VM ID.
+### 3. Reboot the System
 
-   ```bash
-   cd /var/lib/vz/dump
-   qmrestore vzdump-qemu-101-YYYY_MM_DD_HH_MM_SS.vma 102
-   ```
+After installation, a reboot is required for changes to take effect:
 
-3. Run the scripts
+```bash
+sudo reboot
+```
 
-   ```bash
-   curl -O https://raw.githubusercontent.com/ppetroskevicius/bootstrap/main/setup.sh
-   chmod +x setup.sh
-   ./setup.sh
-   ```
+## Configuration Details
 
-## What Does the Script Do?
+### Network Setup
 
-- Detects the operating system (Ubuntu or macOS)
-- Installs essential packages
-- Installs Git
-- Installs 1Password CLI
-- Sets up SSH keys
-- Adds public key to `~/.ssh/authorized_keys` for SSH access
-- Allows to run other setup scripts later
+This script configures networking based on your system’s available interfaces:
+
+- **Wi-Fi**: Uses `networkd` or `NetworkManager` with credentials retrieved from 1Password.
+- **Ethernet**: Automatically detects and configures Ethernet connections.
+
+### Dotfiles Management
+
+Configuration files are linked from the cloned repository to maintain a consistent development environment. This includes:
+
+- Shell (`zsh`, `bash`)
+- Terminal (`tmux`, `vim`, `alacritty`)
+- Wayland (`sway`, `mako`, `i3status-rust`)
+
+### Package Installation
+
+The script installs and configures essential packages, including:
+
+- **Development Tools**: `git`, `vim`, `tmux`, `python3`, `rust`
+- **System Utilities**: `htop`, `jq`, `neofetch`, `btop`
+- **Wayland Compositor**: `sway`, `wayland-protocols`, `xwayland`
+- **Audio & Media**: `pulseaudio`, `bluetooth`, `spotify`
+- **Fonts**: Nerd Fonts for better terminal experience
+
+### Additional Applications
+
+Optional applications can be installed, including:
+
+- **Browsers**: Google Chrome
+- **Editors**: Zed
+- **Messaging**: Discord
+- **Research Tools**: Zotero
+- **Music**: Spotify and `spotify-player`
 
 ## Customization
 
-Replace the placeholders in the script with your actual details:
+You can modify the script to:
 
-- 1Password account details
-- SSH key name in 1Password
-- Git username and email
+- Add or remove packages
+- Change default configurations
+- Adjust network settings
+
+## Troubleshooting
+
+If you encounter issues:
+
+- Run `journalctl -xe` to check system logs.
+- Use `sudo netplan apply` to reapply network settings.
+- Restart services using `systemctl restart <service>`.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to
-discuss what you would like to change.
+Feel free to fork and contribute to this project by submitting a pull request.
+
+## License
+
+This script is open-source and available under the MIT License.

@@ -21,8 +21,8 @@
   },
   "assistant": {
     "default_model": {
-      "provider": "openai",
-      "model": "gpt-4o"
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-latest"
     },
     "version": "2"
   },
@@ -59,6 +59,9 @@
           "arguments": ["-bn", "-ci", "-sr", "-i", "2"]
         }
       }
+    },
+    "TOML": {
+      "format_on_save": "on"
     }
   },
   "inline_completions": {
