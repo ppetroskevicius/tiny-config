@@ -2,7 +2,10 @@
 
 ## Overview
 
-This script provides a minimal and resource-efficient setup for a development machine running Ubuntu Server with Sway on Wayland. It automates system configuration, package installation, dotfiles setup, and various enhancements to create a streamlined, productive development environment.
+This script provides a minimal and resource-efficient setup for a development machine running Ubuntu Server with Sway on Wayland. It automates system configuration, package installation, dotfiles setup, and various enhancements to create a streamlined, productive development environment. The whole setup with windows manager, editor, discord and browser running uses only 4GB of RAM.
+
+![image](https://github.com/user-attachments/assets/7d46d21d-00f4-4f42-a362-13a5d8d0da49)
+
 
 ## Features
 
