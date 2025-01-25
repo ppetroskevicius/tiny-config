@@ -71,9 +71,9 @@ Configuration files are linked from the cloned repository to maintain a consiste
 The script installs and configures essential packages, including:
 
 - **Development Tools**: `git`, `vim`, `tmux`, `python3`, `rust`
-- **System Utilities**: `htop`, `jq`, `neofetch`, `btop`
+- **System Utilities**: `htop`, `jq`,
 - **Wayland Compositor**: `sway`, `wayland-protocols`, `xwayland`
-- **Audio & Media**: `pulseaudio`, `bluetooth`, `spotify`
+- **Audio & Media**: `pulseaudio`, `bluetooth`
 - **Fonts**: Nerd Fonts for better terminal experience
 
 ### Additional Applications
@@ -85,22 +85,6 @@ Optional applications can be installed, including:
 - **Messaging**: Discord
 - **Research Tools**: Zotero
 - **Music**: Spotify and `spotify-player`
-
-## Customization
-
-You can modify the script to:
-
-- Add or remove packages
-- Change default configurations
-- Adjust network settings
-
-## Troubleshooting
-
-If you encounter issues:
-
-- Run `journalctl -xe` to check system logs.
-- Use `sudo netplan apply` to reapply network settings.
-- Restart services using `systemctl restart <service>`.
 
 ## Contributing
 
