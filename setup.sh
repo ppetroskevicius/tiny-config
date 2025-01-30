@@ -275,6 +275,10 @@ install_nerd_fonts() {
 
   fc-cache -fv
   # fc-list | grep "Nerd"
+
+  # install Noto fonts for math symbols and so
+  sudo apt install fonts-noto
+  # fc-list | grep "Noto"
 }
 
 setup_japanese() {
@@ -288,15 +292,20 @@ setup_japanese() {
   # 3. Diagnose (if any issues):
   #    Run: `fcitx5-diagnose`
   #
-  # https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
+  # https://gihyo.jp/admin/serial/01/ubuntu-recipe/0689
+  # (https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794)
   #
   # Sway supports Wayland text-input-v3, but google-chrome only supports wayland text-input-v1 in the Wayland mode:
   #    (https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland#Chromium_.2F_Electron)
   # Google Chrome Japanese input only works when google-chrome is run in X11 mode for now.
   #    (this patch might be fixing it: https://github.com/swaywm/sway/pull/7226)
 
-  # sudo apt install -y fcitx5 fcitx5-mozc fcitx5-config-qt fcitx5-frontend-gtk3 fcitx5-frontend-gtk4 fcitx5-frontend-qt5
   sudo apt install -y fcitx5 fcitx5-mozc fcitx5-configtool
+  im-config -n fcitx5 # switch default input method (IM) for Japanese to fcitx5
+
+  # Patch sway, as in: https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
+  sudo add-apt-repository ppa:ikuya-fruitsbasket/sway
+  sudo apt upgrade
 }
 
 remove_snap() {
