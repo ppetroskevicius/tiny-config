@@ -305,7 +305,7 @@ setup_japanese() {
 
   # Patch sway, as in: https://gihyo.jp/admin/serial/01/ubuntu-recipe/0794
   sudo add-apt-repository ppa:ikuya-fruitsbasket/sway
-  sudo apt upgrade
+  sudo apt upgrade -y
 }
 
 remove_snap() {
