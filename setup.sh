@@ -8,8 +8,9 @@ TARGET_DIR="$HOME/fun/tiny-config"
 NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
 OP_ACCOUNT="my"
 OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
-OP_WIFI_SSID="op://wifi/wifi/ssid"
-OP_WIFI_PASS="op://wifi/wifi/pass"
+OP_WIFI_SSID="op://network/wifi/ssid"
+OP_WIFI_PASS="op://network/wifi/pass"
+OP_OPENVPN_CONFIG_NAME="op://network/openvpn/conf"
 
 tempdir=$(mktemp -d)
 trap 'rm -rf $tempdir' EXIT
@@ -51,6 +52,14 @@ setup_credentials() {
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_ed25519
   fi
+
+  if ! [ -f "/etc/openvpn/client.conf" ]; then
+    sudo mkdir -p /etc/openvpn
+    op read -f --out-file /tmp/openvpn.ovpn "$OP_OPENVPN_CONFIG_NAME"
+    sudo mv /tmp/openvpn.ovpn /etc/openvpn/client/client.conf
+    sudo chmod 600 /etc/openvpn/client.conf
+  fi
+
 }
 
 install_dotfiles() {
@@ -165,8 +174,9 @@ setup_netplan() {
   echo "Netplan configuration applied."
 }
 
-setup_vpn() {
+setup_openvpn() {
   sudo apt install -y openvpn
+
 }
 
 setup_timezone() {
@@ -176,6 +186,18 @@ setup_timezone() {
 
 install_python3() {
   sudo apt install -y python3
+}
+
+install_node() {
+  sudo apt install -y nodejs npm
+  sudo npm install -g n
+  # sudo n latest
+  sudo n 22.0.0 # aws-cdk supports <=22.0.0
+}
+
+install_aws_cli() {
+  sudo npm install -g aws-cdk
+  cdk --version
 }
 
 install_rust() {
@@ -429,6 +451,7 @@ setup_server() {
   setup_credentials
   install_dotfiles
   setup_netplan "networkd"
+  setup_openvpn
   setup_timezone
   install_python3
 }
