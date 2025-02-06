@@ -100,6 +100,9 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.ruff.toml "$HOME"/.config/ruff/ruff.toml
 
   ln -sf "$TARGET_DIR"/.pylintrc "$HOME"/.config/pylintrc
+
+  mkdir -p "$HOME"/.aws
+  ln -sf "$TARGET_DIR"/.aws_config "$HOME"/.aws/config
 }
 
 setup_wifi_in_networkmanager() {
