@@ -5,3 +5,6 @@ export EDITOR='vim'
 export CLICOLOR=1
 
 export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/fastctl/.lmstudio/bin"

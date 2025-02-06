@@ -29,3 +29,6 @@ export QT_IM_MODULE=fcitx
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 source "$HOME"/.bashrc
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/fastctl/.lmstudio/bin"

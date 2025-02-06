@@ -353,7 +353,7 @@ install_zsh() {
 }
 
 install_other() {
-  sudo apt install -y neofetch btop
+  sudo apt install -y neofetch btop direnv
 }
 
 install_uv() {
