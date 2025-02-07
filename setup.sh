@@ -59,7 +59,6 @@ setup_credentials() {
     sudo mv /tmp/openvpn.ovpn /etc/openvpn/client/client.conf
     sudo chmod 600 /etc/openvpn/client.conf
   fi
-
 }
 
 install_dotfiles() {
