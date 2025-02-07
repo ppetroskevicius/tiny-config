@@ -13,9 +13,11 @@ setopt histignorealldups
 plugins=(git zsh-autosuggestions)
 source $ZSH/oh-my-zsh.sh
 
-alias ll='ls -la'
-alias la='ls -A' # Show hidden, but not . and ..
+alias ll='ls -l'
+alias la='ls -lA' # Show hidden, but not . and ..
 alias grep='grep --color=auto'
+
+eval "$(starship init zsh)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/fastctl/.lmstudio/bin"

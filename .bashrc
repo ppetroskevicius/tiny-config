@@ -6,5 +6,7 @@ export CLICOLOR=1
 
 export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
+eval "$(starship init bash)"
+
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/fastctl/.lmstudio/bin"

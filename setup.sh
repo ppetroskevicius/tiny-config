@@ -79,6 +79,8 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.gitconfig "$HOME"
   ln -sf "$TARGET_DIR"/.alacritty.toml "$HOME"
 
+  ln -sf "$TARGET_DIR"/.starship.toml "$HOME"/.config/starship.toml
+
   mkdir -p "$HOME"/.config/sway
   ln -sf "$TARGET_DIR"/.sway "$HOME"/.config/sway/config
 
@@ -362,6 +364,10 @@ install_zsh() {
   fi
 }
 
+install_starship() {
+  curl -sS https://starship.rs/install.sh | sh
+}
+
 install_other() {
   sudo apt install -y neofetch btop direnv
 }
@@ -464,6 +470,8 @@ setup_server() {
   setup_openvpn
   setup_timezone
   install_python3
+  install_node
+  install_aws_cli
 }
 
 setup_desktop() {
@@ -482,6 +490,7 @@ setup_desktop() {
   setup_japanese
   remove_snap
   install_zsh
+  install_starship
   install_other
 }
 
