@@ -14,18 +14,6 @@ format = " $icon $percentage {$time_remaining.dur(hms:true, min_unit:m) }"
 # driver = "sysfs"
 interval = 60
 
-# TODO
-[[block]]
-block = "toggle"
-format = " $icon OpenVPN "
-command_state = "pgrep openvpn"
-command_on = "echo `ON`"
-command_off = "echo `OFF`"
-state_on = "good"
-state_off = "warning"
-interval = 120
-merge_with_next = true
-
 [[block]]
 block = "net"
 device = "^wlp.*$"

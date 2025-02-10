@@ -10,7 +10,7 @@ OP_ACCOUNT="my"
 OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
 OP_WIFI_SSID="op://network/wifi/ssid"
 OP_WIFI_PASS="op://network/wifi/pass"
-OP_OPENVPN_CONFIG_NAME="op://network/openvpn/conf"
+OP_WG_CONFIG_NAME="op://network/wireguard/conf"
 
 tempdir=$(mktemp -d)
 trap 'rm -rf $tempdir' EXIT
@@ -53,11 +53,12 @@ setup_credentials() {
     ssh-add ~/.ssh/id_ed25519
   fi
 
-  if ! [ -f "/etc/openvpn/client.conf" ]; then
-    sudo mkdir -p /etc/openvpn
-    op read -f --out-file /tmp/openvpn.ovpn "$OP_OPENVPN_CONFIG_NAME"
-    sudo mv /tmp/openvpn.ovpn /etc/openvpn/client/client.conf
-    sudo chmod 600 /etc/openvpn/client.conf
+  if ! [ -f "/etc/wireguard/gw0.conf" ]; then
+    sudo mkdir -p /etc/wireguard
+    op read -f --out-file /tmp/gw0.conf "$OP_WG_CONFIG_NAME"
+    sudo mv /tmp/gw0.conf /etc/wireguard/
+    sudo chmod 600 /etc/wireguard/gw0.conf
+    sudo chown root: /etc/wireguard/gw0.conf
   fi
 }
 
@@ -178,8 +179,9 @@ setup_netplan() {
   echo "Netplan configuration applied."
 }
 
-setup_openvpn() {
-  sudo apt install -y openvpn
+install_wireguard() {
+  sudo apt install -y wireguard
+  umask 077
 
 }
 
@@ -386,6 +388,11 @@ install_uv() {
   fi
 }
 
+install_llvm_mlir() {
+  sudo apt update
+  sudo apt install -y cmake ninja-build python3 python3-pip g++ zlib1g-dev libedit-dev libxml2-dev
+}
+
 install_1password_app() {
   sudo apt install -y 1password
 }
@@ -467,7 +474,8 @@ setup_server() {
   setup_credentials
   install_dotfiles
   setup_netplan "networkd"
-  setup_openvpn
+  install_openvpn
+  install_wireguard
   setup_timezone
   install_python3
   install_node

@@ -16,6 +16,9 @@ source $ZSH/oh-my-zsh.sh
 alias ll='ls -l'
 alias la='ls -lA' # Show hidden, but not . and ..
 alias grep='grep --color=auto'
+alias vpn_start="sudo wg-quick up gw0"
+alias vpn_stop="sudo wg-quick down gw0"
+alias vpn_status="sudo wg show gw0"
 
 eval "$(starship init zsh)"
 
