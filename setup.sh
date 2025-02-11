@@ -182,7 +182,6 @@ setup_netplan() {
 install_wireguard() {
   sudo apt install -y wireguard
   umask 077
-
 }
 
 setup_timezone() {
@@ -389,7 +388,6 @@ install_uv() {
 }
 
 install_llvm_mlir() {
-  sudo apt update
   sudo apt install -y cmake ninja-build python3 python3-pip g++ zlib1g-dev libedit-dev libxml2-dev
 }
 
@@ -474,7 +472,6 @@ setup_server() {
   setup_credentials
   install_dotfiles
   setup_netplan "networkd"
-  install_openvpn
   install_wireguard
   setup_timezone
   install_python3

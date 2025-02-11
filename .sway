@@ -209,12 +209,8 @@ bar {
   # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
 
   bar {
-    # font pango:DejaVu Sans Mono, Font Awesome 5 Free
-    # font pango:Monoid Nerd Font
-    font pango:0xProto Nerd Font 8
+    font pango:DejaVu Sans Mono, Font Awesome 8
     position top
-    height 16
-    status_padding 0
     status_command i3status-rs
     colors {
         separator #666666

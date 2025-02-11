@@ -15,6 +15,13 @@ format = " $icon $percentage {$time_remaining.dur(hms:true, min_unit:m) }"
 interval = 60
 
 [[block]]
+block = "external_ip"
+
+[[block]]
+block = "external_ip"
+use_ipv4 = true
+
+[[block]]
 block = "net"
 device = "^wlp.*$"
 format = " $icon {$signal_strength $ssid}"
@@ -96,7 +103,16 @@ cmd = "blueman-manager"
 
 [[block]]
 block = "bluetooth"
-mac = "C0:EB:D0:FB:A3:A6"
+mac = "88:C9:E8:DC:ED:8E"
+disconnected_format = ""
+format = " $icon{ $percentage|}"
+[[block.click]]
+button = "left"
+cmd = "blueman-manager"
+
+[[block]]
+block = "bluetooth"
+mac = "C0:EB:D0:FB:A3:AB"
 disconnected_format = ""
 format = " $icon{ $percentage|} "
 [[block.click]]
