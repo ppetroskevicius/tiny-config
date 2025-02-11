@@ -388,7 +388,10 @@ install_uv() {
 }
 
 install_llvm_mlir() {
+  # for MLIR
   sudo apt install -y cmake ninja-build python3 python3-pip g++ zlib1g-dev libedit-dev libxml2-dev
+  # for LLVM and Clang
+  sudo apt install clang llvm lldb lld
 }
 
 install_1password_app() {
