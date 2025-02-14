@@ -370,7 +370,12 @@ install_starship() {
 }
 
 install_other() {
-  sudo apt install -y neofetch btop direnv swayimg nfs-common
+  sudo apt install -y neofetch btop direnv swayimg
+}
+
+install_nfs_client() {
+  sudo apt install -y nfs-common
+  mkdir -p /mnt/nas001
 }
 
 install_uv() {
