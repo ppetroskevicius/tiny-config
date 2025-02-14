@@ -21,10 +21,23 @@
   },
   "assistant": {
     "default_model": {
-      "provider": "anthropic",
-      "model": "claude-3-opus-latest"
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-latest"
     },
     "version": "2"
+  },
+  "lsp": {
+    "pyright": {
+      "settings": {
+        "python.analysis": {
+          "diagnosticMode": "workspace"
+          // "typeCheckingMode": "strict"
+        },
+        "python": {
+          "pythonPath": ".venv/bin/python"
+        }
+      }
+    }
   },
   "languages": {
     "Python": {
@@ -48,7 +61,7 @@
       "format_on_save": "on"
     },
     "Markdown-Inline": {
-      "show_inline_completions": true
+      "show_edit_predictions": true
     },
     "Shell Script": {
       "format_on_save": "on",
@@ -63,7 +76,7 @@
       "format_on_save": "on"
     }
   },
-  "inline_completions": {
+  "edit_predictions": {
     "disabled_globs": [".env"]
   },
   "inlay_hints": {
@@ -74,8 +87,8 @@
   },
   "theme": "Andromeda",
   "vim_mode": true,
-  "ui_font_size": 14,
-  "buffer_font_size": 14,
+  "ui_font_size": 12,
+  "buffer_font_size": 12,
   "restore_on_startup": "none",
   "tab_size": 2
 }
