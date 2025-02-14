@@ -370,7 +370,7 @@ install_starship() {
 }
 
 install_other() {
-  sudo apt install -y neofetch btop direnv
+  sudo apt install -y neofetch btop direnv swayimg nfs-common
 }
 
 install_uv() {
