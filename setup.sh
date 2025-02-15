@@ -382,14 +382,18 @@ install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
     uv self update
-    uv tool install ruff
-    uv tool install mypy
-    uv tool install pyright
-    uv tool install pylint
-    uv tool install pytest
-    uv tool install pre-commit
     # uv pip3 install torch torchvision torchaudio
   fi
+}
+
+install_linters_formatters() {
+  uv tool install ruff
+  uv tool install mypy
+  uv tool install pyright
+  uv tool install pylint
+  uv tool install pytest
+  uv tool install pre-commit
+  sudo apt install -y shellcheck shfmt
 }
 
 install_llvm_mlir() {
@@ -422,7 +426,6 @@ install_starship() {
 
 install_zed_app() {
   if ! command -v zed > /dev/null; then
-    sudo apt install -y shellcheck shfmt
     curl -f https://zed.dev/install.sh | sh
   fi
 }
@@ -482,6 +485,7 @@ setup_server() {
   setup_git
   setup_1password_cli
   setup_credentials
+  install_zsh
   install_dotfiles
   setup_netplan "networkd"
   install_wireguard
@@ -489,12 +493,14 @@ setup_server() {
   install_python3
   install_node
   install_aws_cli
+  install_rust
+  install_uv
+  install_linters_formatters
+  install_starship
 }
 
 setup_desktop() {
-  install_rust
   install_alacritty_app
-  install_starship
   setup_bluetooth_audio
   setup_sway_wayland
   install_nerd_fonts
@@ -507,13 +513,10 @@ setup_desktop() {
   setup_gamma
   setup_japanese
   remove_snap
-  install_zsh
-  install_starship
   install_other
 }
 
 setup_apps() {
-  install_uv
   install_1password_app
   install_zed_app
   install_chrome_app
