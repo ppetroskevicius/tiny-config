@@ -416,6 +416,10 @@ install_alacritty_app() {
   fi
 }
 
+install_starship() {
+  curl -sS https://starship.rs/install.sh | sh
+}
+
 install_zed_app() {
   if ! command -v zed > /dev/null; then
     sudo apt install -y shellcheck shfmt
@@ -490,6 +494,7 @@ setup_server() {
 setup_desktop() {
   install_rust
   install_alacritty_app
+  install_starship
   setup_bluetooth_audio
   setup_sway_wayland
   install_nerd_fonts
