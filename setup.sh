@@ -26,6 +26,7 @@ install_packages() {
     htop \
     unzip \
     keychain \
+    zfsutils-linux \
     neofetch \
     btop \
     bash-completion \
@@ -40,7 +41,6 @@ install_packages() {
     ipmitool \
     jc \
     jq \
-    linux-tools-generic-hwe-22.04 \
     lm-sensors \
     locales \
     lshw \
@@ -414,6 +414,7 @@ install_nfs_client() {
 install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
+    source $HOME/.local/bin/env
     uv self update
     # uv pip3 install torch torchvision torchaudio
   fi
@@ -510,6 +511,7 @@ install_nvidia_gpu() {
   # https://linuxconfig.org/how-to-install-nvidia-drivers-on-ubuntu-24-04
   ubuntu-drivers devices                # check what drivers are installed (see recommended one)
   sudo apt install -y nvidia-driver-550 # install the above recommended driver
+  cleanup_all
   sudo reboot                           # reboot is required
 }
 
@@ -520,11 +522,7 @@ setup_server() {
   setup_credentials
   install_zsh
   install_dotfiles
-  setup_netplan "networkd"
-  install_wireguard
   setup_timezone
-  install_node
-  install_aws_cli
   install_rust
   install_uv
   install_linters_formatters
@@ -532,6 +530,10 @@ setup_server() {
 }
 
 setup_desktop() {
+  setup_netplan "networkd"
+  install_wireguard
+  install_node
+  install_aws_cli
   install_alacritty_app
   setup_bluetooth_audio
   setup_sway_wayland
@@ -545,7 +547,6 @@ setup_desktop() {
   setup_gamma
   setup_japanese
   remove_snap
-  install_other
 }
 
 setup_apps() {
@@ -564,9 +565,8 @@ require_reboot() {
 }
 
 setup_server
-setup_desktop
-setup_apps
+# setup_desktop
+# setup_apps
 require_reboot
-cleanup_all
 
 echo "[ ] completed in t=$SECONDS"
