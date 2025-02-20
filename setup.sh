@@ -19,8 +19,49 @@ update_packages() {
   sudo apt update && sudo apt upgrade -y
 }
 
-setup_git() {
-  sudo apt install -y git vim tmux htop unzip jq keychain
+install_packages() {
+  sudo apt install -y \
+    vim \
+    tmux \
+    htop \
+    unzip \
+    keychain \
+    neofetch \
+    btop \
+    bash-completion \
+    btop \
+    build-essential \
+    clang \
+    csvtool \
+    fd-find \
+    file \
+    git \
+    infiniband-diags \
+    ipmitool \
+    jc \
+    jq \
+    linux-tools-generic-hwe-22.04 \
+    lm-sensors \
+    locales \
+    lshw \
+    lsof \
+    man-db \
+    nfs-common \
+    parallel \
+    rclone \
+    rdma-core \
+    ripgrep \
+    rsync \
+    systemd-journal-remote \
+    time \
+    netcat-openbsd \
+    python-is-python3 \
+    python3 \
+    python3-pip \
+    python3-venv \
+    avahi-daemon \
+    nvtop \
+    direnv
 }
 
 setup_1password_cli() {
@@ -189,10 +230,6 @@ setup_timezone() {
   timedatectl
 }
 
-install_python3() {
-  sudo apt install -y python3
-}
-
 install_node() {
   sudo apt install -y nodejs npm
   sudo npm install -g n
@@ -237,7 +274,7 @@ setup_bluetooth_audio() {
 }
 
 setup_sway_wayland() {
-  sudo apt install -y sway wayland-protocols xwayland swayidle swaylock
+  sudo apt install -y sway wayland-protocols xwayland swayidle swaylock swayimg
 }
 
 install_i3status-rs() {
@@ -369,10 +406,6 @@ install_starship() {
   curl -sS https://starship.rs/install.sh | sh
 }
 
-install_other() {
-  sudo apt install -y neofetch btop direnv swayimg
-}
-
 install_nfs_client() {
   sudo apt install -y nfs-common
   mkdir -p /mnt/nas001
@@ -482,7 +515,7 @@ install_nvidia_gpu() {
 
 setup_server() {
   update_packages
-  setup_git
+  install_packages
   setup_1password_cli
   setup_credentials
   install_zsh
@@ -490,7 +523,6 @@ setup_server() {
   setup_netplan "networkd"
   install_wireguard
   setup_timezone
-  install_python3
   install_node
   install_aws_cli
   install_rust
@@ -524,7 +556,6 @@ setup_apps() {
   install_zotero_app
   install_spotify_app
   install_spotify_player
-  cleanup_all
 }
 
 require_reboot() {
@@ -536,5 +567,6 @@ setup_server
 setup_desktop
 setup_apps
 require_reboot
+cleanup_all
 
 echo "[ ] completed in t=$SECONDS"
