@@ -23,30 +23,32 @@ install_packages() {
   sudo apt install -y \
     vim \
     tmux \
-    htop \
-    unzip \
+    git \
     keychain \
-    zfsutils-linux \
-    neofetch \
-    btop \
     bash-completion \
+    locales \
+    direnv
+    htop \
     btop \
+    nvtop \
+    neofetch \
+    lm-sensors \
+    unzip \
+    zfsutils-linux \
+    nfs-kernel-server \
+    nfs-common \
     build-essential \
     clang \
     csvtool \
     fd-find \
     file \
-    git \
     infiniband-diags \
     ipmitool \
     jc \
     jq \
-    lm-sensors \
-    locales \
     lshw \
     lsof \
     man-db \
-    nfs-common \
     parallel \
     rclone \
     rdma-core \
@@ -60,8 +62,6 @@ install_packages() {
     python3-pip \
     python3-venv \
     avahi-daemon \
-    nvtop \
-    direnv
 }
 
 setup_1password_cli() {
