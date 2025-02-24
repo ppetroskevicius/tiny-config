@@ -19,24 +19,29 @@ update_packages() {
   sudo apt update && sudo apt upgrade -y
 }
 
-install_packages() {
+install_packages_host() {
   sudo apt install -y \
     vim \
     tmux \
     git \
     keychain \
-    bash-completion \
-    locales \
-    direnv
     htop \
-    btop \
-    nvtop \
-    neofetch \
-    lm-sensors \
     unzip \
     zfsutils-linux \
     nfs-kernel-server \
     nfs-common \
+    netcat-openbsd
+}
+
+install_packages_guest() {
+  sudo apt install -y \
+    bash-completion \
+    locales \
+    direnv \
+    btop \
+    nvtop \
+    neofetch \
+    lm-sensors \
     build-essential \
     clang \
     csvtool \
@@ -56,12 +61,12 @@ install_packages() {
     rsync \
     systemd-journal-remote \
     time \
-    netcat-openbsd \
     python-is-python3 \
     python3 \
     python3-pip \
     python3-venv \
     avahi-daemon \
+    remmina
 }
 
 setup_1password_cli() {
@@ -402,15 +407,6 @@ install_zsh() {
   fi
 }
 
-install_starship() {
-  curl -sS https://starship.rs/install.sh | sh
-}
-
-install_nfs_client() {
-  sudo apt install -y nfs-common
-  mkdir -p /mnt/nas001
-}
-
 install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -512,17 +508,23 @@ install_nvidia_gpu() {
   ubuntu-drivers devices                # check what drivers are installed (see recommended one)
   sudo apt install -y nvidia-driver-550 # install the above recommended driver
   cleanup_all
-  sudo reboot                           # reboot is required
+  sudo reboot # reboot is required
 }
 
-setup_server() {
+setup_server_host() {
+  # minimal packages for the host system
   update_packages
-  install_packages
+  install_packages_minimal
   setup_1password_cli
   setup_credentials
   install_zsh
   install_dotfiles
   setup_timezone
+}
+
+setup_server_guest() {
+  # other packages for development
+  install_packages_other
   install_rust
   install_uv
   install_linters_formatters
@@ -564,7 +566,8 @@ require_reboot() {
   install_nvidia_gpu
 }
 
-setup_server
+setup_server_host
+# setup_server_guest
 # setup_desktop
 # setup_apps
 require_reboot
