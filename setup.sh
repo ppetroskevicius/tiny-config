@@ -19,7 +19,7 @@ update_packages() {
   sudo apt update && sudo apt upgrade -y
 }
 
-install_packages_host() {
+install_packages_common() {
   sudo apt install -y \
     vim \
     tmux \
@@ -27,14 +27,19 @@ install_packages_host() {
     keychain \
     htop \
     unzip \
-    zfsutils-linux \
-    nfs-kernel-server \
-    nfs-common \
     netcat-openbsd
+}
+
+
+install_packages_host() {
+  sudo apt install -y \
+    zfsutils-linux \
+    nfs-kernel-server
 }
 
 install_packages_guest() {
   sudo apt install -y \
+    nfs-common \
     bash-completion \
     locales \
     direnv \
@@ -65,8 +70,7 @@ install_packages_guest() {
     python3 \
     python3-pip \
     python3-venv \
-    avahi-daemon \
-    remmina
+    avahi-daemon
 }
 
 setup_1password_cli() {
@@ -79,10 +83,10 @@ setup_1password_cli() {
     sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
     curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
     sudo apt update && sudo apt install -y 1password-cli
-  else
-    # login
-    eval "$(op signin --account $OP_ACCOUNT)"
   fi
+
+  # login
+  eval "$(op signin --account $OP_ACCOUNT)"
 }
 
 setup_credentials() {
@@ -105,6 +109,15 @@ setup_credentials() {
     sudo mv /tmp/gw0.conf /etc/wireguard/
     sudo chmod 600 /etc/wireguard/gw0.conf
     sudo chown root: /etc/wireguard/gw0.conf
+  fi
+}
+
+install_zsh() {
+  sudo apt install -y zsh
+  chsh -s /usr/bin/zsh
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
   fi
 }
 
@@ -153,15 +166,9 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR"/.aws_config "$HOME"/.aws/config
 }
 
-setup_wifi_in_networkmanager() {
-  if nmcli device status | grep -q "wifi"; then
-    nmcli device wifi list
-    WIFI_SSID=$(op read "$OP_WIFI_SSID")
-    export WIFI_SSID
-    WIFI_PASS=$(op read "$OP_WIFI_PASS")
-    export WIFI_PASS
-    nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASS"
-  fi
+setup_timezone() {
+  sudo timedatectl set-timezone Asia/Tokyo
+  timedatectl
 }
 
 setup_wifi_in_netplan() {
@@ -196,31 +203,14 @@ EOL
 }
 
 setup_netplan() {
-  RENDERER="$1"
-  sudo apt install -y network-manager
-  if [ "$RENDERER" == "networkd" ]; then
-    if systemctl is-enabled --quiet NetworkManager; then
-      sudo systemctl stop NetworkManager
-    fi
-    sudo systemctl disable NetworkManager
-    sudo systemctl enable --now systemd-networkd
-    sudo sed -i 's/renderer: NetworkManager/renderer: networkd/' "$NETPLAN_CONFIG"
-    setup_wifi_in_netplan
-    echo "Configured Netplan to use networkd."
-  elif [ "$RENDERER" == "NetworkManager" ]; then
-    if systemctl is-active --quiet systemd-networkd; then
-      sudo systemctl stop systemd-networkd
-    fi
-    sudo systemctl restart wpa_supplicant
-    sudo systemctl disable systemd-networkd
-    sudo systemctl enable --now NetworkManager
-    sudo sed -i 's/renderer: networkd/renderer: NetworkManager/' "$NETPLAN_CONFIG"
-    echo "Configured Netplan to use NetworkManager."
-    setup_wifi_in_networkmanager
-  else
-    echo "Invalid argument. Please specify either 'networkd' or 'NetworkManager'."
-    return 1
+  if systemctl is-enabled --quiet NetworkManager; then
+    sudo systemctl stop NetworkManager
   fi
+  sudo systemctl disable NetworkManager
+  sudo systemctl enable --now systemd-networkd
+  sudo sed -i 's/renderer: NetworkManager/renderer: networkd/' "$NETPLAN_CONFIG"
+  setup_wifi_in_netplan
+  echo "Configured Netplan to use networkd."
   sudo netplan apply
   echo "Netplan configuration applied."
 }
@@ -228,11 +218,6 @@ setup_netplan() {
 install_wireguard() {
   sudo apt install -y wireguard
   umask 077
-}
-
-setup_timezone() {
-  sudo timedatectl set-timezone Asia/Tokyo
-  timedatectl
 }
 
 install_node() {
@@ -398,13 +383,8 @@ remove_snap() {
   fi
 }
 
-install_zsh() {
-  sudo apt install -y zsh
-  chsh -s /usr/bin/zsh
-  if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-  fi
+install_starship() {
+  curl -sS https://starship.rs/install.sh | sh
 }
 
 install_uv() {
@@ -424,6 +404,10 @@ install_linters_formatters() {
   uv tool install pytest
   uv tool install pre-commit
   sudo apt install -y shellcheck shfmt
+}
+
+install_remote_desktop() {
+  sudo apt install -y remmina
 }
 
 install_llvm_mlir() {
@@ -448,10 +432,6 @@ install_alacritty_app() {
     cd "$TARGET_DIR"
     # But, alacritty does not use Nerd fonts: https://github.com/alacritty/alacritty/issues/8050#issuecomment-2559262078
   fi
-}
-
-install_starship() {
-  curl -sS https://starship.rs/install.sh | sh
 }
 
 install_zed_app() {
@@ -511,10 +491,9 @@ install_nvidia_gpu() {
   sudo reboot # reboot is required
 }
 
-setup_server_host() {
-  # minimal packages for the host system
+setup_common() {
   update_packages
-  install_packages_minimal
+  install_packages_common
   setup_1password_cli
   setup_credentials
   install_zsh
@@ -522,9 +501,14 @@ setup_server_host() {
   setup_timezone
 }
 
+setup_server_host() {
+  # minimal packages for the host system
+  install_packages_host
+}
+
 setup_server_guest() {
   # other packages for development
-  install_packages_other
+  install_packages_guest
   install_rust
   install_uv
   install_linters_formatters
@@ -532,7 +516,7 @@ setup_server_guest() {
 }
 
 setup_desktop() {
-  setup_netplan "networkd"
+  setup_netplan
   install_wireguard
   install_node
   install_aws_cli
@@ -566,10 +550,11 @@ require_reboot() {
   install_nvidia_gpu
 }
 
-setup_server_host
-# setup_server_guest
+setup_common
+# setup_server_host
+setup_server_guest
 # setup_desktop
 # setup_apps
-require_reboot
+# require_reboot
 
 echo "[ ] completed in t=$SECONDS"
