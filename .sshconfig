@@ -5,23 +5,25 @@ Host *
   User fastctl
   IdentityFile ~/.ssh/id_ed25519
 
+Host gpu01
+  Hostname 192.168.20.18
+  ServerAliveInterval 30
+  ServerAliveCountMax 5
+
 Host spacex
-  HostName 192.168.21.20
+  HostName 192.168.20.20
 
 Host oslo
-  HostName 192.168.21.21
+  HostName 192.168.20.21
 
 Host oslo1
-  HostName 192.168.21.22
+  HostName 192.168.20.22
 
 Host oslo2
-  HostName 192.168.21.23
+  HostName 192.168.20.23
 
 Host canarywharf
-  HostName 192.168.21.33
-
-Host kafka
-  HostName 192.168.21.34
+  HostName 192.168.20.33
 
 Host comma-petras
   Hostname comma-0ca1a658939c7345
