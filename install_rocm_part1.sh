@@ -4,6 +4,13 @@ set -x
 
 # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/install-methods/package-manager/package-manager-ubuntu.html
 
+# Install Linux kernel headers and modules
+sudo apt update
+sudo apt install "linux-headers-$(uname -r)" "linux-modules-extra-$(uname -r)"
+
+# Add yourself to the render and video groups to access GPU resources
+sudo usermod -a -G render,video $LOGNAME
+
 # Download and convert the package signing key
 
 # Make the directory if it doesn't exist yet.

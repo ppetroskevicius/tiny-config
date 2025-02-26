@@ -551,7 +551,7 @@ require_reboot() {
 }
 
 setup_common
-# setup_server_host
+setup_server_host
 setup_server_guest
 # setup_desktop
 # setup_apps

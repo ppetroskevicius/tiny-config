@@ -28,10 +28,11 @@ clinfo
 rocm-smi --showmeminfo vram
 
 # Verify the package installation
-apt list --installed
+sudo apt list --installed | grep amdgpu-dkms
+sudo apt list --installed | grep rocm-hip-libraries
+
+sudo apt install rocm-bandwidth-test
+rocm-bandwidth-test
 
 # Monitor GPU
 watch -n 1 rocm-smi
-
-sudo apt install rocm-bandwidth-test
-# rocm-bandwidth-test
