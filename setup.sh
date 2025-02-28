@@ -30,11 +30,15 @@ install_packages_common() {
     netcat-openbsd
 }
 
-
 install_packages_host() {
   sudo apt install -y \
     zfsutils-linux \
-    nfs-kernel-server
+    nfs-kernel-server \
+    nfs-common \
+    mdadm \
+    fio \
+    nvme-cli \
+    pciutils
 }
 
 install_packages_guest() {
