@@ -239,9 +239,9 @@ bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
 # [ ] start chrome in X11 mode for Japanese input to work. Stop all wayland chrome sessions before that.
-bindsym $mod+c exec google-chrome
+bindsym $mod+c+j exec google-chrome
 # [ ] or run chrome in Wayland mode
-# bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
 
 
 # configure notebook touchscreen
@@ -290,4 +290,4 @@ exec discord
 # exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
 
 # [ ] The workaround to input Japanese in google-chrome in sway is to run google-chrome in X11 mode:
-exec google-chrome
+exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
