@@ -25,6 +25,18 @@ fi
 # Load keychain and add SSH key if not already added
 eval "$(keychain --eval --quiet id_ed25519)"
 
+# Homebrew PATH setup for macOS
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  if [[ "$(uname -m)" == "arm64" ]]; then
+    BREW_PREFIX="/opt/homebrew"
+  else
+    BREW_PREFIX="/usr/local"
+  fi
+  if [[ -x "$BREW_PREFIX/bin/brew" ]]; then
+    eval "$("$BREW_PREFIX/bin/brew" shellenv)"
+  fi
+fi
+
 # for fcitx5
 export XMODIFIERS=@im=fcitx
 export GTK_IM_MODULE=fcitx

@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+
+SECONDS=0
+
+source ./install_common_dependencies.sh
+source ./install_python_dependencies.sh
+
+install_homebrew() {
+  if ! command -v brew > /dev/null; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  brew update
+}
+
+install_brew_packages() {
+  brew install git vim tmux htop coreutils netcat
+}
+
+install_brew_apps() {
+  brew install --cask 1password google-chrome zed discord zotero spotify
+}
+
+install_brew_other() {
+  brew bundle --file=- <<- EOS
+brew "git-lfs"
+brew "zlib"
+brew "capnp"
+brew "coreutils"
+brew "eigen"
+brew "ffmpeg"
+brew "glfw"
+brew "libarchive"
+brew "libusb"
+brew "libtool"
+brew "llvm"
+brew "openssl@3.0"
+brew "qt@5"
+brew "zeromq"
+cask "gcc-arm-embedded"
+brew "portaudio"
+brew "gcc@13"
+EOS
+}
+
+setup_macos_preferences() {
+  # Finder preferences
+  defaults write com.apple.finder AppleShowAllFiles -bool true
+  defaults write com.apple.finder ShowPathbar -bool true
+  defaults write com.apple.finder ShowStatusBar -bool true
+
+  # Dock preferences
+  defaults write com.apple.dock autohide -bool true
+  defaults write com.apple.dock tilesize -int 36
+
+  # Keyboard preferences
+  defaults write NSGlobalDomain KeyRepeat -int 2
+  defaults write NSGlobalDomain InitialKeyRepeat -int 15
+
+  # Restart affected applications
+  for app in "Finder" "Dock" "SystemUIServer"; do
+    killall "$app" > /dev/null 2>&1 || true
+  done
+}
+
+main() {
+  install_homebrew
+  install_brew_packages
+  # Common setup
+  setup_1password_cli
+  setup_credentials
+  install_zsh
+  install_dotfiles
+  install_node
+  install_aws_cli
+  install_rust
+  install_nerd_fonts
+  install_starship
+  install_docker
+  install_alacritty_app
+  install_spotify_player
+  # Python setup
+  install_uv
+  install_linters_formatters
+  # macOS-specific setup
+  install_brew_apps
+  install_brew_packages
+  install_brew_other
+  setup_macos_preferences
+}
+
+main
+echo "[ ] macOS setup completed in t=$SECONDS seconds"
