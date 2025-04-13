@@ -152,27 +152,25 @@ install_rust() {
 
 install_nerd_fonts() {
   if ! fc-list | grep -q "Nerd"; then
-    declare -a fonts=("0xProto" "FiraCode" "Hack" "Meslo" "AnonymousPro" "IntelOneMono")
-    font_dir="$HOME/.local/share/fonts"
-    mkdir -p "$font_dir"
-    rm -rf "${font_dir:?}/*"
-    version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
-    for font in "${fonts[@]}"; do
-      zip_file="$font.zip"
-      download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
-      wget --quiet "$download_url" -O "$zip_file" || {
-        echo "Failed to download $font"
-        exit 1
-      }
-      unzip -qo "$zip_file" -d "$font_dir"
-      rm "$zip_file"
-    done
     if [ "$OS" = "Darwin" ]; then
+      brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
       brew install fontconfig
     else
+      declare -a fonts=("0xProto" "FiraCode" "Hack" "Meslo" "AnonymousPro" "IntelOneMono")
+      font_dir="$HOME/.local/share/fonts"
+      mkdir -p "$font_dir"
+      rm -rf "${font_dir:?}/*"
+      version=$(curl -s "https://api.github.com/repos/ryanoasis/nerd-fonts/tags" | jq -r '.[0].name')
+      for font in "${fonts[@]}"; do
+        zip_file="$font.zip"
+        download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${zip_file}"
+        wget --quiet "$download_url" -O "$zip_file"
+        unzip -qo "$zip_file" -d "$font_dir"
+        rm "$zip_file"
+      done
       # install Noto fonts for math symbols and so
       sudo apt install fonts-noto
-      # fc-list | grep "Noto"
+    # fc-list | grep "Noto"
     fi
     fc-cache -fv > /dev/null
     # fc-list | grep "Nerd"
