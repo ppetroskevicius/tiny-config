@@ -54,11 +54,12 @@ install_zsh() {
   if ! command -v zsh > /dev/null; then
     if [ "$OS" = "Darwin" ]; then
       brew install zsh
+      chsh -s "$(which zsh)"
     else
       sudo apt install -y zsh
+      chsh -s /usr/bin/zsh
     fi
   fi
-  chsh -s "$(which zsh)"
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
     git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
