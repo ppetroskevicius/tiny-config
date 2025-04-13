@@ -19,7 +19,7 @@ install_brew_packages() {
 }
 
 install_brew_apps() {
-  brew install --cask 1password google-chrome zed discord zotero spotify || true
+  brew install --cask 1password google-chrome zed discord zotero spotify font-fira-code-nerd-font font-meslo-lg-nerd-font font-meslo-lg-nerd-font  || true
 }
 
 setup_macos_preferences() {
@@ -53,7 +53,7 @@ main() {
   install_node
   install_aws_cli
   install_rust
-  # install_nerd_fonts
+  install_nerd_fonts
   install_starship
   install_docker
   install_alacritty_app
