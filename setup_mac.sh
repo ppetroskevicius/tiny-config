@@ -19,7 +19,7 @@ install_brew_packages() {
 }
 
 install_brew_apps() {
-  brew install --cask 1password google-chrome zed discord zotero spotify
+  brew install --cask 1password google-chrome zed discord zotero spotify || true
 }
 
 setup_macos_preferences() {
