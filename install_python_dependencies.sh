@@ -8,7 +8,7 @@ install_uv() {
   if ! command -v uv > /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
     # Source uv environment (adjust path if needed)
-    source "$HOME/.cargo/env" 2> /dev/null || true
+    source "$HOME/.local/bin/env" 2> /dev/null || true
     uv self update
   fi
 }

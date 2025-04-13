@@ -15,33 +15,11 @@ install_homebrew() {
 }
 
 install_brew_packages() {
-  brew install git vim tmux htop coreutils netcat
+  brew install git vim tmux htop coreutils netcat jq git-lfs
 }
 
 install_brew_apps() {
   brew install --cask 1password google-chrome zed discord zotero spotify
-}
-
-install_brew_other() {
-  brew bundle --file=- <<- EOS
-brew "git-lfs"
-brew "zlib"
-brew "capnp"
-brew "coreutils"
-brew "eigen"
-brew "ffmpeg"
-brew "glfw"
-brew "libarchive"
-brew "libusb"
-brew "libtool"
-brew "llvm"
-brew "openssl@3.0"
-brew "qt@5"
-brew "zeromq"
-cask "gcc-arm-embedded"
-brew "portaudio"
-brew "gcc@13"
-EOS
 }
 
 setup_macos_preferences() {
@@ -75,18 +53,16 @@ main() {
   install_node
   install_aws_cli
   install_rust
-  install_nerd_fonts
+  # install_nerd_fonts
   install_starship
   install_docker
   install_alacritty_app
-  install_spotify_player
   # Python setup
   install_uv
   install_linters_formatters
   # macOS-specific setup
   install_brew_apps
   install_brew_packages
-  install_brew_other
   setup_macos_preferences
 }
 
