@@ -217,6 +217,11 @@ install_ollama() {
     else
       curl -fsSL https://ollama.com/install.sh | sh
       sudo systemctl status ollama
+      sudo systemctl stop ollama
+      mkdir -p /mnt/raid0/ollama_models
+      mv /home/fastctl/.ollama/models /mnt/raid0/ollama_models
+      ln -s /mnt/raid0/ollama_models /home/fastctl/.ollama/models
+      sudo systemctl start ollama
     fi
   fi
   ollama --version
