@@ -42,6 +42,7 @@ main() {
     "host")
       echo "Performing host (minimal) setup..."
       install_packages_host
+      install_docker
       ;;
     "guest")
       echo "Performing guest setup..."
