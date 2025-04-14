@@ -229,8 +229,9 @@ setup_raid() {
     sudo mount /dev/md0 /mnt/raid0
     sudo chown fastctl:fastctl /mnt/raid0
     sudo chmod 755 /mnt/raid0
-    uuid=$(sudo blkid -s UUID -o value /dev/md0)
-    grep -q "$uuid" /etc/fstab || echo "UUID=$uuid /mnt/raid0 ext4 defaults 0 2" | sudo tee -a /etc/fstab
+    sudo sh -c 'uuid=$(blkid -s UUID -o value /dev/md0); grep -q "$uuid" /etc/fstab || echo "UUID=$uuid /mnt/raid0 ext4 defaults 0 2" >> /etc/fstab'
+    sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+    sudo update-initramfs -u
   fi
 }
 
