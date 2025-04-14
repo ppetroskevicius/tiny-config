@@ -216,6 +216,7 @@ install_ollama() {
       brew install ollama
     else
       curl -fsSL https://ollama.com/install.sh | sh
+      sudo systemctl status ollama
     fi
   fi
   ollama --version
