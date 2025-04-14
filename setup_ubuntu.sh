@@ -52,6 +52,9 @@ main() {
       install_linters_formatters
       install_starship
       ;;
+    "gpu")
+      install_ollama
+      ;;
     "desktop")
       echo "Performing desktop setup..."
       # setup desktop environment
@@ -83,7 +86,7 @@ main() {
       install_remote_desktop
       ;;
     *)
-      log "Error: Please specify 'host', 'guest' or 'desktop'"
+      log "Error: Please specify 'host', 'guest', 'gpu' or 'desktop'"
       exit 1
       ;;
   esac

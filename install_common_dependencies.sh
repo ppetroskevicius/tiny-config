@@ -3,7 +3,6 @@ set -euo pipefail
 set -x
 
 OS=$(uname -s)
-ARCH=$(uname -m)
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
 OP_ACCOUNT="my"
@@ -209,6 +208,17 @@ install_docker() {
       sudo docker run hello-world
     fi
   fi
+}
+
+install_ollama() {
+  if ! command -v ollama > /dev/null; then
+    if [ "$OS" = "Darwin" ]; then
+      brew install ollama
+    else
+      curl -fsSL https://ollama.com/install.sh | sh
+    fi
+  fi
+  ollama --version
 }
 
 install_alacritty_app() {
