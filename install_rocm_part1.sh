@@ -6,7 +6,7 @@ set -x
 
 # Install Linux kernel headers and modules
 sudo apt update
-sudo apt install "linux-headers-$(uname -r)" "linux-modules-extra-$(uname -r)"
+sudo apt install "linux-headers-$(uname -r)" "linux-modules-extra-$(uname -r)" -y
 
 # Add yourself to the render and video groups to access GPU resources
 sudo usermod -a -G render,video $LOGNAME
@@ -22,18 +22,18 @@ sudo mkdir --parents --mode=0755 /etc/apt/keyrings
 wget https://repo.radeon.com/rocm/rocm.gpg.key -O - \
   | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
 
-# Add the AMDGPU repository for the driver
-echo "deb [arch=amd64,i386 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/6.3.3/ubuntu noble main" \
+# Register kernel-mode driver
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/6.4/ubuntu jammy main" \
   | sudo tee /etc/apt/sources.list.d/amdgpu.list
 sudo apt update
 
-# Add the ROCm repository
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/6.3.3 noble main" \
+# Register ROCm packages
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/6.4 noble main" \
   | sudo tee --append /etc/apt/sources.list.d/rocm.list
 echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
   | sudo tee /etc/apt/preferences.d/rocm-pin-600
 sudo apt update
 
 # Install kernel driver
-sudo apt install amdgpu-dkms
+sudo apt install amdgpu-dkms -y
 sudo reboot
