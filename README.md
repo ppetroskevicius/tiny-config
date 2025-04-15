@@ -17,7 +17,7 @@ This script provides a minimal and resource-efficient setup for a development ma
 - **Power Management**: Includes power-saving configurations and brightness adjustments.
 - **Audio & Bluetooth**: Installs and configures PulseAudio, Bluetooth utilities, and media control tools.
 - **Japanese Input Support**: Installs and configures Fcitx5 for Japanese input.
-- **NVIDIA GPU Support**: Installs and configures NVIDIA CUDA or AMD ROCm GPU drivers if applicable.
+- **NVIDIA and AMD GPU Support**: Installs and configures NVIDIA CUDA or AMD ROCm GPU drivers if applicable.
 - **Additional Applications**: Installs Chrome, Discord, Spotify, Zotero, Zed, and other useful applications.
 - **Cleanup & Optimization**: Removes unnecessary packages and ensures a clean system setup.
 
@@ -39,7 +39,9 @@ cd ~/fun/tiny-config
 ### 2. Run the Setup Script
 
 ```bash
-chmod +x ./setup_ubuntu.sh
+chmod +x ./setup_ubuntu.sh host  # for Ubuntu host installation
+chmod +x ./setup_ubuntu.sh guest  # for Ubuntu guest installation
+chmod +x ./setup_ubuntu.sh desktop  # for Ubuntu desktop (notebook) installation
 ./setup_ubuntu.sh
 # or
 chmod +x ./setup_mac.sh

@@ -26,34 +26,6 @@ cleanup_all() {
   sudo journalctl --vacuum-time=120d
 }
 
-main() {
-  update_packages
-  # Common setup
-  setup_1password_cli
-  setup_credentials
-  install_zsh
-  install_dotfiles
-  setup_timezone
-  install_node
-  install_aws_cli
-  install_rust
-  install_nerd_fonts
-  install_starship
-  install_docker
-  install_alacritty_app
-  install_spotify_player
-  # Python setup
-  install_uv
-  install_linters_formatters
-  # Ubuntu-specific setup
-  setup_server_host
-  setup_server_guest
-  setup_desktop
-  setup_apps
-  require_reboot
-  cleanup_all
-}
-
 # Main execution
 main() {
 
@@ -70,6 +42,7 @@ main() {
     "host")
       echo "Performing host (minimal) setup..."
       install_packages_host
+      install_docker
       ;;
     "guest")
       echo "Performing guest setup..."
@@ -78,6 +51,9 @@ main() {
       install_uv
       install_linters_formatters
       install_starship
+      ;;
+    "gpu")
+      install_ollama
       ;;
     "desktop")
       echo "Performing desktop setup..."
@@ -110,7 +86,7 @@ main() {
       install_remote_desktop
       ;;
     *)
-      log "Error: Please specify 'host', 'guest' or 'desktop'"
+      log "Error: Please specify 'host', 'guest', 'gpu' or 'desktop'"
       exit 1
       ;;
   esac

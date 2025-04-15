@@ -3,7 +3,6 @@ set -euo pipefail
 set -x
 
 OS=$(uname -s)
-ARCH=$(uname -m)
 SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
 TARGET_DIR="$HOME/fun/tiny-config"
 OP_ACCOUNT="my"
@@ -54,11 +53,12 @@ install_zsh() {
   if ! command -v zsh > /dev/null; then
     if [ "$OS" = "Darwin" ]; then
       brew install zsh
+      chsh -s "$(which zsh)"
     else
       sudo apt install -y zsh
+      chsh -s /usr/bin/zsh
     fi
   fi
-  chsh -s "$(which zsh)"
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
     git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
@@ -169,7 +169,7 @@ install_nerd_fonts() {
         rm "$zip_file"
       done
       # install Noto fonts for math symbols and so
-      sudo apt install fonts-noto
+      sudo apt install -y fonts-noto
     # fc-list | grep "Noto"
     fi
     fc-cache -fv > /dev/null
@@ -188,16 +188,43 @@ install_docker() {
     if [ "$OS" = "Darwin" ]; then
       brew install --cask docker
     else
+      # https://docs.docker.com/engine/install/ubuntu/
+      # Add Docker's official GPG key:
       sudo apt-get update
-      sudo apt-get install -y ca-certificates curl
+      sudo apt-get install ca-certificates curl
       sudo install -m 0755 -d /etc/apt/keyrings
       sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
       sudo chmod a+r /etc/apt/keyrings/docker.asc
-      echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$UBUNTU_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      sudo apt-get update
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      # Add the repository to Apt sources:
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" \
+        | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt update
+
+      sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      sudo docker run hello-world
     fi
   fi
+}
+
+install_ollama() {
+  if ! command -v ollama > /dev/null; then
+    if [ "$OS" = "Darwin" ]; then
+      brew install ollama
+    else
+      curl -fsSL https://ollama.com/install.sh | sh
+      sudo systemctl status ollama
+      sudo systemctl stop ollama
+      mkdir -p /mnt/raid0/ollama_models
+      mv /home/fastctl/.ollama/models /mnt/raid0/ollama_models
+      ln -s /mnt/raid0/ollama_models /home/fastctl/.ollama/models
+      sudo systemctl start ollama
+    fi
+  fi
+  ollama --version
 }
 
 install_alacritty_app() {

@@ -219,6 +219,22 @@ install_spotify_app() {
   fi
 }
 
+setup_raid() {
+  if [ -b /dev/md0 ]; then
+    echo "RAID array /dev/md0 found, skipping creation..."
+  else
+    sudo mdadm --create --verbose /dev/md0 --level=0 --raid-devices=4 /dev/nvme1n1 /dev/nvme2n1 /dev/nvme3n1 /dev/nvme4n1
+    sudo mkfs.ext4 /dev/md0
+    sudo mkdir -p /mnt/raid0
+    sudo mount /dev/md0 /mnt/raid0
+    sudo chown fastctl:fastctl /mnt/raid0
+    sudo chmod 755 /mnt/raid0
+    sudo sh -c 'uuid=$(blkid -s UUID -o value /dev/md0); grep -q "$uuid" /etc/fstab || echo "UUID=$uuid /mnt/raid0 ext4 defaults 0 2" >> /etc/fstab'
+    sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+    sudo update-initramfs -u
+  fi
+}
+
 setup_server_host() {
   install_packages_host
 }

@@ -4,7 +4,7 @@ export PS1="\u@\h:\[\e[0;36m\]\w\[\e[0m\]$ "
 export EDITOR='vim'
 export CLICOLOR=1
 
-export PATH=$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.3.3/bin:$PATH
+export PATH=$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.4.0/bin:$PATH
 
 eval "$(starship init bash)"
 

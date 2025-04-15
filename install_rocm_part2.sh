@@ -3,7 +3,7 @@ set -euo pipefail
 set -x
 
 # Install ROCm packages
-sudo apt install rocm
+sudo apt install rocm -y
 
 # Post install steps:
 
@@ -31,7 +31,7 @@ rocm-smi --showmeminfo vram
 sudo apt list --installed | grep amdgpu-dkms
 sudo apt list --installed | grep rocm-hip-libraries
 
-sudo apt install rocm-bandwidth-test
+sudo apt install rocm-bandwidth-test -y
 rocm-bandwidth-test
 
 # Monitor GPU
