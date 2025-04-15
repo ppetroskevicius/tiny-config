@@ -9,6 +9,8 @@ if command -v op > /dev/null; then
 
   OPENAI_API_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="openai-api-key") | .value')
   ANTHROPIC_API_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="anthropic-api-key") | .value')
+  PINECONE_API_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="pinecone-api-key") | .value')
+  MISTRAL_API_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="mistral-api-key") | .value')
   GH_TOKEN=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="github-api-key") | .value')
   AWS_ACCESS_KEY_ID=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-access-key") | .value')
   AWS_SECRET_ACCESS_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-secret-access-key") | .value')
@@ -16,6 +18,8 @@ if command -v op > /dev/null; then
 
   export OPENAI_API_KEY
   export ANTHROPIC_API_KEY
+  export PINECONE_API_KEY
+  export MISTRAL_API_KEY
   export GH_TOKEN
   export AWS_ACCESS_KEY_ID
   export AWS_SECRET_ACCESS_KEY
