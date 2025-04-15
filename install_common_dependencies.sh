@@ -205,6 +205,10 @@ install_docker() {
 
       sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+      # to run docker without root privileges
+      sudo groupadd docker
+      sudo usermod -aG docker $USER
+      newgrp docker
       sudo docker run hello-world
     fi
   fi
