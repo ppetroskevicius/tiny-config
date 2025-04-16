@@ -100,8 +100,16 @@ install_screenshots() {
     git clone https://git.sr.ht/~whynothugo/shotman "$tempdir/shotman"
     cd "$tempdir/shotman"
     cargo build --release
-    sudo make install}
+    sudo make install
     cd - > /dev/null
+
+    # install oculante for image editing (compiling takes time)
+    sudo apt-get install libxcb-shape0-dev libxcb-xfixes0-dev libgtk-3-dev libasound2-dev nasm cmake
+    # migth require nightly release
+    rustup install nightly
+    rustup default nightly
+
+    cargo install oculante
   fi
 }
 

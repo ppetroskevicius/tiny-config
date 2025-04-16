@@ -289,6 +289,10 @@ install_screenshots() {
     cd "$tempdir/shotman"
     cargo build --release
     sudo make install
+
+    # install oculante for image editing (compiling takes time)
+    # sudo apt-get install libxcb-shape0-dev libxcb-xfixes0-dev libgtk-3-dev libasound2-dev nasm cmake
+    # cargo install oculante
   fi
 }
 

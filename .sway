@@ -255,6 +255,9 @@ bindsym $mod+p       exec shotman --capture window --copy
 bindsym $mod+Shift+p exec shotman --capture region --copy
 bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
+# run image editor
+bindsym $mod+i exec oculante
+
 # run Japanese IME
 exec fcitx5 -dr
 
