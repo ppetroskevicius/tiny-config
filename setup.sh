@@ -182,26 +182,25 @@ setup_wifi_in_netplan() {
     WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
   fi
 
-  if ip link | grep -q "en"; then
-    ETHERNET_INTERFACE=$(ip link | grep "en" | awk '{print $2}' | grep "en" | sed 's/://')
+  # Get all Ethernet interfaces (including USB adapters)
+  ETHERNET_INTERFACES=$(ip link | grep -E "en|eth" | awk '{print $2}' | sed 's/://' | tr '\n' ' ')
+
+  # Start building the netplan configuration
+  CONFIG="network:\n  version: 2\n  renderer: networkd\n"
+
+  # Add WiFi configuration if interface exists
+  if [ -n "${WIFI_INTERFACE:-}" ]; then
+    CONFIG="${CONFIG}  wifis:\n    ${WIFI_INTERFACE}:\n      dhcp4: true\n      dhcp6: true\n      access-points:\n        \"${WIFI_SSID:-}\":\n          password: \"${WIFI_PASS:-}\"\n"
   fi
 
-  sudo tee "$NETPLAN_CONFIG" > /dev/null << EOL
-network:
-  version: 2
-  renderer: networkd
-  wifis:
-    ${WIFI_INTERFACE:-""}:
-      dhcp4: true
-      dhcp6: true
-      access-points:
-        "${WIFI_SSID:-""}":
-          password: "${WIFI_PASS:-""}"
-  ethernets:
-    ${ETHERNET_INTERFACE:-""}:
-      dhcp4: true
-      dhcp6: true
-EOL
+  # Add Ethernet configuration for all detected interfaces
+  CONFIG="${CONFIG}  ethernets:\n"
+  for iface in $ETHERNET_INTERFACES; do
+    CONFIG="${CONFIG}    ${iface}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n"
+  done
+
+  # Write the configuration
+  echo -e "$CONFIG" | sudo tee "$NETPLAN_CONFIG" > /dev/null
 
   sudo netplan apply
 }
