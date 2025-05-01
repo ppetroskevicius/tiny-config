@@ -15,7 +15,8 @@ if command -v op > /dev/null; then
   GH_TOKEN=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="github-api-key") | .value')
   AWS_ACCESS_KEY_ID=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-access-key") | .value')
   AWS_SECRET_ACCESS_KEY=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-secret-access-key") | .value')
-  AWS_HOSTED_ZONE_ID=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="hosted-zone") | .value')
+  AWS_HOSTED_ZONE_ID=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-hosted-zone") | .value')
+  AWS_ACCOUNT_ID=$(echo "$SECRETS_JSON" | jq -r '.fields[] | select(.section.label=="keys" and .label=="aws-account-id") | .value')
 
   export OPENAI_API_KEY
   export ANTHROPIC_API_KEY
@@ -26,6 +27,7 @@ if command -v op > /dev/null; then
   export AWS_ACCESS_KEY_ID
   export AWS_SECRET_ACCESS_KEY
   export AWS_HOSTED_ZONE_ID
+  export AWS_ACCOUNT_ID
 fi
 
 # Load keychain and add SSH key if not already added
