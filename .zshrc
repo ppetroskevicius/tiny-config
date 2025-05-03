@@ -4,7 +4,7 @@ PS1=$'%n@%m:\e[0;36m%~\e[0m$ '
 export EDITOR='vim'
 export CLICOLOR=1
 
-export PATH=$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.4.0/bin:$PATH
+export PATH=$HOME/.npm-global/bin:$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.4.0/bin:$PATH
 
 # oh-my-zsh configuration
 export ZSH="$HOME/.oh-my-zsh"
