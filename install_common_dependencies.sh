@@ -127,10 +127,10 @@ install_node() {
 
   # Install and use Node.js 22.0.0 (for aws-cdk compatibility)
   nvm install 22.0.0
-  nvm use 22.0.0
+  nvm use --delete-prefix 22.0.0  # This will unset any conflicting npm configurations
   nvm alias default 22.0.0
 
-  # Configure npm to use user directory
+  # Configure npm to use user directory (after nvm setup)
   mkdir -p "$HOME/.npm-global"
   npm config set prefix "$HOME/.npm-global"
 }
@@ -149,8 +149,8 @@ install_aws_cli() {
     fi
     aws --version
 
-    # Install AWS CDK
-    sudo npm install -g aws-cdk
+    # Install AWS CDK in user directory
+    npm install -g aws-cdk
     cdk --version
   fi
 }
