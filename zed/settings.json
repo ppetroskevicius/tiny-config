@@ -22,15 +22,26 @@
   "assistant": {
     "default_model": {
       "provider": "zed.dev",
-      "model": "claude-3-5-sonnet-latest"
+      "model": "claude-3-7-sonnet-latest"
     },
     "version": "2"
+  },
+  "context_servers": {
+    "Context7": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@upstash/context7-mcp@latest"]
+      },
+      "settings": {}
+    }
   },
   "lsp": {
     "pyright": {
       "settings": {
         "python.analysis": {
-          "diagnosticMode": "workspace"
+          // "diagnosticMode": "workspace"
+          "diagnosticMode": "openFilesOnly",
+          "useLibraryCodeForTypes": false
           // "typeCheckingMode": "strict"
         },
         "python": {
@@ -85,7 +96,7 @@
     "show_parameter_hints": true,
     "show_other_hints": true
   },
-  "theme": "Andromeda",
+  "theme": "One Dark",
   "vim_mode": true,
   "ui_font_size": 12,
   "buffer_font_size": 12,
