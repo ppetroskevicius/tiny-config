@@ -1,0 +1,11 @@
+{
+  "context_servers": {
+    "Context7": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@upstash/context7-mcp@latest"]
+      },
+      "settings": {}
+    }
+  }
+}

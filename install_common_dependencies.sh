@@ -95,6 +95,12 @@ install_dotfiles() {
   ln -sf "$TARGET_DIR/.ruff.toml" "$HOME/.config/ruff/ruff.toml"
   ln -sf "$TARGET_DIR/zed/keymap.json" "$HOME/.config/zed/"
   ln -sf "$TARGET_DIR/zed/settings.json" "$HOME/.config/zed/"
+
+  # Setup Cursor configuration
+  mkdir -p "$HOME/.cursor"
+  ln -sf "$TARGET_DIR/.cursor_mcp.json" "$HOME/.cursor/mcp.json"
+
+  # Setup other configurations
   ln -sf "$TARGET_DIR/.pylintrc" "$HOME/.config/pylintrc"
   mkdir -p "$HOME/.aws"
   ln -sf "$TARGET_DIR/.aws_config" "$HOME/.aws/config"
