@@ -78,6 +78,7 @@ main() {
       # setup desktop applications
       install_1password_app
       install_zed_app
+      install_windsurf_app
       install_chrome_app
       install_discord_app
       install_zotero_app
