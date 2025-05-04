@@ -100,6 +100,10 @@ install_dotfiles() {
   mkdir -p "$HOME/.cursor"
   ln -sf "$TARGET_DIR/.cursor_mcp.json" "$HOME/.cursor/mcp.json"
 
+  # Setup MCP configuration
+  mkdir -p "$HOME/.codeium/windsurf"
+  ln -sf "$TARGET_DIR/.mcp_config.json" "$HOME/.codeium/windsurf/mcp_config.json"
+
   # Setup other configurations
   ln -sf "$TARGET_DIR/.pylintrc" "$HOME/.config/pylintrc"
   mkdir -p "$HOME/.aws"
@@ -127,7 +131,7 @@ install_node() {
 
   # Install and use Node.js 22.0.0 (for aws-cdk compatibility)
   nvm install 22.0.0
-  nvm use --delete-prefix 22.0.0  # This will unset any conflicting npm configurations
+  nvm use --delete-prefix 22.0.0 # This will unset any conflicting npm configurations
   nvm alias default 22.0.0
 
   # Configure npm to use user directory (after nvm setup)

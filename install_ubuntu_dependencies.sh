@@ -29,7 +29,7 @@ install_packages_guest() {
 install_github_cli() {
   # Install GitHub CLI using the official repository if not already installed
   if ! command -v gh > /dev/null; then
-    (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+    (type -p wget > /dev/null || (sudo apt update && sudo apt-get install wget -y)) \
       && sudo mkdir -p -m 755 /etc/apt/keyrings \
       && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \

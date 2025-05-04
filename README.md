@@ -88,7 +88,7 @@ The script installs and configures essential packages, including:
 Optional applications can be installed, including:
 
 - **Browsers**: Google Chrome
-- **Editors**: Zed
+- **Editors**: Zed, Cursor, Windsurf
 - **Messaging**: Discord
 - **Research Tools**: Zotero
 - **Music**: Spotify and `spotify-player`
