@@ -26,6 +26,20 @@ install_packages_guest() {
       python-is-python3 python3 python3-pip python3-venv avahi-daemon
 }
 
+install_github_cli() {
+  # Install GitHub CLI using the official repository if not already installed
+  if ! command -v gh > /dev/null; then
+    (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+      && sudo mkdir -p -m 755 /etc/apt/keyrings \
+      && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+      && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+      && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+      && sudo apt update \
+      && sudo apt install gh -y
+  fi
+}
+
 setup_wifi_in_netplan() {
   if ip link | grep -q "wl"; then
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
@@ -196,6 +210,15 @@ install_zed_app() {
   fi
 }
 
+install_windsurf_app() {
+  if ! dpkg -l windsurf > /dev/null 2>&1; then
+    curl -fsSL "https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/windsurf.gpg" | sudo gpg --dearmor -o /usr/share/keyrings/windsurf-stable-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/windsurf-stable-archive-keyring.gpg arch=amd64] https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt stable main" | sudo tee /etc/apt/sources.list.d/windsurf.list > /dev/null
+    sudo apt update
+    sudo apt install -y windsurf
+  fi
+}
+
 install_chrome_app() {
   if ! command -v google-chrome > /dev/null; then
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/chrome.deb
@@ -251,6 +274,7 @@ setup_server_host() {
 
 setup_server_guest() {
   install_packages_guest
+  install_github_cli
 }
 
 setup_desktop() {
