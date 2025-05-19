@@ -26,6 +26,7 @@ if command -v op > /dev/null; then
     "TRIEVE_API_KEY:trieve-api-key"
     "VAPI_API_KEY:vapi-api-key"
     "FIRECRAWL_API_KEY:firecrawl-api-key"
+    "QDRANT_API_KEY:qdrant-api-key"
   )
 
   for entry in "${env_vars[@]}"; do
