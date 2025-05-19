@@ -28,6 +28,7 @@ if command -v op > /dev/null; then
     "FIRECRAWL_API_KEY:firecrawl-api-key"
     "QDRANT_API_KEY:qdrant-api-key"
     "QDRANT_URL:qdrant-url"
+    "VITE_MAPBOX_TOKEN:mapbox-token"
   )
 
   for entry in "${env_vars[@]}"; do
