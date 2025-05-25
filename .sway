@@ -242,6 +242,8 @@ bindsym XF86AudioPrev exec playerctl previous
 bindsym $mod+c+j exec google-chrome
 # [ ] or run chrome in Wayland mode
 bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+# start cursor
+bindsym $mod+u exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox .
 
 
 # configure notebook touchscreen
