@@ -96,7 +96,7 @@ setup_bluetooth_audio() {
 
 setup_sway_wayland() {
   dpkg -l sway > /dev/null 2>&1 \
-    || sudo apt install -y sway wayland-protocols xwayland swayidle swaylock swayimg
+    || sudo apt install -y sway wayland-protocols xwayland swayidle swaylock swayimg desktop-file-utils
 }
 
 install_i3status-rs() {
@@ -208,6 +208,11 @@ install_zed_app() {
   if ! command -v zed > /dev/null; then
     curl -f https://zed.dev/install.sh | sh
   fi
+}
+
+install_cursor() {
+  curl -fsSL https://raw.githubusercontent.com/mxsteini/cursor_patch/main/cursor-install.sh | bash
+
 }
 
 install_windsurf_app() {
