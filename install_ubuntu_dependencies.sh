@@ -55,13 +55,13 @@ setup_wifi_in_netplan() {
 
   # Add WiFi configuration if interface exists
   if [ -n "${WIFI_INTERFACE:-}" ]; then
-    CONFIG="${CONFIG}  wifis:\n    ${WIFI_INTERFACE}:\n      dhcp4: true\n      dhcp6: true\n      access-points:\n        \"${WIFI_SSID:-}\":\n          password: \"${WIFI_PASS:-}\"\n"
+    CONFIG="${CONFIG}  wifis:\n    ${WIFI_INTERFACE}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n      dhcp4-overrides:\n        route-metric: 600\n      dhcp6-overrides:\n        route-metric: 600\n      access-points:\n        \"${WIFI_SSID:-}\":\n          password: \"${WIFI_PASS:-}\"\n"
   fi
 
   # Add Ethernet configuration for all detected interfaces
   CONFIG="${CONFIG}  ethernets:\n"
   for iface in $ETHERNET_INTERFACES; do
-    CONFIG="${CONFIG}    ${iface}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n"
+    CONFIG="${CONFIG}    ${iface}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n      dhcp4-overrides:\n        route-metric: 100\n      dhcp6-overrides:\n        route-metric: 100\n"
   done
 
   # Write the configuration
