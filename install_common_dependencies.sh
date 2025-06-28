@@ -159,6 +159,23 @@ install_aws_cli() {
   fi
 }
 
+install_gcp_cli() {
+  if ! command -v gcloud > /dev/null; then
+    if [ "$OS" = "Darwin" ]; then
+      brew install --cask google-cloud-sdk
+    else
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+      echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+        sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+        sudo gpg --dearmor --yes -o /usr/share/keyrings/cloud.google.gpg
+      sudo apt-get update && sudo apt-get install -y google-cloud-cli
+    fi
+    gcloud --version
+  fi
+}
+
 install_rust() {
   if ! [ -f "$HOME/.cargo/bin/cargo" ]; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

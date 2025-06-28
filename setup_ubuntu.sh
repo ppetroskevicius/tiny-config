@@ -62,6 +62,7 @@ main() {
       install_wireguard
       install_node
       install_aws_cli
+      install_gcp_cli
       install_alacritty_app
       setup_bluetooth_audio
       setup_sway_wayland
