@@ -4,6 +4,9 @@ set -euo pipefail
 # run below manually ONCE
 # gcloud init
 
+# revoke credentials (delete `credentials.db`)
+# gcloud auth revoke
+
 # Ensure project IDs are set
 : "${GCP_DEV_PROJECT_ID:?}"
 : "${GCP_TEST_PROJECT_ID:?}"
