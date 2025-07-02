@@ -31,6 +31,9 @@ if command -v op > /dev/null; then
     "VITE_MAPBOX_TOKEN:mapbox-token"
     "GEOAPIFY_API_KEY:geoapify-api-key"
     "GOOGLE_MAPS_API_KEY:google-maps-api-key"
+    "GCP_DEV_PROJECT_ID:gcp-dev-project-id"
+    "GCP_TEST_PROJECT_ID:gcp-test-project-id"
+    "GCP_PROD_PROJECT_ID:gcp-prod-project-id"
   )
 
   for entry in "${env_vars[@]}"; do
