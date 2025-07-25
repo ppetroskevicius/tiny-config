@@ -61,6 +61,7 @@ main() {
   install_node
   install_aws_cli
   install_gcp_cli
+  install_firebase_cli
   install_rust
   install_nerd_fonts
   install_starship

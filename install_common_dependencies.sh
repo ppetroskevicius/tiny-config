@@ -176,6 +176,38 @@ install_gcp_cli() {
   fi
 }
 
+install_firebase_cli() {
+  if ! command -v firebase > /dev/null || ! firebase --version > /dev/null 2>&1; then
+    # Remove any broken installation first
+    if [ -f "/usr/local/bin/firebase" ]; then
+      sudo rm -f /usr/local/bin/firebase
+    fi
+
+    # Install Firebase CLI using npm (more reliable than the curl script)
+    if command -v npm > /dev/null; then
+      npm install -g firebase-tools
+
+      # Ensure npm global bin directory is in PATH
+      npm_global_bin=$(npm config get prefix)/bin
+      if ! echo "$PATH" | grep -q "$npm_global_bin"; then
+        echo "export PATH=\"$npm_global_bin:\$PATH\"" >> "$HOME/.zshrc"
+        export PATH="$npm_global_bin:$PATH"
+      fi
+    else
+      echo "npm not found. Please install Node.js first."
+      return 1
+    fi
+
+    # Verify the installation works
+    if command -v firebase > /dev/null && firebase --version > /dev/null 2>&1; then
+      firebase --version
+    else
+      echo "Firebase CLI installation failed. Please check the installation manually."
+      return 1
+    fi
+  fi
+}
+
 install_rust() {
   if ! [ -f "$HOME/.cargo/bin/cargo" ]; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

@@ -1,3 +1,4 @@
+# Generic settings (good defaults for macOS)
 Host *
   IgnoreUnknown UseKeychain
   UseKeychain yes
@@ -5,25 +6,23 @@ Host *
   User fastctl
   IdentityFile ~/.ssh/id_ed25519
 
-Host gpu01
-  Hostname 192.168.20.18
-  ServerAliveInterval 30
-  ServerAliveCountMax 5
-
 Host spacex
-  HostName 192.168.20.20
+  HostName 192.168.21.20
 
 Host oslo
-  HostName 192.168.20.21
+  HostName 192.168.21.21
 
 Host oslo1
-  HostName 192.168.20.22
+  HostName 192.168.21.22
 
 Host oslo2
-  HostName 192.168.20.23
+  HostName 192.168.21.23
 
 Host canarywharf
-  HostName 192.168.20.33
+  HostName 192.168.21.33
+
+Host kafka
+  HostName 192.168.21.34
 
 Host comma-petras
   Hostname comma-0ca1a658939c7345
@@ -31,3 +30,16 @@ Host comma-petras
   User comma
   IdentityFile ~/.ssh/id_ed25519
   ProxyCommand ssh %h@ssh.comma.ai -W %h:%p
+
+# Private GitHub
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+
+# Work GitHub
+Host github.com-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+
