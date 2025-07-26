@@ -25,6 +25,13 @@ alias vpn_start="sudo wg-quick up gw0"
 alias vpn_stop="sudo wg-quick down gw0"
 alias vpn_status="sudo wg show gw0"
 
+# GCloud configuration aliases
+alias gdev='gcloud config configurations activate dev'
+alias gprod='gcloud config configurations activate prod'
+alias gtest='gcloud config configurations activate test'
+alias gconfig='gcloud config list'
+alias gprojects='gcloud projects list'
+
 eval "$(starship init zsh)"
 
 # Added by LM Studio CLI (lms)

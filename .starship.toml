@@ -1,2 +1,11 @@
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
+
+# Google Cloud module configuration
+[gcloud]
+format = 'on [$symbol$project]($style) '
+symbol = "☁️ "
+[gcloud.project_aliases]
+monoya-connect-dev = 'dev'
+monoya-connect-prod = 'prod'
+monoya-connect-test = 'test'
