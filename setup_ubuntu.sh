@@ -81,6 +81,7 @@ main() {
       install_1password_app
       install_zed_app
       install_cursor_app
+      install_claude_code_app
       install_windsurf_app
       install_chrome_app
       install_discord_app

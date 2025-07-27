@@ -67,6 +67,7 @@ main() {
   install_starship
   install_docker
   install_alacritty_app
+  install_claude_code_app
   # Python setup
   install_uv
   install_linters_formatters

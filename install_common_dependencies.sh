@@ -139,6 +139,13 @@ install_node() {
   npm config set prefix "$HOME/.npm-global"
 }
 
+install_claude_code_app() {
+  if ! command -v claude > /dev/null; then
+    # Install Claude Code using the official npm package
+    npm install -g @anthropic-ai/claude-code
+  fi
+}
+
 install_aws_cli() {
   if ! command -v aws > /dev/null; then
     if [ "$OS" = "Darwin" ]; then

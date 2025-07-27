@@ -210,7 +210,7 @@ install_zed_app() {
   fi
 }
 
-install_cursor() {
+install_cursor_app() {
   curl -fsSL https://raw.githubusercontent.com/mxsteini/cursor_patch/main/cursor-install.sh | bash
 
 }
