@@ -282,6 +282,9 @@ install_docker() {
       sudo usermod -aG docker $USER
       newgrp docker
       sudo docker run hello-world
+
+      sudo systemctl enable docker
+      sudo systemctl start docker
     fi
   fi
 }
@@ -295,8 +298,16 @@ install_podman() {
       sudo apt update
       sudo apt -y install podman
 
+      sudo apt install -y uidmap
+      sudo usermod --add-subuids 100000-165536 --add-subgids 100000-165536 $USER
+
+      sudo systemctl enable podman
+      sudo systemctl start podman
+
+
       # Test installation
       podman --version
+      podman info --debug
       podman run hello-world
     fi
   fi
