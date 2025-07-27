@@ -43,6 +43,7 @@ main() {
       echo "Performing host (minimal) setup..."
       install_packages_host
       install_docker
+      install_podman
       ;;
     "guest")
       echo "Performing guest setup..."

@@ -66,6 +66,7 @@ main() {
   install_nerd_fonts
   install_starship
   install_docker
+  install_podman
   install_alacritty_app
   install_claude_code_app
   # Python setup

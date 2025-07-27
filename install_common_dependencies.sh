@@ -286,6 +286,22 @@ install_docker() {
   fi
 }
 
+install_podman() {
+  if ! command -v podman > /dev/null; then
+    if [ "$OS" = "Darwin" ]; then
+      brew install podman
+    else
+      # https://podman.io/docs/installation
+      sudo apt update
+      sudo apt -y install podman
+
+      # Test installation
+      podman --version
+      podman run hello-world
+    fi
+  fi
+}
+
 install_ollama() {
   if ! command -v ollama > /dev/null; then
     if [ "$OS" = "Darwin" ]; then
