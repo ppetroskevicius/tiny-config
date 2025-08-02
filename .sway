@@ -244,7 +244,7 @@ bindsym $mod+c+j exec google-chrome
 # bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
 
 # [ ] start cursor and windsurf
-bindsym $mod+c exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox .
+bindsym $mod+c exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox /home/fastctl/fun/monoya
 # bindsym $mod+w exec /home/fastctl/bin/windsurf
 
 
@@ -303,7 +303,7 @@ exec swaymsg 'workspace 1; \
 
 # workspace 2: Cursor + Chrome
 exec swaymsg 'workspace 2; \
-  exec /home/fastctl/bin/cursor --no-sandbox /home/fastctl/fun/monoya; \
+  exec cursor --no-sandbox /home/fastctl/fun/monoya; \
   exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
 
 # workspace 3: Windsurf + Chrome
