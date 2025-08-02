@@ -291,8 +291,8 @@ workspace 10 output DP-1, DP-3
 # assign [app_id="dev.zed.Zed"] workspace 2
 # assign [app_id="google-chrome"] workspace 2
 # assign [instance="discord"] workspace 3
-# assign [instance="cursor"] workspace 3
-# assign [instance="windsurf"] workspace 4
+assign [instance="cursor"] workspace 2
+assign [instance="windsurf"] workspace 3
 assign [instance="spotify"] workspace 9
 
 # autostart
