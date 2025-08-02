@@ -15,7 +15,7 @@ export PATH="$PATH:$HOME/.npm-global/bin:$HOME/.cargo/bin:$HOME/.local/bin:/opt/
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="robbyrussell"
 setopt histignorealldups
-plugins=(git zsh-autosuggestions)
+plugins=(git zsh-autosuggestions terraform gcloud docker docker-compose)
 source $ZSH/oh-my-zsh.sh
 
 alias ll='ls -l'
