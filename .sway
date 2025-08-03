@@ -39,7 +39,7 @@ include /etc/sway/config-vars.d/*
 bindsym $mod+q exec swaylock -c 000000
 exec swayidle -w \
   timeout 3000 'swaylock -f -c 000000' \
-  timeout 3500 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  timeout 3010 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
   before-sleep 'playerctl pause' \
   before-sleep 'swaylock -f -c 000000'
 #
