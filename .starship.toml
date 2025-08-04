@@ -3,8 +3,8 @@
 
 # Google Cloud module configuration
 [gcloud]
-format = 'on [$symbol$project$account]($style) '
-symbol = "☁️ "
+format = 'on [$symbol$project|$account]($style) '
+symbol = "\ue7f0 "
 disabled = false
 # Show account information including service account when impersonating
 [gcloud.project_aliases]
