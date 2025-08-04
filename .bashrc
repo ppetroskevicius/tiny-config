@@ -18,6 +18,10 @@ alias gtest='gcloud config configurations activate test'
 alias gconfig='gcloud config list'
 alias gprojects='gcloud projects list'
 
+alias g-tf-mode='gcloud config set auth/impersonate_service_account $GCP_TERRAFORM_SA'
+alias g-dev-mode='gcloud config set auth/impersonate_service_account $GCP_DEVELOPER_SA'
+alias gwhoami='gcloud auth list'
+
 eval "$(starship init bash)"
 
 # Added by LM Studio CLI (lms)

@@ -3,8 +3,10 @@
 
 # Google Cloud module configuration
 [gcloud]
-format = 'on [$symbol$project]($style) '
+format = 'on [$symbol$project$account]($style) '
 symbol = "☁️ "
+disabled = false
+# Show account information including service account when impersonating
 [gcloud.project_aliases]
 monoya-connect-dev = 'dev'
 monoya-connect-prod = 'prod'
