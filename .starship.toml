@@ -3,11 +3,21 @@
 
 # Google Cloud module configuration
 [gcloud]
-format = 'on [$symbol$project|$account]($style) '
+format = 'on [$symbol$project|$account]($style)'
 symbol = "\ue7f0 "
 disabled = false
+
 # Show account information including service account when impersonating
 [gcloud.project_aliases]
 monoya-connect-dev = 'dev'
 monoya-connect-prod = 'prod'
 monoya-connect-test = 'test'
+
+# Custom module to show impersonated service account
+[custom.gcp_impersonate]
+description = "Show GCP impersonated service account"
+command = "grep -h 'impersonate_service_account' ~/.config/gcloud/configurations/config_* 2>/dev/null | head -1 | cut -d'=' -f2 | tr -d ' ' | sed 's/@.*//' || echo ''"
+when = "grep -q 'impersonate_service_account' ~/.config/gcloud/configurations/config_* 2>/dev/null"
+format = "|[$output]($style) "
+shell = "bash"
+style = "green"
