@@ -27,15 +27,35 @@ alias vpn_status="sudo wg show gw0"
 
 # GCloud configuration aliases
 alias gdev='gcloud config configurations activate dev'
-alias gprod='gcloud config configurations activate prod'
 alias gtest='gcloud config configurations activate test'
+alias gprod='gcloud config configurations activate prod'
 alias gconfig='gcloud config list'
 alias gprojects='gcloud projects list'
 
 # This command tells ADC to use the *-sa-dev identity for all future commands
-alias g-tf-mode='gcloud config set auth/impersonate_service_account $GCP_TERRAFORM_SA'
-alias g-dev-mode='gcloud config set auth/impersonate_service_account $GCP_DEVELOPER_SA'
-alias gwhoami='gcloud auth list'
+alias gdev-tf='gcloud config set auth/impersonate_service_account $GCP_DEV_TERRAFORM_SA'
+alias gdev-sa='gcloud config set auth/impersonate_service_account $GCP_DEV_DEVELOPER_SA'
+alias gtest-tf='gcloud config set auth/impersonate_service_account $GCP_TEST_TERRAFORM_SA'
+alias gtest-sa='gcloud config set auth/impersonate_service_account $GCP_TEST_DEVELOPER_SA'
+alias gprod-tf='gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA'
+alias gprod-sa='gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA'
+
+# NEW: Stop impersonating and return to your user credentials
+alias gowner='gcloud config unset auth/impersonate_service_account'
+
+# IMPROVED: A more detailed status check
+gwhoami() {
+    echo "--- Active Configuration ---"
+    gcloud config list --format="table(core.project, compute.region, compute.zone)"
+    echo "\n--- Authentication State ---"
+    gcloud auth list
+    IMPERSONATED_SA=$(gcloud config get-value auth/impersonate_service_account 2>/dev/null)
+    if [ -n "$IMPERSONATED_SA" ]; then
+        echo "\n\033[1;33mCurrently Impersonating:\033[0m $IMPERSONATED_SA"
+    else
+        echo "\n\033[1;32mActing as primary user.\033[0m"
+    fi
+}
 
 eval "$(starship init zsh)"
 

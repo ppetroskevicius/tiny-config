@@ -34,8 +34,12 @@ if command -v op > /dev/null; then
     "GCP_DEV_PROJECT_ID:gcp-dev-project-id"
     "GCP_TEST_PROJECT_ID:gcp-test-project-id"
     "GCP_PROD_PROJECT_ID:gcp-prod-project-id"
-    "GCP_DEVELOPER_SA:gcp-developer-sa"
-    "GCP_TERRAFORM_SA:gcp-terraform-sa"
+    "GCP_DEV_DEVELOPER_SA:gcp-dev-developer-sa"
+    "GCP_DEV_TERRAFORM_SA:gcp-dev-terraform-sa"
+    "GCP_TEST_DEVELOPER_SA:gcp-test-developer-sa"
+    "GCP_TEST_TERRAFORM_SA:gcp-test-terraform-sa"
+    "GCP_PROD_DEVELOPER_SA:gcp-prod-developer-sa"
+    "GCP_PROD_TERRAFORM_SA:gcp-prod-terraform-sa"
   )
 
   for entry in "${env_vars[@]}"; do
