@@ -36,19 +36,19 @@ format = "[\ue7f0 $output]($style)"
 command = "echo 'dev'"
 when = "test $GCP_ENV = 'dev'"
 style = "bold green"
-format = "[@$output]($style)"
+format = "[@$output]($style) "
 
 [custom.gcp_env_test]
 command = "echo 'test'"
 when = "test $GCP_ENV = 'test'"
 style = "bold yellow"
-format = "[@$output]($style)"
+format = "[@$output]($style) "
 
 [custom.gcp_env_prod]
 command = "echo 'prod'"
 when = "test $GCP_ENV = 'prod'"
 style = "bold red"
-format = "[@$output]($style)"
+format = "[@$output]($style) "
 
 
 # --- Grouping for main format string ---
