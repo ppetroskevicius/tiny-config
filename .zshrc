@@ -25,37 +25,50 @@ alias vpn_start="sudo wg-quick up gw0"
 alias vpn_stop="sudo wg-quick down gw0"
 alias vpn_status="sudo wg show gw0"
 
-# GCloud configuration aliases
-alias gdev='gcloud config configurations activate dev'
-alias gtest='gcloud config configurations activate test'
-alias gprod='gcloud config configurations activate prod'
+# --- GCP State Management Functions for Starship ---
+
+# Set Environment (dev, test, prod)
+gdev() {
+    gcloud config configurations activate dev
+    export GCP_ENV="dev"
+    gowner # Default to owner identity when switching envs
+}
+gtest() {
+    gcloud config configurations activate test
+    export GCP_ENV="test"
+    gowner
+}
+gprod() {
+    gcloud config configurations activate prod
+    export GCP_ENV="prod"
+    gowner
+}
+
+# Set Identity (tf, sa, owner)
+gdev-tf() { gdev && gcloud config set auth/impersonate_service_account $GCP_DEV_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
+gdev-sa() { gdev && gcloud config set auth/impersonate_service_account $GCP_DEV_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
+
+gtest-tf() { gtest && gcloud config set auth/impersonate_service_account $GCP_TEST_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
+gtest-sa() { gtest && gcloud config set auth/impersonate_service_account $GCP_TEST_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
+
+gprod-tf() { gprod && gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
+gprod-sa() { gprod && gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
+
+# Return to Owner identity
+gowner() {
+    gcloud config unset auth/impersonate_service_account >/dev/null 2>&1
+    export GCP_IDENTITY="owner"
+}
+
+# Utility aliases (can remain as is)
 alias gconfig='gcloud config list'
 alias gprojects='gcloud projects list'
+alias gwhoami='gcloud auth list'
 
-# This command tells ADC to use the *-sa-dev identity for all future commands
-alias gdev-tf='gcloud config set auth/impersonate_service_account $GCP_DEV_TERRAFORM_SA'
-alias gdev-sa='gcloud config set auth/impersonate_service_account $GCP_DEV_DEVELOPER_SA'
-alias gtest-tf='gcloud config set auth/impersonate_service_account $GCP_TEST_TERRAFORM_SA'
-alias gtest-sa='gcloud config set auth/impersonate_service_account $GCP_TEST_DEVELOPER_SA'
-alias gprod-tf='gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA'
-alias gprod-sa='gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA'
+# Activate the default environment
+gdev-sa
 
-# Stop impersonating and return to your user credentials
-alias gowner='gcloud config unset auth/impersonate_service_account'
-
-# Detailed status check
-gwhoami() {
-    echo "--- Active Configuration ---"
-    gcloud config list --format="table(core.project, compute.region, compute.zone)"
-    echo "\n--- Authentication State ---"
-    gcloud auth list
-    IMPERSONATED_SA=$(gcloud config get-value auth/impersonate_service_account 2>/dev/null)
-    if [ -n "$IMPERSONATED_SA" ]; then
-        echo "\n\033[1;33mCurrently Impersonating:\033[0m $IMPERSONATED_SA"
-    else
-        echo "\n\033[1;32mActing as primary user.\033[0m"
-    fi
-}
+# --- End GCP Section ---
 
 eval "$(starship init zsh)"
 
