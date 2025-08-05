@@ -40,10 +40,10 @@ alias gtest-sa='gcloud config set auth/impersonate_service_account $GCP_TEST_DEV
 alias gprod-tf='gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA'
 alias gprod-sa='gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA'
 
-# NEW: Stop impersonating and return to your user credentials
+# Stop impersonating and return to your user credentials
 alias gowner='gcloud config unset auth/impersonate_service_account'
 
-# IMPROVED: A more detailed status check
+# Detailed status check
 gwhoami() {
     echo "--- Active Configuration ---"
     gcloud config list --format="table(core.project, compute.region, compute.zone)"
