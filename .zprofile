@@ -1,7 +1,9 @@
 # Runs only for login session
 
 if command -v op > /dev/null; then
-  if ! op whoami > /dev/null 2>&1; then
+  # Sign in only if there is no valid session
+  if ! op account get >/dev/null 2>&1; then
+    # This will prompt for your unlock method (biometrics, password, etc.)
     eval "$(op signin --account my)"
   fi
 
