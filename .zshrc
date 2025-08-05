@@ -61,9 +61,10 @@ gowner() {
 }
 
 # Utility aliases (can remain as is)
-alias gconfig='gcloud config list'
+alias gconf='gcloud config list'
 alias gprojects='gcloud projects list'
-alias gwhoami='gcloud auth list'
+alias gauth='gcloud auth list' # who am i
+alias gimp='gcloud config get-value auth/impersonate_service_account' # check which service account we are impersonating
 
 # Activate the default environment
 gdev-sa
