@@ -51,6 +51,23 @@ style = "bold red"
 format = "[@$output]($style) "
 
 
+# --- Custom GCP Dev Project Check (defined?) ---
+
+[custom.gcp_dev_project_ok]
+command = "echo '✔'"
+when = "test -n \"$GCP_DEV_PROJECT_ID\""
+style = "bold green"
+format = "[$output]($style) "
+
+[custom.gcp_dev_project_missing]
+command = "echo '✗'"
+when = "test -z \"$GCP_DEV_PROJECT_ID\""
+style = "bold red"
+format = "[$output]($style) "
+
+[custom.gcp_dev_project_status]
+format = "$gcp_dev_project_ok$gcp_dev_project_missing"
+
 # --- Grouping for main format string ---
 
 [custom.gcp_env]
