@@ -31,7 +31,7 @@ interval = 10
 
 [[block]]
 block = "net"
-device = "^enx.*$"
+device = "^enp.*$"
 format = " $icon $device"
 format_alt = " $icon $ip $ipv6 $speed_down $speed_up via $device"
 missing_format = "No Ethernet"
