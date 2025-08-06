@@ -11,6 +11,11 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH="$PATH:$HOME/.npm-global/bin:$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.4.0/bin:/home/fastctl/.lmstudio/bin:$HOME/bin"
 
+# Load keychain and add SSH key if not already added
+if command -v keychain >/dev/null 2>&1; then
+  eval "$(keychain --eval --quiet id_ed25519)"
+fi
+
 # oh-my-zsh configuration
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="robbyrussell"
