@@ -120,31 +120,23 @@ setup_timezone() {
 }
 
 install_node() {
-  # Install nvm if not present
+  # https://nodejs.org/en/download/
   if ! command -v nvm > /dev/null; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-    # Source nvm to make it available in the current shell
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
   fi
 
-  # Install and use Node.js 22.0.0 (for aws-cdk compatibility)
-  nvm install 22.0.0
-  nvm use --delete-prefix 22.0.0 # This will unset any conflicting npm configurations
-  nvm alias default 22.0.0
+  # in lieu of restarting the shell
+  . "$HOME/.nvm/nvm.sh"
 
-  # Configure npm to use user directory (after nvm setup)
-  mkdir -p "$HOME/.npm-global"
-  npm config set prefix "$HOME/.npm-global"
+  # Download and install Node.js:
+  nvm install 22
 
-  # Verify installation
-  echo "[INFO] Verifying nvm installation..."
-  nvm --version
-  node --version
-  npm --version
-  nvm list
-  echo "[INFO] nvm installation verification complete"
+  # Verify the Node.js version:
+  node -v # Should print "v22.18.0".
+  nvm current # Should print "v22.18.0".
+
+  # Verify npm version:
+  npm -v # Should print "10.9.3".
 }
 
 install_claude_code_app() {
