@@ -52,15 +52,6 @@ format_alt = " $icon $used.eng(w:3,u:B,p:Mi)/$total"
 interval = 300
 
 [[block]]
-block = "github"
-token = "..."
-format = " $icon $total.eng(w:1) "
-info = ["total"]
-warning = ["mention","review_requested"]
-hide_if_total_is_zero = true
-interval = 300
-
-[[block]]
 block = "temperature"
 format = " $icon $average"
 chip = "*-isa-*"
