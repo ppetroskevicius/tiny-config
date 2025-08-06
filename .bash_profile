@@ -40,6 +40,7 @@ if command -v op > /dev/null; then
     "GCP_TEST_TERRAFORM_SA:gcp-test-terraform-sa"
     "GCP_PROD_DEVELOPER_SA:gcp-prod-developer-sa"
     "GCP_PROD_TERRAFORM_SA:gcp-prod-terraform-sa"
+    "I3RS_GITHUB_TOKEN:i3rs-github-token"
   )
 
   for entry in "${env_vars[@]}"; do
