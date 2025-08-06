@@ -43,10 +43,10 @@ install_github_cli() {
 setup_wifi_in_netplan() {
   local wifi_interface=""
   local ethernet_interfaces=""
-  
+
   # Get WiFi interface - look for interfaces starting with 'wl' (more precise)
   wifi_interface=$(ip link show | awk '/^[0-9]+: wl[^:]*:/ {gsub(/:/, "", $2); print $2}' | head -1 || true)
-  
+
   # Get WiFi credentials if interface exists
   if [ -n "$wifi_interface" ]; then
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
@@ -90,7 +90,7 @@ setup_wifi_in_netplan() {
   if [ -n "$ethernet_interfaces" ]; then
     config="$config
   ethernets:"
-    
+
     for iface in $ethernet_interfaces; do
       config="$config
     $iface:
@@ -110,7 +110,7 @@ setup_wifi_in_netplan() {
   echo "Generated netplan configuration:"
   echo "WiFi interface: ${wifi_interface:-none}"
   echo "Ethernet interfaces: ${ethernet_interfaces:-none}"
-  
+
   # Validate the configuration before applying
   if sudo netplan generate; then
     echo "Netplan configuration is valid, applying..."
@@ -262,6 +262,7 @@ install_zed_app() {
 }
 
 install_cursor_app() {
+  sudo apt install libnotify-bin
   curl -fsSL https://raw.githubusercontent.com/mxsteini/cursor_patch/main/cursor-install.sh | bash
 
 }
