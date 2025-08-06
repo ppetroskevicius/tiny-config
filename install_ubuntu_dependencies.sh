@@ -41,33 +41,84 @@ install_github_cli() {
 }
 
 setup_wifi_in_netplan() {
-  if ip link | grep -q "wl"; then
+  local wifi_interface=""
+  local ethernet_interfaces=""
+  
+  # Get WiFi interface - look for interfaces starting with 'wl' (more precise)
+  wifi_interface=$(ip link show | awk '/^[0-9]+: wl[^:]*:/ {gsub(/:/, "", $2); print $2}' | head -1 || true)
+  
+  # Get WiFi credentials if interface exists
+  if [ -n "$wifi_interface" ]; then
     WIFI_SSID=$(op read "$OP_WIFI_SSID")
     WIFI_PASS=$(op read "$OP_WIFI_PASS")
-    WIFI_INTERFACE=$(ip link | grep "wl" | awk '{print $2}' | sed 's/://')
   fi
 
-  # Get all Ethernet interfaces (including USB adapters)
-  ETHERNET_INTERFACES=$(ip link | grep -E "en|eth" | awk '{print $2}' | sed 's/://' | tr '\n' ' ')
+  # Get Ethernet interfaces - look for interfaces starting with 'en' or 'eth' (more precise)
+  # Exclude loopback, virtual, and docker interfaces
+  ethernet_interfaces=$(ip link show | awk '
+    /^[0-9]+: (en[^:]*|eth[^:]*):/ {
+      gsub(/:/, "", $2)
+      iface = $2
+      if (iface != "lo" && iface !~ /^veth/ && iface !~ /^br-/ && iface !~ /^docker/) {
+        print iface
+      }
+    }' | tr '\n' ' ')
 
   # Start building the netplan configuration
-  CONFIG="network:\n  version: 2\n  renderer: networkd\n"
+  local config="network:
+  version: 2
+  renderer: networkd"
 
   # Add WiFi configuration if interface exists
-  if [ -n "${WIFI_INTERFACE:-}" ]; then
-    CONFIG="${CONFIG}  wifis:\n    ${WIFI_INTERFACE}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n      dhcp4-overrides:\n        route-metric: 600\n      dhcp6-overrides:\n        route-metric: 600\n      access-points:\n        \"${WIFI_SSID:-}\":\n          password: \"${WIFI_PASS:-}\"\n"
+  if [ -n "$wifi_interface" ]; then
+    config="$config
+  wifis:
+    $wifi_interface:
+      dhcp4: true
+      dhcp6: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 600
+      dhcp6-overrides:
+        route-metric: 600
+      access-points:
+        \"${WIFI_SSID:-}\":
+          password: \"${WIFI_PASS:-}\""
   fi
 
   # Add Ethernet configuration for all detected interfaces
-  CONFIG="${CONFIG}  ethernets:\n"
-  for iface in $ETHERNET_INTERFACES; do
-    CONFIG="${CONFIG}    ${iface}:\n      dhcp4: true\n      dhcp6: true\n      optional: true\n      dhcp4-overrides:\n        route-metric: 100\n      dhcp6-overrides:\n        route-metric: 100\n"
-  done
+  if [ -n "$ethernet_interfaces" ]; then
+    config="$config
+  ethernets:"
+    
+    for iface in $ethernet_interfaces; do
+      config="$config
+    $iface:
+      dhcp4: true
+      dhcp6: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 100
+      dhcp6-overrides:
+        route-metric: 100"
+    done
+  fi
 
   # Write the configuration
-  echo -e "$CONFIG" | sudo tee "$NETPLAN_CONFIG" > /dev/null
+  echo "$config" | sudo tee "$NETPLAN_CONFIG" > /dev/null
 
-  sudo netplan apply
+  echo "Generated netplan configuration:"
+  echo "WiFi interface: ${wifi_interface:-none}"
+  echo "Ethernet interfaces: ${ethernet_interfaces:-none}"
+  
+  # Validate the configuration before applying
+  if sudo netplan generate; then
+    echo "Netplan configuration is valid, applying..."
+    sudo netplan apply
+  else
+    echo "ERROR: Invalid netplan configuration generated!"
+    return 1
+  fi
 }
 
 setup_netplan() {

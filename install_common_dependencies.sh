@@ -137,6 +137,14 @@ install_node() {
   # Configure npm to use user directory (after nvm setup)
   mkdir -p "$HOME/.npm-global"
   npm config set prefix "$HOME/.npm-global"
+
+  # Verify installation
+  echo "[INFO] Verifying nvm installation..."
+  nvm --version
+  node --version
+  npm --version
+  nvm list
+  echo "[INFO] nvm installation verification complete"
 }
 
 install_claude_code_app() {
