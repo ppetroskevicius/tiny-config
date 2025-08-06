@@ -25,6 +25,9 @@ alias vpn_start="sudo wg-quick up gw0"
 alias vpn_stop="sudo wg-quick down gw0"
 alias vpn_status="sudo wg show gw0"
 
+setopt EXTENDED_HISTORY          # store timestamp with every command
+export HIST_STAMPS="%F %T "      # how “history” will print it: YYYY-MM-DD HH:MM:SS
+
 # --- GCP State Management Functions for Starship ---
 
 # Set Environment (dev, test, prod)
