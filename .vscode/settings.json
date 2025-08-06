@@ -23,5 +23,12 @@
     "system/**",
     "third_party/**",
     "tools/**",
-  ]
+  ],
+  "terminal.integrated.fontFamily": "FiraCode Nerd Font Mono",
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontWeight": "normal",
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.letterSpacing": 0,
+  "terminal.integrated.lineHeight": 1.2,
+  "terminal.integrated.gpuAcceleration": "on"
 }
