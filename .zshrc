@@ -35,47 +35,85 @@ export HIST_STAMPS="%F %T "      # how “history” will print it: YYYY-MM-DD H
 
 # --- GCP State Management Functions for Starship ---
 
-# Set Environment (dev, test, prod)
-gdev() {
-    gcloud config configurations activate dev
-    export GCP_ENV="dev"
-    gowner # Default to owner identity when switching envs
+gset() {
+    # --- 1. Define local variables and parse arguments ---
+    local env=$1
+    local identity=${2:-owner} # Default to 'owner' if identity isn't provided
+    local project_id_var="GCP_${(U)env}_PROJECT_ID"
+    local project_id=${(P)project_id_var}
+
+    # --- 2. Validate environment and project ID ---
+    if [[ -z "$env" ]]; then
+        echo "🔴 Usage: gcp-set <env> [identity]"
+        echo "   env:      dev, test, prod"
+        echo "   identity: owner, tf, sa (defaults to owner)"
+        return 1
+    fi
+
+    if [[ -z "$project_id" ]]; then
+        echo "🔴 Error: Project ID for environment '$env' is not set."
+        echo "   Please export the variable '$project_id_var'."
+        return 1
+    fi
+
+    # --- 3. Activate gcloud configuration and set ADC Quota Project ---
+    echo "🔄 Switching to environment: ${(U)env}"
+    gcloud config configurations activate "$env" >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "🔴 Error: Failed to activate gcloud configuration '$env'."
+        return 1
+    fi
+
+    # THIS IS THE KEY ADDITION
+    # It automatically sets the quota project based on the active config.
+    echo "🔧 Setting ADC quota project to: $project_id"
+    gcloud auth application-default set-quota-project "$project_id" >/dev/null 2>&1
+
+    # --- 4. Set identity (impersonation) ---
+    local sa_email=""
+    case "$identity" in
+        tf)
+            local sa_var="GCP_${(U)env}_TERRAFORM_SA"
+            sa_email=${(P)sa_var}
+            echo "👤 Impersonating Terraform SA..."
+            ;;
+        sa)
+            local sa_var="GCP_${(U)env}_DEVELOPER_SA"
+            sa_email=${(P)sa_var}
+            echo "👤 Impersonating Developer SA..."
+            ;;
+        owner)
+            echo "👑 Using owner account."
+            gcloud config unset auth/impersonate_service_account >/dev/null 2>&1
+            ;;
+        *)
+            echo "🔴 Error: Unknown identity '$identity'."
+            return 1
+            ;;
+    esac
+
+    if [[ -n "$sa_email" ]]; then
+        if [[ -z "$sa_email" ]]; then
+            echo "🔴 Error: Service account for '$identity' in '$env' is not set."
+            return 1
+        fi
+        gcloud config set auth/impersonate_service_account "$sa_email" >/dev/null 2>&1
+    fi
+
+    # --- 5. Set environment variables for Starship prompt ---
+    export GCP_ENV="$env"
+    export GCP_IDENTITY="$identity"
+    echo "✅ Done. Active context: ${(U)env} as ${(U)identity}"
 }
-gtest() {
-    gcloud config configurations activate test
-    export GCP_ENV="test"
-    gowner
-}
-gprod() {
-    gcloud config configurations activate prod
-    export GCP_ENV="prod"
-    gowner
-}
 
-# Set Identity (tf, sa, owner)
-gdev-tf() { gdev && gcloud config set auth/impersonate_service_account $GCP_DEV_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
-gdev-sa() { gdev && gcloud config set auth/impersonate_service_account $GCP_DEV_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
-
-gtest-tf() { gtest && gcloud config set auth/impersonate_service_account $GCP_TEST_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
-gtest-sa() { gtest && gcloud config set auth/impersonate_service_account $GCP_TEST_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
-
-gprod-tf() { gprod && gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA && export GCP_IDENTITY="tf"; }
-gprod-sa() { gprod && gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA && export GCP_IDENTITY="sa"; }
-
-# Return to Owner identity
-gowner() {
-    gcloud config unset auth/impersonate_service_account >/dev/null 2>&1
-    export GCP_IDENTITY="owner"
-}
-
-# Utility aliases (can remain as is)
+# --- Utility aliases (can remain as is) ---
 alias gconf='gcloud config list'
 alias gprojects='gcloud projects list'
-alias gauth='gcloud auth list' # who am i
-alias gimp='gcloud config get-value auth/impersonate_service_account' # check which service account we are impersonating
+alias gauth='gcloud auth list'
+alias gimp='gcloud config get-value auth/impersonate_service_account'
 
-# Activate the default environment
-gdev-sa
+# --- Set a default environment on shell startup ---
+# gset dev sa
 
 # --- End GCP Section ---
 
