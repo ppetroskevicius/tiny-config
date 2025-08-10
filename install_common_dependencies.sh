@@ -263,6 +263,25 @@ install_nerd_fonts() {
   fi
 }
 
+install_java() {
+  if command -v java > /dev/null; then
+    return 0
+  fi
+
+  if [ "$OS" = "Darwin" ]; then
+    # Install latest OpenJDK via Homebrew
+    brew install openjdk
+    # Ensure Java binaries are on PATH for immediate use
+    sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk || true
+    export PATH="$(brew --prefix)/opt/openjdk/bin:$PATH"
+  else
+    # Use default-jdk meta-package to allow easy version switching later
+    sudo apt install -y default-jdk
+  fi
+
+  java -version
+}
+
 install_starship() {
   if ! command -v starship > /dev/null; then
     curl -sS https://starship.rs/install.sh | sh -s -- -y

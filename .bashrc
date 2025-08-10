@@ -11,39 +11,99 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH="$PATH:$HOME/.npm-global/bin:$HOME/.cargo/bin:$HOME/.local/bin:/opt/rocm-6.4.0/bin:/home/fastctl/.lmstudio/bin:$HOME/bin"
 
-# GCloud configuration aliases
-alias gdev='gcloud config configurations activate dev'
-alias gtest='gcloud config configurations activate test'
-alias gprod='gcloud config configurations activate prod'
-alias gconfig='gcloud config list'
-alias gprojects='gcloud projects list'
+# --- GCP State Management Functions for Starship ---
 
-# This command tells ADC to use the *-sa-dev identity for all future commands
-alias gdev-tf='gcloud config set auth/impersonate_service_account $GCP_DEV_TERRAFORM_SA'
-alias gdev-sa='gcloud config set auth/impersonate_service_account $GCP_DEV_DEVELOPER_SA'
-alias gtest-tf='gcloud config set auth/impersonate_service_account $GCP_TEST_TERRAFORM_SA'
-alias gtest-sa='gcloud config set auth/impersonate_service_account $GCP_TEST_DEVELOPER_SA'
-alias gprod-tf='gcloud config set auth/impersonate_service_account $GCP_PROD_TERRAFORM_SA'
-alias gprod-sa='gcloud config set auth/impersonate_service_account $GCP_PROD_DEVELOPER_SA'
+gset() {
+    # --- 1. Define local variables and parse arguments ---
+    local env=$1
+    local identity=${2:-owner} # Default to 'owner' if identity isn't provided
+    local project_id_var="GCP_${(U)env}_PROJECT_ID"
+    local project_id=${(P)project_id_var}
 
-# Stop impersonating and return to your user credentials
-alias gowner='gcloud config unset auth/impersonate_service_account'
-
-# Detailed status check
-gwhoami() {
-    echo "--- Active Configuration ---"
-    gcloud config list --format="table(core.project, compute.region, compute.zone)"
-    echo "\n--- Authentication State ---"
-    gcloud auth list
-    IMPERSONATED_SA=$(gcloud config get-value auth/impersonate_service_account 2>/dev/null)
-    if [ -n "$IMPERSONATED_SA" ]; then
-        echo "\n\033[1;33mCurrently Impersonating:\033[0m $IMPERSONATED_SA"
-    else
-        echo "\n\033[1;32mActing as primary user.\033[0m"
+    # --- 2. Validate environment and project ID ---
+    if [[ -z "$env" ]]; then
+        echo "🔴 Usage: gcp-set <env> [identity]"
+        echo "   env:      dev, test, prod"
+        echo "   identity: owner, tf, sa (defaults to owner)"
+        return 1
     fi
+
+    if [[ -z "$project_id" ]]; then
+        echo "🔴 Error: Project ID for environment '$env' is not set."
+        echo "   Please export the variable '$project_id_var'."
+        return 1
+    fi
+
+    # --- 3. Activate gcloud configuration and set ADC Quota Project ---
+    echo "🔄 Switching to environment: ${(U)env}"
+    gcloud config configurations activate "$env" >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "🔴 Error: Failed to activate gcloud configuration '$env'."
+        return 1
+    fi
+
+    # THIS IS THE KEY ADDITION
+    # It automatically sets the quota project based on the active config.
+    echo "🔧 Setting ADC quota project to: $project_id"
+    gcloud auth application-default set-quota-project "$project_id" >/dev/null 2>&1
+
+    # --- 4. Set identity (impersonation) ---
+    local sa_email=""
+    case "$identity" in
+        tf)
+            local sa_var="GCP_${(U)env}_TERRAFORM_SA"
+            sa_email=${(P)sa_var}
+            echo "👤 Impersonating Terraform SA..."
+            ;;
+        sa)
+            local sa_var="GCP_${(U)env}_DEVELOPER_SA"
+            sa_email=${(P)sa_var}
+            echo "👤 Impersonating Developer SA..."
+            ;;
+        owner)
+            echo "👑 Using owner account."
+            gcloud config unset auth/impersonate_service_account >/dev/null 2>&1
+            ;;
+        *)
+            echo "🔴 Error: Unknown identity '$identity'."
+            return 1
+            ;;
+    esac
+
+    if [[ -n "$sa_email" ]]; then
+        if [[ -z "$sa_email" ]]; then
+            echo "🔴 Error: Service account for '$identity' in '$env' is not set."
+            return 1
+        fi
+        gcloud config set auth/impersonate_service_account "$sa_email" >/dev/null 2>&1
+    fi
+
+    # --- 5. Set environment variables for Starship prompt ---
+    export GCP_ENV="$env"
+    export GCP_IDENTITY="$identity"
+    echo "✅ Done. Active context: ${(U)env} as ${(U)identity}"
 }
+
+# --- Utility aliases (can remain as is) ---
+alias gconf='gcloud config list'
+alias gprojects='gcloud projects list'
+alias gauth='gcloud auth list'
+alias gimp='gcloud config get-value auth/impersonate_service_account'
+
+# --- Set a default environment on shell startup ---
+# gset dev sa
+
+# --- End GCP Section ---
 
 eval "$(starship init bash)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/fastctl/.lmstudio/bin:$HOME/bin"
+
+# --- Java environment ---
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  export JAVA_HOME="$(brew --prefix)/opt/openjdk"
+else
+  export JAVA_HOME="/usr/lib/jvm/default-java"
+fi
+export PATH="$JAVA_HOME/bin:$PATH"

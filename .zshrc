@@ -121,3 +121,11 @@ eval "$(starship init zsh)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/fastctl/.lmstudio/bin:$HOME/bin"
+
+# --- Java environment ---
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  export JAVA_HOME="$(brew --prefix)/opt/openjdk"
+else
+  export JAVA_HOME="/usr/lib/jvm/default-java"
+fi
+export PATH="$JAVA_HOME/bin:$PATH"

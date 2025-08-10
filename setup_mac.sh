@@ -59,6 +59,7 @@ main() {
   install_zsh
   install_dotfiles
   install_node
+  install_java
   install_aws_cli
   install_gcp_cli
   install_firebase_cli
