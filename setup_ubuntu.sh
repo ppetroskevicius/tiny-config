@@ -62,6 +62,8 @@ main() {
       setup_netplan
       install_wireguard
       install_node
+      # Playwright CLI (also installs runtime libraries)
+      install_playwright_cli
       install_java
       install_aws_cli
       install_gcp_cli

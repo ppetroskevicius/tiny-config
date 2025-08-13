@@ -120,6 +120,7 @@ setup_timezone() {
 }
 
 install_node() {
+  # Install Node via nvm and Playwright for frontend testing
   # https://nodejs.org/en/download/
   if ! command -v nvm > /dev/null; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -137,6 +138,31 @@ install_node() {
 
   # Verify npm version:
   npm -v # Should print "10.9.3".
+
+  # Install Playwright CLI and browsers
+  install_playwright_cli
+
+}
+
+# Install Playwright CLI and browsers for frontend testing
+install_playwright_cli() {
+  # Install Playwright browser libraries on Ubuntu
+  if [ "$(uname -s)" != "Darwin" ]; then
+    if ! dpkg -s libwoff1 >/dev/null 2>&1; then
+      sudo apt-get update
+      sudo apt-get install -y \
+        libwoff1 \
+        libevent-2.1-7 \
+        libsecret-1-0 \
+        libhyphen0 \
+        libmanette-0.2-0
+    fi
+  fi
+  if ! command -v playwright > /dev/null; then
+    npm install -g playwright
+    # Install browsers in user scope
+    playwright install chromium firefox webkit || true
+  fi
 }
 
 install_claude_code_app() {

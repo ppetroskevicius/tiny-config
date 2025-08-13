@@ -359,6 +359,7 @@ setup_apps() {
   install_spotify_app
 }
 
+
 require_reboot() {
   install_nvidia_gpu
 }

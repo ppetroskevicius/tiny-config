@@ -59,6 +59,7 @@ main() {
   install_zsh
   install_dotfiles
   install_node
+  install_playwright_cli
   install_java
   install_aws_cli
   install_gcp_cli
