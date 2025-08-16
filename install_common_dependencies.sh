@@ -130,7 +130,7 @@ install_node() {
   . "$HOME/.nvm/nvm.sh"
 
   # Download and install Node.js:
-  nvm install 22
+  nvm install --lts
 
   # Verify the Node.js version:
   node -v # Should print "v22.18.0".
