@@ -41,6 +41,9 @@ if command -v op > /dev/null; then
     "GCP_PROD_DEVELOPER_SA:gcp-prod-developer-sa"
     "GCP_PROD_TERRAFORM_SA:gcp-prod-terraform-sa"
     "I3RS_GITHUB_TOKEN:i3rs-github-token"
+    "REPLICATE_API_TOKEN:replicate-api-token"
+    "SENDGRID_API_KEY:sendgrid-api-key"
+    "SLACK_INCOMING_WEBHOOK_URL:slack-incoming-webhook-url"
   )
 
   for entry in "${env_vars[@]}"; do
