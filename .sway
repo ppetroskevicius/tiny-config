@@ -262,6 +262,9 @@ bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 # run image editor
 bindsym $mod+i exec oculante
 
+# Start PulseAudio manually to fix bluetooth mic issues
+exec pulseaudio --start
+
 # run Japanese IME
 exec fcitx5 -dr
 
@@ -316,3 +319,8 @@ exec swaymsg 'workspace 3; \
 # because google-chrome only supports wayland text-input-v1 and sway only supports text-input-v3
 # [ ] The workaround to input Japanese in google-chrome in sway is to run google-chrome in X11 mode:
 # exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+
+### Power management
+#
+# Suspend the system when the lid is closed.
+bindswitch lid:on exec systemctl suspend
