@@ -206,21 +206,16 @@ bindsym $mod+r mode "resize"
 # https://manpages.debian.org/experimental/sway/sway-bar.5.en.html
 bar {
   position top
-  # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-
-  bar {
-    font pango:DejaVu Sans Mono, Font Awesome 8
-    position top
-    status_command i3status-rs
-    colors {
-        separator #666666
-        background #222222
-        statusline #dddddd
-        focused_workspace #0088CC #0088CC #ffffff
-        active_workspace #333333 #333333 #ffffff
-        inactive_workspace #333333 #333333 #888888
-        urgent_workspace #2f343a #900000 #ffffff
-    }
+  font pango:DejaVu Sans Mono, Font Awesome 8
+  status_command i3status-rs /home/fastctl/fun/tiny-config/.i3status-rust.toml
+  colors {
+      separator #666666
+      background #222222
+      statusline #dddddd
+      focused_workspace #0088CC #0088CC #ffffff
+      active_workspace #333333 #333333 #ffffff
+      inactive_workspace #333333 #333333 #888888
+      urgent_workspace #2f343a #900000 #ffffff
   }
 }
 
@@ -231,9 +226,15 @@ include /etc/sway/config.d/*
 # fix notebook hardware buttons
 bindsym XF86MonBrightnessUp exec brightnessctl set +10%
 bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+
+# Audio controls (speakers/headphones)
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+# Additional microphone controls (if you have custom keys or want to bind to other keys)
+bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym $mod+Shift+m exec pactl list sources | grep -A 10 "State: RUNNING"
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
@@ -261,9 +262,6 @@ bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
 # run image editor
 bindsym $mod+i exec oculante
-
-# Start PulseAudio manually to fix bluetooth mic issues
-exec pulseaudio --start
 
 # run Japanese IME
 exec fcitx5 -dr
