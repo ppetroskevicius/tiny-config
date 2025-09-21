@@ -74,6 +74,15 @@ button = "left"
 cmd = "pavucontrol"
 
 [[block]]
+block = "toggle"
+format = " $icon A2DP/Handsfree "
+command_state = "~/fun/tiny-config/bt_profile_state.sh"
+command_on = "~/fun/tiny-config/bt_toggle_profile.sh"
+command_off = "~/fun/tiny-config/bt_toggle_profile.sh"
+state_on = "good"
+state_off = "warning"
+
+[[block]]
 block = "music"
 player = "spotify"
 format = " $icon $volume_icon  $play $next |"

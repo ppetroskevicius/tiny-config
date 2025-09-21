@@ -44,6 +44,12 @@ when = "test $GCP_ENV = 'test'"
 style = "bold yellow"
 format = "[@$output]($style) "
 
+[custom.gcp_env_demo]
+command = "echo 'demo'"
+when = "test $GCP_ENV = 'demo'"
+style = "bold blue"
+format = "[@$output]($style) "
+
 [custom.gcp_env_prod]
 command = "echo 'prod'"
 when = "test $GCP_ENV = 'prod'"
@@ -71,7 +77,7 @@ format = "$gcp_dev_project_ok$gcp_dev_project_missing"
 # --- Grouping for main format string ---
 
 [custom.gcp_env]
-format = "$gcp_env_dev$gcp_env_test$gcp_env_prod"
+format = "$gcp_env_dev$gcp_env_test$gcp_env_demo$gcp_env_prod"
 
 [custom.gcp_identity]
 format = "$gcp_id_sa$gcp_id_tf$gcp_id_owner"
