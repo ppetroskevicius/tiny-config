@@ -18,7 +18,6 @@ if command -v op > /dev/null; then
     "AWS_ACCOUNT_ID:aws-account-id"
     "FASTCTL_API_KEY:fastctl-api-key"
     "OPENAI_API_KEY:openai-api-key"
-    "ANTHROPIC_API_KEY:anthropic-api-key"
     "MISTRAL_API_KEY:mistral-api-key"
     "GEMINI_API_KEY:gemini-api-key"
     "GROQ_API_KEY:groq-api-key"
