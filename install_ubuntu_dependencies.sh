@@ -148,6 +148,12 @@ setup_bluetooth_audio() {
 setup_sway_wayland() {
   dpkg -l sway > /dev/null 2>&1 \
     || sudo apt install -y sway wayland-protocols xwayland swayidle swaylock swayimg desktop-file-utils
+  # Install xdg-desktop-portal packages for screen sharing support
+  dpkg -l xdg-desktop-portal-wlr > /dev/null 2>&1 \
+    || sudo apt install -y xdg-desktop-portal xdg-desktop-portal-wlr
+  # Ensure portal services are enabled for screen sharing
+  systemctl --user enable --now xdg-desktop-portal.service 2>/dev/null || true
+  systemctl --user enable --now xdg-desktop-portal-wlr.service 2>/dev/null || true
 }
 
 install_i3status-rs() {

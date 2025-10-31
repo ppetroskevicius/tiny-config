@@ -239,10 +239,12 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# [ ] start chrome in X11 mode for Japanese input to work. Stop all wayland chrome sessions before that.
+# Chrome: X11 mode (for Japanese input with fcitx5 - note: screen sharing may not work)
 bindsym $mod+c+j exec google-chrome
-# [ ] or run chrome in Wayland mode
-# bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+# Chrome: Wayland mode (for screen sharing support - note: Japanese input may not work)
+# With XDG_CURRENT_DESKTOP=sway set, you can use just: google-chrome
+# But for explicit control, use: google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+bindsym $mod+c+w exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
 
 # [ ] start cursor and windsurf
 bindsym $mod+c exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox /home/fastctl/fun/monoya
@@ -304,12 +306,12 @@ exec swaymsg 'workspace 1; \
 
 # workspace 2: Cursor + Chrome
 exec swaymsg 'workspace 2; \
-  exec cursor --no-sandbox /home/fastctl/fun/monoya; \
+  exec cursor --no-sandbox /home/fastctl/fun/tiny-config; \
   exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
 
 # workspace 3: Windsurf + Chrome
 exec swaymsg 'workspace 3; \
-  exec windsurf /home/fastctl/fun/monoya; \
+  exec windsurf /home/fastctl/fun/tiny-config; \
   exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
 
 

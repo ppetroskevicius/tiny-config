@@ -65,6 +65,11 @@ export XMODIFIERS=@im=fcitx
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 
+# for Wayland/Sway desktop environment
+if [[ "$(uname -s)" == "Linux" ]] && command -v sway > /dev/null; then
+  export XDG_CURRENT_DESKTOP=sway
+fi
+
 # for KVM
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
