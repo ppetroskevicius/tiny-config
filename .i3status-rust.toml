@@ -31,7 +31,9 @@ interval = 10
 
 [[block]]
 block = "net"
-device = "^enp.*$"
+# Match USB ethernet adapters (like Lenovo dock) - enx* pattern
+# Also match built-in ethernet - enp* pattern
+device = "^(enx|enp).*$"
 format = " $icon $device"
 format_alt = " $icon $ip $ipv6 $speed_down $speed_up via $device"
 missing_format = "No Ethernet"
@@ -64,6 +66,10 @@ headphones_indicator = true
 [block.mappings]
 "alsa_output.pci-0000_00_1f.3.analog-stereo" = "Speakers"
 "alsa_output.usb-Lenovo_ThinkPad_USB-C_Dock_Audio_000000000000-00.analog-stereo" = "Lenovo Dock"
+# PipeWire device names (Ubuntu 24.04+)
+"bluez_output.88_C9_E8_DC_ED_8E.1" = "Sony WH-1000XM5"
+"bluez_output.88_C9_E8_DC_ED_8E" = "Sony WH-1000XM5"
+# Legacy PulseAudio device names (for compatibility)
 "bluez_sink.88_C9_E8_DC_ED_8E.a2dp_sink" = "Sony WH-1000XM5"
 "bluez_sink.88_C9_E8_DC_ED_8E.handsfree_head_unit" = "Sony WH-1000XM5 (Call)"
 "bluez_sink.04_52_C7_F4_55_2A.a2dp_sink" = "Headset"
@@ -73,15 +79,6 @@ headphones_indicator = true
 [[block.click]]
 button = "left"
 cmd = "pavucontrol"
-
-[[block]]
-block = "toggle"
-format = " $icon A2DP/Handsfree "
-command_state = "~/fun/tiny-config/bt_profile_state.sh"
-command_on = "~/fun/tiny-config/bt_toggle_profile.sh"
-command_off = "~/fun/tiny-config/bt_toggle_profile.sh"
-state_on = "good"
-state_off = "warning"
 
 [[block]]
 block = "music"
