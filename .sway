@@ -161,7 +161,7 @@ exec swayidle -w \
   bindsym $mod+space focus mode_toggle
 
   # Move focus to the parent container
-  bindsym $mod+a focus parent
+  bindsym $mod+Shift+a focus parent
 #
 # Scratchpad:
 #
@@ -232,19 +232,24 @@ bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
 bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-# Additional microphone controls (if you have custom keys or want to bind to other keys)
+# Additional microphone controls
 bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-bindsym $mod+Shift+m exec pactl list sources | grep -A 10 "State: RUNNING"
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
 # Chrome: X11 mode (for Japanese input with fcitx5 - note: screen sharing may not work)
 bindsym $mod+c+j exec google-chrome
-# Chrome: Wayland mode (for screen sharing support - note: Japanese input may not work)
-# With XDG_CURRENT_DESKTOP=sway set, you can use just: google-chrome
-# But for explicit control, use: google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
-bindsym $mod+c+w exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+# Chrome: Wayland mode (for screen sharing + microphone support - note: Japanese input may not work)
+# Note: For microphone access, switch Bluetooth profile to Handsfree mode first ($mod+Shift+b)
+# Environment variables and flags needed for Wayland screen sharing and microphone
+bindsym $mod+g exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland /usr/bin/google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer
+
+# Firefox: Wayland mode (better screen sharing support than Chrome on Wayland)
+# Firefox has better native Wayland support and screen sharing usually works out of the box
+# Environment variables (MOZ_ENABLE_WAYLAND, XDG_CURRENT_DESKTOP) are set in ~/.zprofile
+# and imported into systemd, so they're available automatically
+bindsym $mod+o exec firefox
 
 # [ ] start cursor and windsurf
 bindsym $mod+c exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox /home/fastctl/fun/monoya
@@ -264,6 +269,13 @@ bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
 # run image editor
 bindsym $mod+i exec oculante
+
+# Import environment variables for Wayland screen sharing
+# These must run in order: import env vars, update D-Bus, then start services
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP MOZ_ENABLE_WAYLAND
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway MOZ_ENABLE_WAYLAND=1
+# Start portal services explicitly (they require WAYLAND_DISPLAY to be set)
+exec systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr wireplumber
 
 # run Japanese IME
 exec fcitx5 -dr

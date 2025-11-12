@@ -139,10 +139,18 @@ install_wireguard() {
 }
 
 setup_bluetooth_audio() {
-  dpkg -l bluez pulseaudio > /dev/null 2>&1 \
-    || sudo apt install -y bluez blueman bluetooth pulseaudio pulseaudio-module-bluetooth pavucontrol alsa-utils playerctl
+  dpkg -l bluez > /dev/null 2>&1 \
+    || sudo apt install -y bluez blueman bluetooth pavucontrol alsa-utils playerctl pulsemixer fzf
+  # Ubuntu 24.04 uses PipeWire by default for better Wayland support
+  # PipeWire provides PulseAudio compatibility layer for Chrome and other apps
+  dpkg -l pipewire pipewire-pulse > /dev/null 2>&1 \
+    || sudo apt install -y pipewire pipewire-pulse pipewire-audio wireplumber pipewire-alsa
+  # Also install PulseAudio modules for Bluetooth (used by PipeWire)
+  dpkg -l pulseaudio-module-bluetooth > /dev/null 2>&1 \
+    || sudo apt install -y pulseaudio-module-bluetooth
   sudo systemctl enable --now bluetooth
-  systemctl --user enable --now pulseaudio
+  # Enable PipeWire services (they provide PulseAudio compatibility for Wayland)
+  systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
 }
 
 setup_sway_wayland() {
@@ -150,7 +158,7 @@ setup_sway_wayland() {
     || sudo apt install -y sway wayland-protocols xwayland swayidle swaylock swayimg desktop-file-utils
   # Install xdg-desktop-portal packages for screen sharing support
   dpkg -l xdg-desktop-portal-wlr > /dev/null 2>&1 \
-    || sudo apt install -y xdg-desktop-portal xdg-desktop-portal-wlr
+    || sudo apt install -y xdg-desktop-portal xdg-desktop-portal-wlr pipewire-audio-client-libraries
   # Ensure portal services are enabled for screen sharing
   systemctl --user enable --now xdg-desktop-portal.service 2>/dev/null || true
   systemctl --user enable --now xdg-desktop-portal-wlr.service 2>/dev/null || true
@@ -291,6 +299,55 @@ install_chrome_app() {
   fi
 }
 
+install_firefox_app() {
+  if ! command -v firefox > /dev/null; then
+    # Install Firefox from Mozilla's direct APT repository (not snap) - Updated November 2025
+    # Mozilla now recommends this method over the PPA for the same .deb packages
+    # Remove snap version if installed (use --purge to remove all data)
+    if command -v snap > /dev/null; then
+      sudo snap remove --purge firefox 2>/dev/null || true
+    fi
+
+    # Method: Mozilla's direct APT repository (recommended by Mozilla)
+    # 1. Create keyrings directory
+    sudo install -d -m 0755 /etc/apt/keyrings
+
+    # 2. Download and install Mozilla's signing key
+    wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+
+    # 3. Verify the key fingerprint (35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3)
+    KEY_FINGERPRINT=$(gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc 2>/dev/null | awk '/pub/{getline; gsub(/^ +| +$/,""); print $0}')
+    if [ "$KEY_FINGERPRINT" != "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3" ]; then
+      echo "⚠️  Warning: Key fingerprint verification failed. Expected: 35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3, Got: $KEY_FINGERPRINT"
+      echo "   Continuing anyway, but you may want to verify manually."
+    fi
+
+    # 4. Add Mozilla's APT repository
+    echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
+
+    # 5. Set priority to prefer Mozilla repository and block Ubuntu/snap version
+    echo 'Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+
+Package: firefox*
+Pin: release o=Ubuntu*
+Pin-Priority: -1' | sudo tee /etc/apt/preferences.d/mozilla
+
+    # 6. Configure unattended-upgrades to allow Mozilla updates (optional but recommended)
+    DISTRO_CODENAME=$(lsb_release -cs)
+    echo "Unattended-Upgrade::Allowed-Origins:: \"LP-PPA-mozillateam:${DISTRO_CODENAME}\";" | sudo tee /etc/apt/preferences.d/mozilla-firefox-unattended > /dev/null 2>&1 || true
+
+    sudo apt update
+    sudo apt install -y firefox
+
+    # Verify it's the DEB version (not snap)
+    if dpkg -l | grep -q "^ii.*firefox"; then
+      echo "✅ Firefox installed as .deb package (not snap)"
+    fi
+  fi
+}
+
 install_discord_app() {
   if ! command -v discord > /dev/null; then
     wget -O /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
@@ -360,6 +417,7 @@ setup_apps() {
   install_1password_app
   install_zed_app
   install_chrome_app
+  install_firefox_app
   install_discord_app
   install_zotero_app
   install_spotify_app
