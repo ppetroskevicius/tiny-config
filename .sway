@@ -243,7 +243,9 @@ bindsym $mod+c+j exec google-chrome
 # Chrome: Wayland mode (for screen sharing + microphone support - note: Japanese input may not work)
 # Note: For microphone access, switch Bluetooth profile to Handsfree mode first ($mod+Shift+b)
 # Environment variables and flags needed for Wayland screen sharing and microphone
-bindsym $mod+g exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland /usr/bin/google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer
+# Disable hardware video encoding (VCN) to prevent AMD GPU freezes during screen sharing
+# Use software encoding instead (slightly higher CPU usage, but stable)
+bindsym $mod+g exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland /usr/bin/google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder
 
 # Firefox: Wayland mode (better screen sharing support than Chrome on Wayland)
 # Firefox has better native Wayland support and screen sharing usually works out of the box
@@ -270,6 +272,9 @@ bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 # run image editor
 bindsym $mod+i exec oculante
 
+# Re-detect external monitor (useful when monitor is turned off/on)
+bindsym $mod+Shift+m exec /home/fastctl/fun/tiny-config/redetect_monitor.sh
+
 # Import environment variables for Wayland screen sharing
 # These must run in order: import env vars, update D-Bus, then start services
 exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP MOZ_ENABLE_WAYLAND
@@ -290,16 +295,18 @@ exec mako
 # swaymsg -t get_outputs
 
 # assign workspaces to outputs
+# Note: External monitor output name can vary (DP-1, DP-3, DP-8, etc.) depending on dock port
+# Sway will use any matching output name, so listing multiple names works
 workspace 1 output eDP-1
-workspace 2 output DP-1, DP-3
-workspace 3 output DP-1, DP-3
-workspace 4 output DP-1, DP-3
-workspace 5 output DP-1, DP-3
-workspace 6 output DP-1, DP-3
-workspace 7 output DP-1, DP-3
-workspace 8 output DP-1, DP-3
-workspace 9 output DP-1, DP-3
-workspace 10 output DP-1, DP-3
+workspace 2 output DP-1, DP-3, DP-8
+workspace 3 output DP-1, DP-3, DP-8
+workspace 4 output DP-1, DP-3, DP-8
+workspace 5 output DP-1, DP-3, DP-8
+workspace 6 output DP-1, DP-3, DP-8
+workspace 7 output DP-1, DP-3, DP-8
+workspace 8 output DP-1, DP-3, DP-8
+workspace 9 output DP-1, DP-3, DP-8
+workspace 10 output DP-1, DP-3, DP-8
 
 # assign apps to workspaces
 # assign [app_id="Alacritty"] workspace 1
@@ -314,17 +321,17 @@ assign [instance="spotify"] workspace 9
 # workspace 1: Alacritty + Htop
 exec swaymsg 'workspace 1; \
   exec alacritty -e htop; \
-  exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
 
 # workspace 2: Cursor + Chrome
 exec swaymsg 'workspace 2; \
   exec cursor --no-sandbox /home/fastctl/fun/tiny-config; \
-  exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
 
 # workspace 3: Windsurf + Chrome
 exec swaymsg 'workspace 3; \
   exec windsurf /home/fastctl/fun/tiny-config; \
-  exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland'
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
 
 
 # Default will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,
