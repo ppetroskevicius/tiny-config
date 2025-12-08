@@ -129,3 +129,10 @@ else
   export JAVA_HOME="/usr/lib/jvm/default-java"
 fi
 export PATH="$JAVA_HOME/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="/home/fastctl/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
