@@ -120,7 +120,7 @@ setup_timezone() {
 }
 
 install_node() {
-  # Install Node via nvm and Playwright for frontend testing
+  # Install Node via nvm
   # https://nodejs.org/en/download/
   if ! command -v nvm > /dev/null; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -133,11 +133,16 @@ install_node() {
   nvm install --lts
 
   # Verify the Node.js version:
-  node -v # Should print "v22.18.0".
-  nvm current # Should print "v22.18.0".
+  node -v # Should print "v24.11.1".
 
-  # Verify npm version:
-  npm -v # Should print "10.9.3".
+  # Install pnpm package manager using standalone installer
+  # https://pnpm.io/installation
+  # Note: PATH configuration is handled in .zshrc/.bashrc dotfiles
+  if ! command -v pnpm > /dev/null; then
+    curl -fsSL https://get.pnpm.io/install.sh | sh -
+    # Verify pnpm installation
+    pnpm -v
+  fi
 
   # Install Playwright CLI and browsers
   install_playwright_cli
@@ -159,7 +164,7 @@ install_playwright_cli() {
     fi
   fi
   if ! command -v playwright > /dev/null; then
-    npm install -g playwright
+    pnpm add -g playwright
     # Install browsers in user scope
     playwright install chromium firefox webkit || true
   fi
@@ -167,8 +172,8 @@ install_playwright_cli() {
 
 install_claude_code_app() {
   if ! command -v claude > /dev/null; then
-    # Install Claude Code using the official npm package
-    npm install -g @anthropic-ai/claude-code
+    # Install Claude Code using pnpm
+    pnpm add -g @anthropic-ai/claude-code
   fi
 }
 
@@ -187,7 +192,7 @@ install_aws_cli() {
     aws --version
 
     # Install AWS CDK in user directory
-    npm install -g aws-cdk
+    pnpm add -g aws-cdk
     cdk --version
   fi
 }
@@ -216,18 +221,12 @@ install_firebase_cli() {
       sudo rm -f /usr/local/bin/firebase
     fi
 
-    # Install Firebase CLI using npm (more reliable than the curl script)
-    if command -v npm > /dev/null; then
-      npm install -g firebase-tools
-
-      # Ensure npm global bin directory is in PATH
-      npm_global_bin=$(npm config get prefix)/bin
-      if ! echo "$PATH" | grep -q "$npm_global_bin"; then
-        echo "export PATH=\"$npm_global_bin:\$PATH\"" >> "$HOME/.zshrc"
-        export PATH="$npm_global_bin:$PATH"
-      fi
+    # Install Firebase CLI using pnpm
+    # Note: PATH configuration is handled in .zshrc/.bashrc dotfiles
+    if command -v pnpm > /dev/null; then
+      pnpm add -g firebase-tools
     else
-      echo "npm not found. Please install Node.js first."
+      echo "pnpm not found. Please install Node.js and pnpm first."
       return 1
     fi
 
