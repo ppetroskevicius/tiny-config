@@ -52,6 +52,7 @@ main() {
       install_uv
       install_linters_formatters
       install_starship
+      install_yazi
       ;;
     "gpu")
       install_ollama
@@ -76,6 +77,7 @@ main() {
       install_screenshots
       install_notifications
       install_kickoff
+      install_yazi
       setup_power_management
       setup_brightness
       setup_gamma

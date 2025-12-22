@@ -72,6 +72,7 @@ main() {
   install_podman
   install_alacritty_app
   install_claude_code_app
+  install_yazi
   # Python setup
   install_uv
   install_linters_formatters

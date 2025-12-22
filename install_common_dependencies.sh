@@ -415,3 +415,17 @@ install_spotify_player() {
     cargo install spotify_player --locked
   fi
 }
+
+install_yazi() {
+  if ! command -v yazi > /dev/null; then
+    if [ "$OS" = "Darwin" ]; then
+      # macOS: Install via Homebrew with optional dependencies
+      brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide resvg imagemagick font-symbols-only-nerd-font
+    else
+      # Ubuntu: Install system dependencies first
+      sudo apt install -y ffmpeg p7zip jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
+      # Install yazi-build which installs yazi-fm and yazi-cli
+      cargo install --force yazi-build
+    fi
+  fi
+}
