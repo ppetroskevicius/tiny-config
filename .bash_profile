@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
 # Runs for login sessions
 
 if command -v op >/dev/null; then
@@ -76,4 +78,5 @@ export LIBVIRT_DEFAULT_URI="qemu:///system"
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/fastctl/.lmstudio/bin"
 
+# shellcheck source=/dev/null
 source "$HOME"/.bashrc

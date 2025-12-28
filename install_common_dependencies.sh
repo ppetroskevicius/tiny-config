@@ -135,6 +135,7 @@ install_node() {
 	fi
 
 	# in lieu of restarting the shell
+	# shellcheck source=/dev/null
 	. "$HOME/.nvm/nvm.sh"
 
 	# Download and install Node.js:
@@ -265,7 +266,8 @@ install_terraform_cli() {
 install_rust() {
 	if ! [ -f "$HOME/.cargo/bin/cargo" ]; then
 		curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-		source "$HOME/.cargo/env"
+		# shellcheck source=/dev/null
+		. "$HOME/.cargo/env"
 	fi
 }
 
@@ -305,8 +307,9 @@ install_java() {
 		# Install latest OpenJDK via Homebrew
 		brew install openjdk
 		# Ensure Java binaries are on PATH for immediate use
-		sudo ln -sfn $(brew --prefix)/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk || true
-		export PATH="$(brew --prefix)/opt/openjdk/bin:$PATH"
+		sudo ln -sfn "$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk" /Library/Java/JavaVirtualMachines/openjdk.jdk || true
+		PATH="$(brew --prefix)/opt/openjdk/bin:$PATH"
+		export PATH
 	else
 		# Use default-jdk meta-package to allow easy version switching later
 		sudo apt install -y default-jdk
@@ -335,6 +338,7 @@ install_docker() {
 			sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 			# Add the repository to Apt sources:
+			# shellcheck source=/dev/null
 			echo \
 				"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
       $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" |
@@ -345,7 +349,7 @@ install_docker() {
 
 			# to run docker without root privileges
 			sudo groupadd docker
-			sudo usermod -aG docker $USER
+			sudo usermod -aG docker "$USER"
 			newgrp docker
 			sudo docker run hello-world
 
@@ -365,7 +369,7 @@ install_podman() {
 			sudo apt -y install podman
 
 			sudo apt install -y uidmap
-			sudo usermod --add-subuids 100000-165536 --add-subgids 100000-165536 $USER
+			sudo usermod --add-subuids 100000-165536 --add-subgids 100000-165536 "$USER"
 
 			sudo systemctl enable podman
 			sudo systemctl start podman

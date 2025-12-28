@@ -4,7 +4,9 @@ set -x
 
 SECONDS=0
 
+# shellcheck source=/dev/null
 source ./install_common_dependencies.sh
+# shellcheck source=/dev/null
 source ./install_python_dependencies.sh
 
 install_homebrew() {

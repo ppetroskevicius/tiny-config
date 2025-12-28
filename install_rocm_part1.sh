@@ -9,7 +9,7 @@ sudo apt update
 sudo apt install "linux-headers-$(uname -r)" "linux-modules-extra-$(uname -r)" -y
 
 # Add yourself to the render and video groups to access GPU resources
-sudo usermod -a -G render,video $LOGNAME
+sudo usermod -a -G render,video "$LOGNAME"
 
 # Download and convert the package signing key
 

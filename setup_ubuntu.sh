@@ -6,8 +6,11 @@ set -x
 SECONDS=0
 SETUP_TYPE=${1:-"host"} # Options: host, guest, desktop
 
+# shellcheck source=/dev/null
 source ./install_common_dependencies.sh
+# shellcheck source=/dev/null
 source ./install_python_dependencies.sh
+# shellcheck source=/dev/null
 source ./install_ubuntu_dependencies.sh
 
 update_packages() {
