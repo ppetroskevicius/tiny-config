@@ -8,7 +8,7 @@ sudo apt install rocm -y
 # Post install steps:
 
 # Configure the system linker by indicating where to find the shared objects (.so files) for the ROCm applications
-sudo tee --append /etc/ld.so.conf.d/rocm.conf << EOF
+sudo tee --append /etc/ld.so.conf.d/rocm.conf <<EOF
 /opt/rocm/lib
 /opt/rocm/lib64
 EOF

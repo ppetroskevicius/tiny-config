@@ -10,33 +10,33 @@ APPIMAGE_URL=$(echo $FETCH_STABLE | grep -o 'https://downloads\.cursor\.com/prod
 APPIMAGE_VERSION=$(echo $APPIMAGE_URL | grep -o 'Cursor-[0-9]\+\.[0-9]\+\.[0-9]\+' | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
 
 function writeConfig() {
-  echo "CURRENT_VERSION=$APPIMAGE_VERSION" >$HOME/.config/Cursor/LastVersion
-  echo "USE_AS_SHIPPED=$USE_AS_SHIPPED" >>$HOME/.config/Cursor/LastVersion
+	echo "CURRENT_VERSION=$APPIMAGE_VERSION" >$HOME/.config/Cursor/LastVersion
+	echo "USE_AS_SHIPPED=$USE_AS_SHIPPED" >>$HOME/.config/Cursor/LastVersion
 }
 if [ -f $HOME/.config/Cursor/LastVersion ]; then
-  . $HOME/.config/Cursor/LastVersion
+	. $HOME/.config/Cursor/LastVersion
 else
-  USE_AS_SHIPPED=0
-  CURRENT_VERSION=0
+	USE_AS_SHIPPED=0
+	CURRENT_VERSION=0
 fi
 
 # Check if the first argument is --useAsShipped
 case "$1" in
 --useAsShipped)
-  USE_AS_SHIPPED=1
-  ;;
+	USE_AS_SHIPPED=1
+	;;
 --useAsShipped=false)
-  USE_AS_SHIPPED=0
-  ;;
+	USE_AS_SHIPPED=0
+	;;
 *)
-  USE_AS_SHIPPED=${USE_AS_SHIPPED:-0}
-  ;;
+	USE_AS_SHIPPED=${USE_AS_SHIPPED:-0}
+	;;
 esac
 
 if [ "$CURRENT_VERSION" == "$APPIMAGE_VERSION" ]; then
-  writeConfig
-  notify-send "Updating Cursor" "Already up to date"
-  exit 0
+	writeConfig
+	notify-send "Updating Cursor" "Already up to date"
+	exit 0
 fi
 notify-send "Updating Cursor" "Downloading latest version"
 
@@ -47,17 +47,17 @@ curl $APPIMAGE_URL --output $TEMPDIR/cursor.AppImage.original
 chmod +x $TEMPDIR/cursor.AppImage.original
 
 if [ "$USE_AS_SHIPPED" = "1" ]; then
-  # If --useAsShipped is provided, skip the extraction and modification
-  mkdir -p $BINDIR
-  cp $TEMPDIR/cursor.AppImage.original $BINDIR/cursor
-  chmod +x $BINDIR/cursor
+	# If --useAsShipped is provided, skip the extraction and modification
+	mkdir -p $BINDIR
+	cp $TEMPDIR/cursor.AppImage.original $BINDIR/cursor
+	chmod +x $BINDIR/cursor
 
-  # Clean up and exit
-  popd
-  writeConfig
-  rm -rf $TEMPDIR
-  notify-send "Updating Cursor" "Updated to version $APPIMAGE_VERSION (as shipped)"
-  exit 0
+	# Clean up and exit
+	popd
+	writeConfig
+	rm -rf $TEMPDIR
+	notify-send "Updating Cursor" "Updated to version $APPIMAGE_VERSION (as shipped)"
+	exit 0
 fi
 
 # Extract the AppImage

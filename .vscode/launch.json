@@ -15,9 +15,7 @@
       "id": "cpp_process",
       "type": "pickString",
       "description": "Select the process to debug",
-      "options": [
-        "selfdrive/ui/ui"
-      ]
+      "options": ["selfdrive/ui/ui"]
     },
     {
       "id": "args",
@@ -40,7 +38,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/${input:cpp_process}",
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}"
     }
   ]
 }

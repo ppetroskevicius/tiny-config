@@ -13,35 +13,41 @@ The repository includes scripts for Ubuntu (with Sway Wayland desktop), macOS, a
 ## Key Features
 
 ### **Multi-Platform Support**
+
 - **Ubuntu**: Full desktop setup with Sway Wayland, server configurations, and container environments
 - **macOS**: Complete development environment with Homebrew and native applications
 - **Cross-platform**: Consistent tooling and configurations across all platforms
 
 ### **Development Environment**
+
 - **Shell & Terminal**: Zsh with Oh-My-Zsh, Starship prompt, Alacritty terminal, and Tmux
 - **Editors & IDEs**: Vim, Zed, Cursor, and Windsurf with optimized configurations
 - **Version Control**: Git with multi-account SSH setup for GitHub
 - **Package Managers**: Homebrew (macOS), apt (Ubuntu), npm, cargo, and uv (Python)
 
 ### **Cloud & DevOps Tools**
+
 - **Google Cloud Platform**: CLI installation and multi-environment configuration (dev/test/prod)
 - **AWS**: CLI and CDK installation with configuration management
 - **Firebase**: CLI tools for web and mobile development
 - **Docker**: Container runtime and management tools
 
 ### **System Configuration**
+
 - **Credential Management**: 1Password CLI integration for secure credential storage
 - **Network Setup**: Automated WiFi and Ethernet configuration with systemd-networkd
 - **Security**: WireGuard VPN setup and SSH key management
 - **Power Management**: Optimized power settings and brightness controls
 
 ### **Development Tools**
+
 - **Languages**: Python, Rust, Node.js with version management
 - **Linters & Formatters**: Ruff, Pylint, and code quality tools
 - **GPU Computing**: ROCm support for AMD GPUs and CUDA alternatives
 - **Fonts**: Nerd Fonts for enhanced terminal experience
 
 ### **Desktop Applications** (Ubuntu)
+
 - **Web Browser**: Google Chrome
 - **Communication**: Discord
 - **Research**: Zotero
@@ -49,6 +55,7 @@ The repository includes scripts for Ubuntu (with Sway Wayland desktop), macOS, a
 - **Productivity**: 1Password, remote desktop tools
 
 ### **System Optimization**
+
 - **Memory Efficiency**: Minimal resource usage with Sway Wayland
 - **Performance**: Optimized package selection and system cleanup
 - **Japanese Input**: Fcitx5 setup for international development
@@ -91,29 +98,34 @@ sudo reboot
 ### Setup Options
 
 #### Desktop Setup (Recommended for Development)
+
 ```bash
 ./setup_ubuntu.sh desktop
 ```
+
 - Full desktop environment with Sway Wayland
 - All development tools and applications
 - Gcloud CLI and other cloud tools
 - Desktop applications (Chrome, Discord, Spotify, etc.)
 
 #### Host Setup (Minimal)
+
 ```bash
 ./setup_ubuntu.sh host
 ```
+
 - Minimal setup for servers or headless machines
 - Basic tools and Docker
 - Core dependencies
 
 #### Guest Setup
+
 ```bash
 ./setup_ubuntu.sh guest
 ```
+
 - Development environment setup
 - Rust, Python tools, linters
-
 
 ## Configuration Details
 

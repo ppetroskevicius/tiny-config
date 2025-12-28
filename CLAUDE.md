@@ -3,15 +3,18 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Repository Purpose
+
 This repository contains shell scripts for setting up minimal development environments on Mac or Ubuntu with Sway on Wayland.
 
 ## Commands
+
 - Shellcheck: `shellcheck *.sh`
 - Test script locally: `bash -x <script>.sh` (run with `-x` flag for debug output)
 - Check script formatting: `shfmt -i 2 -ci -d *.sh`
 - Format scripts: `shfmt -i 2 -ci -w *.sh`
 
 ## Code Style Guidelines
+
 - Use 2-space indentation in shell scripts
 - Follow Google Shell Style Guide: https://google.github.io/styleguide/shellguide.html
 - Use lowercase variable names
