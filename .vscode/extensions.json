@@ -25,7 +25,8 @@
     "graphql.vscode-graphql-syntax", // GraphQL syntax support
     "mechatroner.rainbow-csv", // CSV highlighting & manipulation
 
-    // Markdown
+    // ──────── Markdown ────────
+    "yzhang.markdown-all-in-one", // Markdown All in One
     "mermaidchart.vscode-mermaid-chart", // Mermaid diagram preview
 
     // ──────── Rust ────────

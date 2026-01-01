@@ -54,7 +54,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
 
   // ────────── Python tooling ──────────
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python", // portable for macOS/Linux
@@ -71,6 +76,9 @@
   "typescript.preferences.includePackageJsonAutoImports": "on",
   "typescript.suggest.autoImports": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // ────────── Markdown tooling ──────────
+  "markdown.extension.preview.autoShowPreviewToSide": true,
 
   // ────────── Ignore patterns ──────────
   "files.exclude": {
@@ -124,5 +132,8 @@
   "terminal.integrated.fontWeightBold": "bold",
   "terminal.integrated.letterSpacing": 0,
   "terminal.integrated.lineHeight": 1.2,
-  "terminal.integrated.gpuAcceleration": "on"
+  "terminal.integrated.gpuAcceleration": "on",
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "files.autoSave": "afterDelay"
 }
