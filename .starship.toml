@@ -1,0 +1,91 @@
+# ~/.config/starship.toml
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+
+
+# Disable the default gcloud module
+[gcloud]
+disabled = true
+
+# --- Custom GCP Identity Modules (sa | tf | owner) ---
+
+[custom.gcp_id_sa]
+command = "echo 'sa'"
+when = "test $GCP_IDENTITY = 'sa'"
+style = "bold green"
+format = "[\ue7f0 $output]($style)"
+
+[custom.gcp_id_tf]
+command = "echo 'tf'"
+when = "test $GCP_IDENTITY = 'tf'"
+style = "bold yellow"
+format = "[\ue7f0 $output]($style)"
+
+[custom.gcp_id_owner]
+command = "echo 'owner'"
+when = "test $GCP_IDENTITY = 'owner'"
+style = "bold red"
+format = "[\ue7f0 $output]($style)"
+
+
+# --- Custom GCP Environment Modules (dev | test | prod) ---
+
+[custom.gcp_env_dev]
+command = "echo 'dev'"
+when = "test $GCP_ENV = 'dev'"
+style = "bold green"
+format = "[@$output]($style) "
+
+[custom.gcp_env_test]
+command = "echo 'test'"
+when = "test $GCP_ENV = 'test'"
+style = "bold yellow"
+format = "[@$output]($style) "
+
+[custom.gcp_env_demo]
+command = "echo 'demo'"
+when = "test $GCP_ENV = 'demo'"
+style = "bold blue"
+format = "[@$output]($style) "
+
+[custom.gcp_env_prod]
+command = "echo 'prod'"
+when = "test $GCP_ENV = 'prod'"
+style = "bold red"
+format = "[@$output]($style) "
+
+
+# --- Custom GCP Dev Project Check (defined?) ---
+
+[custom.gcp_dev_project_ok]
+command = "echo '✔'"
+when = "test -n \"$GCP_DEV_PROJECT_ID\""
+style = "bold green"
+format = "[$output]($style) "
+
+[custom.gcp_dev_project_missing]
+command = "echo '✗'"
+when = "test -z \"$GCP_DEV_PROJECT_ID\""
+style = "bold red"
+format = "[$output]($style) "
+
+[custom.gcp_dev_project_status]
+format = "$gcp_dev_project_ok$gcp_dev_project_missing"
+
+# --- Grouping for main format string ---
+
+[custom.gcp_env]
+format = "$gcp_env_dev$gcp_env_test$gcp_env_demo$gcp_env_prod"
+
+[custom.gcp_identity]
+format = "$gcp_id_sa$gcp_id_tf$gcp_id_owner"
+
+[aws]
+format = '/ [$symbol$region]($style) / '
+style = 'bold blue'
+symbol = ' ' # This is the \uf270 Nerd Font icon
+[aws.region_aliases]
+us-east-2 = 'us'
+ap-northeast-1 = 'jp'

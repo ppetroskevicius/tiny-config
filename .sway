@@ -39,7 +39,7 @@ include /etc/sway/config-vars.d/*
 bindsym $mod+q exec swaylock -c 000000
 exec swayidle -w \
   timeout 3000 'swaylock -f -c 000000' \
-  timeout 3500 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  timeout 3010 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
   before-sleep 'playerctl pause' \
   before-sleep 'swaylock -f -c 000000'
 #
@@ -161,7 +161,7 @@ exec swayidle -w \
   bindsym $mod+space focus mode_toggle
 
   # Move focus to the parent container
-  bindsym $mod+a focus parent
+  bindsym $mod+Shift+a focus parent
 #
 # Scratchpad:
 #
@@ -206,25 +206,16 @@ bindsym $mod+r mode "resize"
 # https://manpages.debian.org/experimental/sway/sway-bar.5.en.html
 bar {
   position top
-  # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-
-  bar {
-    # font pango:DejaVu Sans Mono, Font Awesome 5 Free
-    # font pango:Monoid Nerd Font
-    font pango:0xProto Nerd Font 8
-    position top
-    height 16
-    status_padding 0
-    status_command i3status-rs
-    colors {
-        separator #666666
-        background #222222
-        statusline #dddddd
-        focused_workspace #0088CC #0088CC #ffffff
-        active_workspace #333333 #333333 #ffffff
-        inactive_workspace #333333 #333333 #888888
-        urgent_workspace #2f343a #900000 #ffffff
-    }
+  font pango:DejaVu Sans Mono, Font Awesome 8
+  status_command i3status-rs /home/fastctl/fun/tiny-config/.i3status-rust.toml
+  colors {
+      separator #666666
+      background #222222
+      statusline #dddddd
+      focused_workspace #0088CC #0088CC #ffffff
+      active_workspace #333333 #333333 #ffffff
+      inactive_workspace #333333 #333333 #888888
+      urgent_workspace #2f343a #900000 #ffffff
   }
 }
 
@@ -235,17 +226,36 @@ include /etc/sway/config.d/*
 # fix notebook hardware buttons
 bindsym XF86MonBrightnessUp exec brightnessctl set +10%
 bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+
+# Audio controls (speakers/headphones)
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+# Additional microphone controls
+bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# [ ] start chrome in X11 mode for Japanese input to work. Stop all wayland chrome sessions before that.
+# Chrome: X11 mode (for Japanese input with fcitx5 - note: screen sharing may not work)
 bindsym $mod+c+j exec google-chrome
-# [ ] or run chrome in Wayland mode
-bindsym $mod+c exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
+# Chrome: Wayland mode (for screen sharing + microphone support - note: Japanese input may not work)
+# Note: For microphone access, switch Bluetooth profile to Handsfree mode first ($mod+Shift+b)
+# Environment variables and flags needed for Wayland screen sharing and microphone
+# Disable hardware video encoding (VCN) to prevent AMD GPU freezes during screen sharing
+# Use software encoding instead (slightly higher CPU usage, but stable)
+bindsym $mod+g exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland /usr/bin/google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder
+
+# Firefox: Wayland mode (better screen sharing support than Chrome on Wayland)
+# Firefox has better native Wayland support and screen sharing usually works out of the box
+# Environment variables (MOZ_ENABLE_WAYLAND, XDG_CURRENT_DESKTOP) are set in ~/.zprofile
+# and imported into systemd, so they're available automatically
+bindsym $mod+o exec firefox
+
+# [ ] start cursor and windsurf
+bindsym $mod+c exec env ELECTRON_OZONE_PLATFORM_HINT=auto /home/fastctl/bin/cursor --no-sandbox /home/fastctl/fun/monoya
+# bindsym $mod+w exec /home/fastctl/bin/windsurf
 
 
 # configure notebook touchscreen
@@ -259,6 +269,19 @@ bindsym $mod+p       exec shotman --capture window --copy
 bindsym $mod+Shift+p exec shotman --capture region --copy
 bindsym $mod+Ctrl+p  exec shotman --capture output --copy
 
+# run image editor
+bindsym $mod+i exec oculante
+
+# Re-detect external monitor (useful when monitor is turned off/on)
+bindsym $mod+Shift+m exec /home/fastctl/fun/tiny-config/redetect_monitor.sh
+
+# Import environment variables for Wayland screen sharing
+# These must run in order: import env vars, update D-Bus, then start services
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP MOZ_ENABLE_WAYLAND
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway MOZ_ENABLE_WAYLAND=1
+# Start portal services explicitly (they require WAYLAND_DISPLAY to be set)
+exec systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr wireplumber
+
 # run Japanese IME
 exec fcitx5 -dr
 
@@ -268,39 +291,55 @@ exec blueman-applet
 # run notifyer
 exec mako
 
+# check output names
+# swaymsg -t get_outputs
+
 # assign workspaces to outputs
+# Note: External monitor output name can vary (DP-1, DP-3, DP-8, etc.) depending on dock port
+# Sway will use any matching output name, so listing multiple names works
 workspace 1 output eDP-1
-workspace 2 output DP-1
-workspace 3 output DP-1
-workspace 4 output DP-1
-workspace 5 output DP-1
+workspace 2 output DP-1, DP-3, DP-8
+workspace 3 output DP-1, DP-3, DP-8
+workspace 4 output DP-1, DP-3, DP-8
+workspace 5 output DP-1, DP-3, DP-8
+workspace 6 output DP-1, DP-3, DP-8
+workspace 7 output DP-1, DP-3, DP-8
+workspace 8 output DP-1, DP-3, DP-8
+workspace 9 output DP-1, DP-3, DP-8
+workspace 10 output DP-1, DP-3, DP-8
 
 # assign apps to workspaces
-assign [app_id="Alacritty"] workspace 1
-assign [app_id="dev.zed.Zed"] workspace 2
-assign [app_id="google-chrome"] workspace 2
-assign [instance="discord"] workspace 3
-assign [instance="spotify"] workspace 4
+# assign [app_id="Alacritty"] workspace 1
+# assign [app_id="dev.zed.Zed"] workspace 2
+# assign [app_id="google-chrome"] workspace 2
+# assign [instance="discord"] workspace 3
+assign [instance="cursor"] workspace 2
+assign [instance="windsurf"] workspace 3
+assign [instance="spotify"] workspace 9
 
-# start apps in assigned workspaces
-exec zed
+# autostart
+# workspace 1: Alacritty + Htop
+exec swaymsg 'workspace 1; \
+  exec alacritty -e htop; \
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
 
-# This will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,
+# workspace 2: Cursor + Chrome
+exec swaymsg 'workspace 2; \
+  exec cursor --no-sandbox /home/fastctl/fun/tiny-config; \
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
+
+# workspace 3: Windsurf + Chrome
+exec swaymsg 'workspace 3; \
+  exec windsurf /home/fastctl/fun/tiny-config; \
+  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
+
+
+# Default will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,
 # because google-chrome only supports wayland text-input-v1 and sway only supports text-input-v3
+# [ ] The workaround to input Japanese in google-chrome in sway is to run google-chrome in X11 mode:
 # exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland
 
-# [ ] The workaround to input Japanese in google-chrome in sway is to run google-chrome in X11 mode:
-# exec google-chrome
-
-# [ ] this will switch chrome to wayland text-input-v1 but sway only supports text-input-v3, so it will not work:
-# exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime
-
-# [ ] this will allow Japanese input under sway, but will run chrome in X11 mode
-exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --wayland-text-input-version=3
-
-# [ ] these flags are mutually exclusive, so would still run chrome in X11 mode
-# exec google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3
-
-exec alacritty
-exec discord
-exec spotify
+### Power management
+#
+# Suspend the system when the lid is closed.
+bindswitch lid:on exec systemctl suspend

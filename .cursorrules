@@ -1,0 +1,35 @@
+Follow these guidelines when working with Python code:
+
+# Python Style
+
+- Use PEP 8 style guide
+- Maximum line length: 88 characters (Black default)
+- Use type hints for all function parameters and return values
+- Use f-strings for string formatting instead of %-formatting or .format()
+
+# Project Structure
+
+- Keep modules small and focused
+- Separate concerns between data, logic, and presentation
+- Use relative imports within the package
+
+# Code Quality
+
+- Commands:
+  - Lint: `ruff check .`
+  - Format: `black .`
+  - Type check: `mypy .`
+  - Run tests: `pytest`
+- Always run tests before committing
+
+# Docstrings
+
+- Use Google style docstrings
+- Document parameters, return types, and exceptions
+- Include examples for complex functions
+
+# Error Handling
+
+- Use specific exception types
+- Handle exceptions at appropriate levels
+- Log exceptions with appropriate severity

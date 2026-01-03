@@ -1,3 +1,4 @@
+# Generic settings (good defaults for macOS)
 Host *
   IgnoreUnknown UseKeychain
   UseKeychain yes
@@ -29,3 +30,16 @@ Host comma-petras
   User comma
   IdentityFile ~/.ssh/id_ed25519
   ProxyCommand ssh %h@ssh.comma.ai -W %h:%p
+
+# Private GitHub
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+
+# Work GitHub
+Host github.com-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+
