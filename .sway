@@ -306,15 +306,15 @@ exec mako
 # Note: External monitor output name can vary (DP-1, DP-3, DP-8, etc.) depending on dock port
 # Sway will use any matching output name, so listing multiple names works
 workspace 1 output eDP-1
-workspace 2 output DP-1, DP-3, DP-8
-workspace 3 output DP-1, DP-3, DP-8
-workspace 4 output DP-1, DP-3, DP-8
-workspace 5 output DP-1, DP-3, DP-8
-workspace 6 output DP-1, DP-3, DP-8
-workspace 7 output DP-1, DP-3, DP-8
-workspace 8 output DP-1, DP-3, DP-8
-workspace 9 output DP-1, DP-3, DP-8
-workspace 10 output DP-1, DP-3, DP-8
+workspace 2 output DP-9
+workspace 3 output DP-8
+workspace 4 output DP-8
+workspace 5 output DP-8
+workspace 6 output DP-8
+workspace 7 output DP-8
+workspace 8 output DP-8
+workspace 9 output DP-8
+workspace 10 output DP-8
 
 # assign apps to workspaces
 # assign [app_id="Alacritty"] workspace 1
@@ -322,24 +322,22 @@ workspace 10 output DP-1, DP-3, DP-8
 # assign [app_id="google-chrome"] workspace 2
 # assign [instance="discord"] workspace 3
 assign [instance="cursor"] workspace 2
-assign [instance="windsurf"] workspace 3
+assign [instance="firefox"] workspace 3
 assign [instance="spotify"] workspace 9
 
 # autostart
 # workspace 1: Alacritty + Htop
 exec swaymsg 'workspace 1; \
-  exec alacritty -e htop; \
-  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
+  exec alacritty -e htop;'
 
 # workspace 2: Cursor + Chrome
 exec swaymsg 'workspace 2; \
   exec cursor --no-sandbox /home/fastctl/fun/tiny-config; \
-  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
+  exec firefox'
 
 # workspace 3: Windsurf + Chrome
 exec swaymsg 'workspace 3; \
-  exec windsurf /home/fastctl/fun/tiny-config; \
-  exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland google-chrome --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-webrtc-pipewire-capturer --disable-features=VaapiVideoDecoder,VaapiVideoEncoder'
+  exec firefox'
 
 
 # Default will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,

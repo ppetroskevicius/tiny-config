@@ -25,7 +25,7 @@ install_homebrew() {
 }
 
 install_brew_packages() {
-	brew install git gh vim tmux htop coreutils netcat jq git-lfs
+	brew install git gh vim tmux htop coreutils netcat jq git-lfs inxi
 }
 
 install_brew_apps() {

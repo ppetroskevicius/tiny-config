@@ -20,7 +20,7 @@ install_packages_host() {
 
 install_packages_guest() {
 	dpkg -l nfs-common build-essential >/dev/null 2>&1 ||
-		sudo apt install -y nfs-common bash-completion locales direnv btop nvtop neofetch lm-sensors \
+		sudo apt install -y nfs-common bash-completion locales direnv btop nvtop inxineofetch lm-sensors \
 			build-essential clang csvtool fd-find file infiniband-diags ipmitool jc jq lshw lsof \
 			man-db parallel rclone rdma-core ripgrep rsync systemd-journal-remote time \
 			python-is-python3 python3 python3-pip python3-venv avahi-daemon
