@@ -83,6 +83,15 @@
 - **Snap Removal**: Optional removal of Snap packages for faster boot times
 - **Kernel Management**: Automatic cleanup of old kernels
 
+## Development Commands
+
+For maintaining and testing the scripts in this repository:
+
+- **Shellcheck**: `shellcheck *.sh` - Static analysis for shell scripts
+- **Test script locally**: `bash -x <script>.sh` - Run with debug output
+- **Check script formatting**: `shfmt -i 2 -ci -d *.sh` - Check formatting
+- **Format scripts**: `shfmt -i 2 -ci -w *.sh` - Auto-format scripts
+
 ## Prerequisites
 
 Before running the setup scripts, ensure you have:
@@ -106,21 +115,21 @@ Before running the setup scripts, ensure you have:
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/ppetroskevicius/tiny-config.git
+git clone <repository-url>
 cd tiny-config
 ```
 
 ### Ubuntu Installation
 
-The Ubuntu setup script (`setup_ubuntu.sh`) supports five machine types as defined in [INVENTORY.md](docs/INVENTORY.md):
+The setup script (`setup.sh`) supports five machine types as defined in [INVENTORY.md](docs/INVENTORY.md):
 
 #### Development Desktop (`dt-dev`)
 
 Full desktop environment with Sway Wayland, all development tools, and desktop applications:
 
 ```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh dt-dev
+chmod +x setup.sh
+./setup.sh dt-dev
 ```
 
 **What it installs:**
@@ -142,8 +151,8 @@ chmod +x setup_ubuntu.sh
 Physical servers dedicated to running KVM for hosting VMs:
 
 ```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh bm-hypervisor
+chmod +x setup.sh
+./setup.sh bm-hypervisor
 ```
 
 **What it installs:**
@@ -160,8 +169,8 @@ chmod +x setup_ubuntu.sh
 Virtual machines configured as Kubernetes nodes (k3s):
 
 ```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh vm-k8s-node
+chmod +x setup.sh
+./setup.sh vm-k8s-node
 ```
 
 **What it installs:**
@@ -181,8 +190,8 @@ chmod +x setup_ubuntu.sh
 VMs dedicated to running Dev Containers for isolated development:
 
 ```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh vm-dev-container
+chmod +x setup.sh
+./setup.sh vm-dev-container
 ```
 
 **What it installs:**
@@ -201,8 +210,8 @@ chmod +x setup_ubuntu.sh
 Clean VMs for standalone services (NFS, databases, etc.):
 
 ```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh vm-service
+chmod +x setup.sh
+./setup.sh vm-service
 ```
 
 **What it installs:**
@@ -249,13 +258,13 @@ For AMD GPU support, install ROCm in two parts (requires reboot after part 1):
 
 ```bash
 # Part 1: Install kernel drivers (requires reboot)
-chmod +x install_rocm_part1.sh
-./install_rocm_part1.sh
+chmod +x tools/install_rocm_part1.sh
+./tools/install_rocm_part1.sh
 # System will reboot automatically
 
 # After reboot, run part 2
-chmod +x install_rocm_part2.sh
-./install_rocm_part2.sh
+chmod +x tools/install_rocm_part2.sh
+./tools/install_rocm_part2.sh
 ```
 
 **Note**: Part 1 installs kernel headers, adds user to render/video groups, and installs AMD GPU drivers. Part 2 completes the ROCm installation.
@@ -275,8 +284,8 @@ export GCP_PROD_PROJECT_ID="your-prod-project"
 export GCP_DEMO_PROJECT_ID="your-demo-project"
 
 # 3. Run the configuration script
-chmod +x install_gcp_configs.sh
-./install_gcp_configs.sh
+chmod +x tools/install_gcp_configs.sh
+./tools/install_gcp_configs.sh
 ```
 
 Creates separate GCP configurations for dev, test, prod, and demo environments.
@@ -286,8 +295,8 @@ Creates separate GCP configurations for dev, test, prod, and demo environments.
 Install Snap packages if needed:
 
 ```bash
-chmod +x install_snap.sh
-./install_snap.sh
+chmod +x tools/install_snap.sh
+./tools/install_snap.sh
 ```
 
 **Note**: The desktop setup includes an option to remove Snap packages for faster boot times.
@@ -297,8 +306,8 @@ chmod +x install_snap.sh
 Synchronize Cursor extensions with `.vscode/extensions.json`:
 
 ```bash
-chmod +x sync_cursor_extensions.sh
-./sync_cursor_extensions.sh
+chmod +x tools/sync_cursor_extensions.sh
+./tools/sync_cursor_extensions.sh
 ```
 
 This script:
@@ -451,19 +460,19 @@ All configuration files can be customized after installation:
 
 ### Main Setup Scripts
 
-#### `setup_ubuntu.sh`
+#### `setup.sh`
 
-Primary Ubuntu setup script with five machine types: `bm-hypervisor`, `vm-k8s-node`, `vm-dev-container`, `vm-service`, and `dt-dev`.
+Primary setup script with five machine types: `bm-hypervisor`, `vm-k8s-node`, `vm-dev-container`, `vm-service`, and `dt-dev`.
 
 **Dependencies:**
 
-- Sources `install_common_dependencies.sh`
-- Sources `install_ubuntu_dependencies.sh`
+- Sources modular scripts from `scripts/` directory (01_update.sh through 15_profiles.sh)
+- Uses profile functions defined in `scripts/15_profiles.sh`
 
 **Usage:**
 
 ```bash
-./setup_ubuntu.sh [bm-hypervisor|vm-k8s-node|vm-dev-container|vm-service|dt-dev]
+./setup.sh [bm-hypervisor|vm-k8s-node|vm-dev-container|vm-service|dt-dev]
 ```
 
 **Machine Types:**
@@ -503,63 +512,49 @@ Primary macOS setup script.
 - macOS system preferences
 - Development tools
 
-### Dependency Installation Scripts
+### Modular Scripts
 
-#### `install_common_dependencies.sh`
+The setup process is organized into modular scripts in the `scripts/` directory:
 
-Shared functions for both Ubuntu and macOS:
+#### Core Setup Modules
 
-- 1Password CLI setup
-- Credential management (SSH keys, WireGuard)
-- Zsh and Oh-My-Zsh installation
-- Dotfile symlinking
-- Node.js (via nvm) and pnpm
-- AWS CLI and CDK
-- GCP CLI
-- Firebase CLI
-- Terraform CLI
-- Rust toolchain
-- Kotlin (via SDKMAN)
-- Golang (official installer)
-- Starship prompt
-- Docker
-- Alacritty
-- Claude Code app
-- Yazi file manager
+- **`01_update.sh`**: System updates and package management
+- **`02_credentials.sh`**: 1Password CLI setup and credential management
+- **`03_shell.sh`**: Zsh, Oh-My-Zsh, and shell configuration
+- **`04_dotfiles.sh`**: Configuration file symlinking
+- **`05_system.sh`**: Basic system utilities and tools
 
-**When to use independently**: Rarely; typically sourced by main setup scripts.
+#### Infrastructure Modules
 
-#### `install_ubuntu_dependencies.sh`
+- **`06_hypervisor.sh`**: KVM, libvirt, and virtualization tools
+- **`07_storage.sh`**: Storage tools (ZFS, mdadm, NFS)
+- **`08_containers.sh`**: Docker, Dev Container CLI, k3s
 
-Ubuntu-specific installations:
+#### Development Modules
 
-- Package management
-- Desktop environment (Sway, Wayland)
-- System services (networkd, Bluetooth, audio)
-- Desktop applications
-- Power management
-- Japanese input
+- **`09_languages.sh`**: Programming language runtimes and tools
+- **`10_cloud.sh`**: Cloud CLI tools (AWS, GCP, Firebase, Terraform)
+- **`13_gpus_ml.sh`**: GPU and machine learning tools
 
-**When to use independently**: Only if you need to add Ubuntu-specific components after initial setup.
+#### Desktop & Applications
 
-#### `install_mac_dependencies.sh`
+- **`11_desktop.sh`**: Desktop environment (Sway, Wayland, etc.)
+- **`12_desktop_apps.sh`**: GUI applications and desktop tools
 
-macOS-specific installation functions:
+#### Configuration & Cleanup
 
-- Homebrew installation and setup
-- Homebrew packages (git, gh, vim, tmux, etc.)
-- Homebrew applications (1Password, Chrome, Firefox, etc.)
-- macOS system preferences configuration
+- **`14_cleanup.sh`**: System cleanup and optimization
+- **`15_profiles.sh`**: Machine type profiles and orchestration
 
-**When to use independently**: Only if you need to add macOS-specific components after initial setup.
+**When to use independently**: These modules are designed to be sourced by the main `setup.sh` script and define functions called by machine type profiles.
 
 ### Specialized Scripts
 
-#### `install_rocm_part1.sh` & `install_rocm_part2.sh`
+#### `tools/install_rocm_part1.sh` & `tools/install_rocm_part2.sh`
 
 Two-part ROCm installation for AMD GPUs.
 
-**Part 1** (`install_rocm_part1.sh`):
+**Part 1** (`tools/install_rocm_part1.sh`):
 
 - Installs kernel headers
 - Adds user to render/video groups
@@ -567,14 +562,14 @@ Two-part ROCm installation for AMD GPUs.
 - Installs kernel driver (`amdgpu-dkms`)
 - **Requires reboot**
 
-**Part 2** (`install_rocm_part2.sh`):
+**Part 2** (`tools/install_rocm_part2.sh`):
 
 - Completes ROCm installation
 - Installs ROCm libraries and tools
 
 **When to use**: On systems with AMD GPUs for GPU computing workloads.
 
-#### `install_gcp_configs.sh`
+#### `tools/install_gcp_configs.sh`
 
 Creates multiple GCP configurations (dev, test, prod, demo).
 
@@ -591,7 +586,7 @@ export GCP_DEV_PROJECT_ID="..."
 export GCP_TEST_PROJECT_ID="..."
 export GCP_PROD_PROJECT_ID="..."
 export GCP_DEMO_PROJECT_ID="..."
-./install_gcp_configs.sh
+./tools/install_gcp_configs.sh
 ```
 
 **Outputs:**
@@ -602,20 +597,20 @@ export GCP_DEMO_PROJECT_ID="..."
 
 **When to use**: After initial setup when you need multi-environment GCP access.
 
-#### `install_snap.sh`
+#### `tools/install_snap.sh`
 
 Installs Snap packages (Ubuntu).
 
 **When to use**: If you need Snap packages that aren't installed by default (desktop setup can remove Snap).
 
-#### `sync_cursor_extensions.sh`
+#### `tools/sync_cursor_extensions.sh`
 
 Synchronizes Cursor extensions with `.vscode/extensions.json`.
 
 **Usage:**
 
 ```bash
-./sync_cursor_extensions.sh
+./tools/sync_cursor_extensions.sh
 ```
 
 **Outputs:**
