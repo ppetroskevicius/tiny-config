@@ -8,22 +8,101 @@ OP_WIFI_PASS="op://network/wifi/pass"
 tempdir=$(mktemp -d)
 trap 'rm -rf "$tempdir"' EXIT
 
+update_packages() {
+	sudo apt update && sudo apt upgrade -y
+}
+
+cleanup_all() {
+	sudo apt autoremove -y
+	sudo apt clean -y
+
+	# Clean up old kernels
+	sudo dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d' | xargs sudo apt -y purge || true
+
+	# Clean up temporary files
+	sudo rm -rf /tmp/*
+	sudo journalctl --vacuum-time=120d
+}
+
 install_packages_common() {
 	dpkg -l vim tmux git >/dev/null 2>&1 ||
 		sudo apt install -y vim tmux git keychain htop unzip netcat-openbsd
 }
 
-install_packages_host() {
-	dpkg -l zfsutils-linux >/dev/null 2>&1 ||
-		sudo apt install -y zfsutils-linux nfs-kernel-server nfs-common mdadm fio nvme-cli pciutils
+install_kvm() {
+	dpkg -l qemu-kvm >/dev/null 2>&1 ||
+		sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+	sudo systemctl enable --now libvirtd
+	sudo usermod -aG libvirt "$USER"
 }
 
-install_packages_guest() {
-	dpkg -l nfs-common build-essential >/dev/null 2>&1 ||
-		sudo apt install -y nfs-common bash-completion locales direnv btop nvtop inxineofetch lm-sensors \
-			build-essential clang csvtool fd-find file infiniband-diags ipmitool jc jq lshw lsof \
-			man-db parallel rclone rdma-core ripgrep rsync systemd-journal-remote time \
-			python-is-python3 python3 python3-pip python3-venv avahi-daemon
+install_k3s() {
+	if ! command -v k3s >/dev/null; then
+		curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+		sudo systemctl enable k3s
+		sudo systemctl start k3s
+	fi
+}
+
+install_containerd() {
+	# k3s includes containerd, but this function can be used if needed standalone
+	if ! command -v containerd >/dev/null; then
+		sudo apt install -y containerd
+		sudo systemctl enable containerd
+		sudo systemctl start containerd
+	fi
+}
+
+install_dev_container_cli() {
+	if ! command -v devcontainer >/dev/null; then
+		# Requires Node.js/pnpm - should be installed before calling this
+		if command -v pnpm >/dev/null; then
+			pnpm add -g @devcontainers/cli
+		elif command -v npm >/dev/null; then
+			npm install -g @devcontainers/cli
+		else
+			echo "Error: pnpm or npm required for Dev Container CLI installation"
+			return 1
+		fi
+	fi
+}
+
+install_packages_bm_hypervisor() {
+	dpkg -l zfsutils-linux >/dev/null 2>&1 ||
+		sudo apt install -y zfsutils-linux nfs-kernel-server nfs-common mdadm fio nvme-cli pciutils lm-sensors
+	install_kvm
+}
+
+install_packages_vm_k8s_node() {
+	dpkg -l nfs-common >/dev/null 2>&1 ||
+		sudo apt install -y nfs-common locales direnv btop nvtop inxi \
+			csvtool fd-find file infiniband-diags ipmitool jc jq lshw lsof \
+			man-db parallel rclone rdma-core ripgrep rsync systemd-journal-remote time pciutils \
+			python-is-python3 python3 python3-pip python3-venv
+}
+
+install_packages_vm_dev_container() {
+	dpkg -l nfs-common >/dev/null 2>&1 ||
+		sudo apt install -y nfs-common locales btop nvtop inxi \
+			csvtool fd-find file jc jq lshw lsof \
+			man-db parallel rclone ripgrep rsync time pciutils \
+			python-is-python3 python3 python3-pip python3-venv
+}
+
+install_packages_vm_service() {
+	# Minimal packages - core utilities plus basic file/system tools
+	dpkg -l file >/dev/null 2>&1 ||
+		sudo apt install -y file rsync jq man-db nfs-common pciutils
+	# Service-specific packages should be installed separately
+}
+
+install_packages_dt_dev() {
+	# All packages from vm-k8s-node plus build tools and nvme-cli
+	install_packages_vm_k8s_node
+	dpkg -l build-essential >/dev/null 2>&1 ||
+		sudo apt install -y build-essential clang nvme-cli
+	# Note: Development languages (Rust, Python via uv, Node.js, Java) are installed separately
+	# via install_rust, install_uv, install_node, install_java functions
 }
 
 install_github_cli() {
@@ -281,15 +360,6 @@ install_cursor_app() {
 
 }
 
-install_windsurf_app() {
-	if ! dpkg -l windsurf >/dev/null 2>&1; then
-		curl -fsSL "https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/windsurf.gpg" | sudo gpg --dearmor -o /usr/share/keyrings/windsurf-stable-archive-keyring.gpg
-		echo "deb [signed-by=/usr/share/keyrings/windsurf-stable-archive-keyring.gpg arch=amd64] https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt stable main" | sudo tee /etc/apt/sources.list.d/windsurf.list >/dev/null
-		sudo apt update
-		sudo apt install -y windsurf
-	fi
-}
-
 install_chrome_app() {
 	if ! command -v google-chrome >/dev/null; then
 		wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/chrome.deb
@@ -386,43 +456,4 @@ setup_raid() {
 		sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
 		sudo update-initramfs -u
 	fi
-}
-
-setup_server_host() {
-	install_packages_host
-}
-
-setup_server_guest() {
-	install_packages_guest
-	install_github_cli
-}
-
-setup_desktop() {
-	setup_netplan
-	install_wireguard
-	setup_bluetooth_audio
-	setup_sway_wayland
-	install_i3status-rs
-	install_screenshots
-	install_notifications
-	install_kickoff
-	setup_power_management
-	setup_brightness
-	setup_gamma
-	setup_japanese
-	remove_snap
-}
-
-setup_apps() {
-	install_1password_app
-	install_zed_app
-	install_chrome_app
-	install_firefox_app
-	install_discord_app
-	install_zotero_app
-	install_spotify_app
-}
-
-require_reboot() {
-	install_nvidia_gpu
 }

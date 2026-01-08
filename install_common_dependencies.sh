@@ -108,10 +108,6 @@ install_dotfiles() {
 		ln -sf "$TARGET_DIR/.vscode/settings.json" "$HOME/.config/Cursor/User/settings.json"
 	fi
 
-	# Setup MCP configuration
-	mkdir -p "$HOME/.codeium/windsurf"
-	ln -sf "$TARGET_DIR/.mcp_config.json" "$HOME/.codeium/windsurf/mcp_config.json"
-
 	# Setup other configurations
 	ln -sf "$TARGET_DIR/.pylintrc" "$HOME/.config/pylintrc"
 	mkdir -p "$HOME/.aws"
@@ -359,29 +355,6 @@ install_docker() {
 	fi
 }
 
-install_podman() {
-	if ! command -v podman >/dev/null; then
-		if [ "$OS" = "Darwin" ]; then
-			brew install podman
-		else
-			# https://podman.io/docs/installation
-			sudo apt update
-			sudo apt -y install podman
-
-			sudo apt install -y uidmap
-			sudo usermod --add-subuids 100000-165536 --add-subgids 100000-165536 "$USER"
-
-			sudo systemctl enable podman
-			sudo systemctl start podman
-
-			# Test installation
-			podman --version
-			podman info --debug
-			podman run hello-world
-		fi
-	fi
-}
-
 install_ollama() {
 	if ! command -v ollama >/dev/null; then
 		if [ "$OS" = "Darwin" ]; then
@@ -438,5 +411,82 @@ install_yazi() {
 			# Install yazi-build which installs yazi-fm and yazi-cli
 			cargo install --force yazi-build
 		fi
+	fi
+}
+
+install_uv() {
+	if ! command -v uv >/dev/null; then
+		curl -LsSf https://astral.sh/uv/install.sh | sh
+		# Source uv environment (adjust path if needed)
+		# shellcheck source=/dev/null
+		source "$HOME/.local/bin/env" 2>/dev/null || true
+		uv self update
+	fi
+}
+
+install_linters_formatters() {
+	# Install Python tools via uv
+	uv tool install ruff
+	uv tool install mypy
+	uv tool install pyright
+	uv tool install pylint
+	uv tool install pytest
+	uv tool install pre-commit
+	# Install shell tools
+	if [ "$OS" = "Darwin" ]; then
+		if ! command -v shellcheck >/dev/null || ! command -v shfmt >/dev/null; then
+			brew install shellcheck shfmt
+		fi
+	else
+		if ! dpkg -l shellcheck shfmt >/dev/null 2>&1; then
+			sudo apt install -y shellcheck shfmt
+		fi
+	fi
+}
+
+install_sdkman() {
+	if [ ! -d "$HOME/.sdkman" ]; then
+		curl -s "https://get.sdkman.io" | bash
+		# shellcheck source=/dev/null
+		source "$HOME/.sdkman/bin/sdkman-init.sh"
+	fi
+}
+
+install_kotlin() {
+	install_sdkman
+	# shellcheck source=/dev/null
+	source "$HOME/.sdkman/bin/sdkman-init.sh"
+	if ! command -v kotlin >/dev/null; then
+		sdk install kotlin
+	fi
+}
+
+install_golang() {
+	if ! command -v go >/dev/null; then
+		if [ "$OS" = "Darwin" ]; then
+			# macOS: Use Homebrew for Go installation
+			brew install go
+		else
+			# Linux: Download and install from official Go installer
+			local go_version
+			go_version=$(curl -s https://go.dev/VERSION?m=text | head -1)
+			local arch
+			arch=$(uname -m)
+			if [ "$arch" = "x86_64" ]; then
+				arch="amd64"
+			elif [ "$arch" = "aarch64" ]; then
+				arch="arm64"
+			fi
+			local go_tar="${go_version}.linux-${arch}.tar.gz"
+			local go_url="https://go.dev/dl/${go_tar}"
+			cd /tmp || exit 1
+			wget -q "$go_url"
+			sudo rm -rf /usr/local/go
+			sudo tar -C /usr/local -xzf "$go_tar"
+			rm "$go_tar"
+			# Add Go to PATH (will be in .zshrc/.bashrc)
+			export PATH="/usr/local/go/bin:$PATH"
+		fi
+		go version
 	fi
 }
