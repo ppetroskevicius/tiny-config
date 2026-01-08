@@ -65,7 +65,7 @@ setup_power_management() {
 	sudo apt install -y tlp tlp-rdw
 	sudo systemctl enable --now tlp
 	sudo rm -f /etc/tlp.conf
-	sudo ln -sf "$HOME/fun/tiny-config/.tlp.conf" /etc/tlp.conf
+	sudo ln -sf "$TARGET_DIR/dotfiles/.tlp.conf" /etc/tlp.conf
 }
 
 setup_brightness() {

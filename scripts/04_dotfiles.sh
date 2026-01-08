@@ -20,20 +20,20 @@ install_dotfiles_core() {
 	mkdir -p "$HOME/.config"
 	rm -f "$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.zprofile" "$HOME/.zshrc"
 
-	ln -sf "$TARGET_DIR/.sshconfig" "$HOME/.ssh/config"
-	ln -sf "$TARGET_DIR/.bash_profile" "$HOME"
-	ln -sf "$TARGET_DIR/.bashrc" "$HOME"
-	ln -sf "$TARGET_DIR/.zprofile" "$HOME"
-	ln -sf "$TARGET_DIR/.zshrc" "$HOME"
-	ln -sf "$TARGET_DIR/.tmux.conf" "$HOME"
-	ln -sf "$TARGET_DIR/.vimrc" "$HOME"
-	ln -sf "$TARGET_DIR/.gitconfig" "$HOME"
-	ln -sf "$TARGET_DIR/.starship.toml" "$HOME/.config/starship.toml"
+	ln -sf "$TARGET_DIR/dotfiles/.sshconfig" "$HOME/.ssh/config"
+	ln -sf "$TARGET_DIR/dotfiles/.bash_profile" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.bashrc" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.zprofile" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.zshrc" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.tmux.conf" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.vimrc" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.gitconfig" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.starship.toml" "$HOME/.config/starship.toml"
 
 	# Editors (headless configs)
-	ln -sf "$TARGET_DIR/.pylintrc" "$HOME/.config/pylintrc"
+	ln -sf "$TARGET_DIR/dotfiles/.pylintrc" "$HOME/.config/pylintrc"
 	mkdir -p "$HOME/.config/ruff"
-	ln -sf "$TARGET_DIR/.ruff.toml" "$HOME/.config/ruff/ruff.toml"
+	ln -sf "$TARGET_DIR/dotfiles/.ruff.toml" "$HOME/.config/ruff/ruff.toml"
 }
 
 install_dotfiles_desktop() {
@@ -41,13 +41,13 @@ install_dotfiles_desktop() {
 	clone_dotfiles_repo
 
 	# Terminal & Window Manager
-	ln -sf "$TARGET_DIR/.alacritty.toml" "$HOME"
+	ln -sf "$TARGET_DIR/dotfiles/.alacritty.toml" "$HOME"
 
 	if [ "$OS" != "Darwin" ]; then
 		mkdir -p "$HOME/.config/sway" "$HOME/.config/mako" "$HOME/.config/i3status-rust"
-		ln -sf "$TARGET_DIR/.sway" "$HOME/.config/sway/config"
-		ln -sf "$TARGET_DIR/.mako" "$HOME/.config/mako/config"
-		ln -sf "$TARGET_DIR/.i3status-rust.toml" "$HOME/.config/i3status-rust/config.toml"
+		ln -sf "$TARGET_DIR/dotfiles/.sway" "$HOME/.config/sway/config"
+		ln -sf "$TARGET_DIR/dotfiles/.mako" "$HOME/.config/mako/config"
+		ln -sf "$TARGET_DIR/dotfiles/.i3status-rust.toml" "$HOME/.config/i3status-rust/config.toml"
 	fi
 
 	rm -rf "$HOME/.config/alacritty"
@@ -55,19 +55,19 @@ install_dotfiles_desktop() {
 
 	# Editors (GUI)
 	mkdir -p "$HOME/.config/zed" "$HOME/.cursor"
-	ln -sf "$TARGET_DIR/zed/keymap.json" "$HOME/.config/zed/"
-	ln -sf "$TARGET_DIR/zed/settings.json" "$HOME/.config/zed/"
-	ln -sf "$TARGET_DIR/.cursor_mcp.json" "$HOME/.cursor/mcp.json"
+	ln -sf "$TARGET_DIR/dotfiles/zed/keymap.json" "$HOME/.config/zed/"
+	ln -sf "$TARGET_DIR/dotfiles/zed/settings.json" "$HOME/.config/zed/"
+	ln -sf "$TARGET_DIR/dotfiles/.cursor_mcp.json" "$HOME/.cursor/mcp.json"
 
 	if [ "$OS" = "Darwin" ]; then
 		mkdir -p "$HOME/Library/Application Support/Cursor/User"
-		ln -sf "$TARGET_DIR/.vscode/settings.json" "$HOME/Library/Application Support/Cursor/User/settings.json"
+		ln -sf "$TARGET_DIR/dotfiles/.vscode/settings.json" "$HOME/Library/Application Support/Cursor/User/settings.json"
 	else
 		mkdir -p "$HOME/.config/Cursor/User"
-		ln -sf "$TARGET_DIR/.vscode/settings.json" "$HOME/.config/Cursor/User/settings.json"
+		ln -sf "$TARGET_DIR/dotfiles/.vscode/settings.json" "$HOME/.config/Cursor/User/settings.json"
 	fi
 
 	# Cloud Configs (Desktop only)
 	mkdir -p "$HOME/.aws"
-	ln -sf "$TARGET_DIR/.aws_config" "$HOME/.aws/config"
+	ln -sf "$TARGET_DIR/dotfiles/.aws_config" "$HOME/.aws/config"
 }

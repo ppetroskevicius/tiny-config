@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Sync Cursor extensions with .vscode/extensions.json
+# Sync Cursor extensions with dotfiles/.vscode/extensions.json
 # Removes all extensions not listed in the recommendations
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXTENSIONS_JSON="${SCRIPT_DIR}/.vscode/extensions.json"
+EXTENSIONS_JSON="${SCRIPT_DIR}/dotfiles/.vscode/extensions.json"
 
 if [[ ! -f "$EXTENSIONS_JSON" ]]; then
-	echo "Error: .vscode/extensions.json not found at $EXTENSIONS_JSON"
+	echo "Error: dotfiles/.vscode/extensions.json not found at $EXTENSIONS_JSON"
 	exit 1
 fi
 
@@ -25,7 +25,7 @@ INSTALLED_EXTENSIONS=$(cursor --list-extensions | sort)
 
 echo "=== Extension Sync Report ==="
 echo ""
-echo "Recommended extensions (from .vscode/extensions.json):"
+echo "Recommended extensions (from dotfiles/.vscode/extensions.json):"
 echo "$RECOMMENDED_EXTENSIONS" | nl
 echo ""
 echo "Currently installed extensions:"
