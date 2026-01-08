@@ -1,6 +1,6 @@
 # Package Inventory
 
-This document maps all packages, tools, and configurations to the 5 machine types defined in [TODO.md](TODO.md).
+This document maps all packages, tools, and configurations to the 5 machine types defined in [TODO.md](docs/TODO.md).
 
 ## Machine Types
 
@@ -14,11 +14,50 @@ This document maps all packages, tools, and configurations to the 5 machine type
 
 - ✓ = Included
 - ✗ = Excluded (per requirements)
-- ○ = Optional/Conditional
-- ⚠ = To be added (not in current scripts)
-- N/A = Not applicable
 
-## Core System Packages
+## 1. Update packages (common)
+
+| Package/Tool    | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes             |
+| --------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ----------------- |
+| Update packages | ✓             | ✓           | ✓                | ✓          | ✓      | Update packages   |
+| Timezone setup  | ✓             | ✓           | ✓                | ✓          | ✓      | Set to Asia/Tokyo |
+
+## 2. Setup Credentials (common)
+
+| Package/Tool           | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                |
+| ---------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | -------------------- |
+| 1Password CLI          | ✓             | ✓           | ✓                | ✓          | ✓      | Password manager CLI |
+| Credentials (SSH keys) | ✓             | ✓           | ✓                | ✓          | ✓      | From 1Password       |
+
+## 3. Setup Zsh
+
+| Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes         |
+| ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | ------------- |
+| zsh          | ✓             | ✓           | ✓                | ✓          | ✓      | Z shell       |
+| oh-my-zsh    | ✓             | ✓           | ✓                | ✓          | ✓      | Zsh framework |
+
+## 4. Dotfiles (common)
+
+| Package/Tool         | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                                 |
+| -------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------------------- |
+| Dotfiles (all)       | ✓             | ✓           | ✓                | ✓          | ✓      | All dotfiles (per user preference)    |
+| SSH config           | ✓             | ✓           | ✓                | ✓          | ✓      | SSH configuration                     |
+| Git config           | ✓             | ✓           | ✓                | ✓          | ✓      | Git configuration                     |
+| Zsh config           | ✓             | ✓           | ✓                | ✓          | ✓      | Zsh configuration                     |
+| Tmux config          | ✓             | ✓           | ✓                | ✓          | ✓      | Tmux configuration                    |
+| Vim config           | ✓             | ✓           | ✓                | ✓          | ✓      | Vim configuration                     |
+| Alacritty config     | ✗             | ✗           | ✗                | ✗          | ✓      | Terminal config                       |
+| Starship config      | ✗             | ✗           | ✗                | ✗          | ✓      | Prompt config (if Starship installed) |
+| Sway config          | ✗             | ✗           | ✗                | ✗          | ✓      | Window manager config                 |
+| Mako config          | ✗             | ✗           | ✗                | ✗          | ✓      | Notification config                   |
+| i3status-rust config | ✗             | ✗           | ✗                | ✗          | ✓      | Status bar config                     |
+| Ruff config          | ✗             | ✗           | ✗                | ✗          | ✓      | Python linter config                  |
+| Zed config           | ✗             | ✗           | ✗                | ✗          | ✓      | Editor config                         |
+| Cursor config        | ✗             | ✗           | ✗                | ✗          | ✓      | Editor config                         |
+| AWS config           | ✗             | ✗           | ✗                | ✗          | ✓      | AWS configuration                     |
+| GCP configs          | ✗             | ✗           | ✗                | ✗          | ✓      | GCP configurations                    |
+
+## 5. Core System Packages
 
 | Package/Tool            | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                  |
 | ----------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ---------------------- |
@@ -37,9 +76,6 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | nvtop                   | ✓             | ✓           | ✓                | ✓          | ✓      | GPU monitoring         |
 | inxi                    | ✓             | ✓           | ✓                | ✓          | ✓      | System info            |
 | lm-sensors              | ✓             | ✓           | ✓                | ✓          | ✓      | Hardware sensors       |
-| **Build Tools**         |
-| build-essential         | ✗             | ✗           | ✗                | ✗          | ✓      | Compiler toolchain     |
-| clang                   | ✗             | ✗           | ✗                | ✗          | ✓      | C/C++ compiler         |
 | **File/Text Utilities** |
 | csvtool                 | ✗             | ✓           | ✓                | ✓          | ✓      | CSV processing         |
 | fd-find                 | ✗             | ✓           | ✓                | ✓          | ✓      | Find alternative       |
@@ -65,8 +101,11 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | python3                 | ✗             | ✓           | ✓                | ✗          | ✓      | Python 3               |
 | python3-pip             | ✗             | ✓           | ✓                | ✗          | ✓      | Python package manager |
 | python3-venv            | ✗             | ✓           | ✓                | ✗          | ✓      | Python virtualenv      |
+| **Build Tools**         |
+| build-essential         | ✗             | ✗           | ✗                | ✗          | ✓      | Compiler toolchain     |
+| clang                   | ✗             | ✗           | ✗                | ✗          | ✓      | C/C++ compiler         |
 
-## Hypervisor & Virtualization
+## 6. Hypervisor & Virtualization
 
 | Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                      |
 | ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | -------------------------- |
@@ -75,7 +114,7 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | bridge-utils | ✓             | ✗           | ✗                | ✗          | ✓      | Network bridging           |
 | virt-manager | ✓             | ✗           | ✗                | ✗          | ✓      | GUI for libvirt (optional) |
 
-## Storage & Filesystems
+## 7. Storage & Filesystems
 
 | Package/Tool      | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes           |
 | ----------------- | ------------- | ----------- | ---------------- | ---------- | ------ | --------------- |
@@ -87,7 +126,7 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | nfs-kernel-server | ✓             | ✗           | ✗                | ✗          | ✓      | NFS server      |
 | nfs-common        | ✓             | ✓           | ✓                | ✓          | ✓      | NFS client      |
 
-## Container & Orchestration
+## 8. Container & Orchestration
 
 | Package/Tool      | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                                |
 | ----------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------------------ |
@@ -95,23 +134,7 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | k3s               | ✗             | ✓           | ✗                | ✗          | ✗      | Lightweight Kubernetes               |
 | Dev Container CLI | ✗             | ✗           | ✓                | ✗          | ✓      | VS Code Dev Containers (to be added) |
 
-## Kubernetes Tools
-
-| Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                             |
-| ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | --------------------------------- |
-| kubectl      | ✗             | ○           | ✗                | ✗          | ○      | K8s CLI (if not using k3s)        |
-| helm         | ✗             | ○           | ✗                | ✗          | ○      | K8s package manager (to be added) |
-
-## Shell & Terminal
-
-| Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                              |
-| ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | ---------------------------------- |
-| zsh          | ✓             | ✓           | ✓                | ✓          | ✓      | Z shell                            |
-| oh-my-zsh    | ✓             | ✓           | ✓                | ✓          | ✓      | Zsh framework                      |
-| Starship     | ✗             | ✗           | ✗                | ✗          | ✓      | Prompt (excluded per requirements) |
-| Alacritty    | ✗             | ✗           | ✗                | ✗          | ✓      | Terminal emulator                  |
-
-## Development Languages & Tools
+## 9. Development Languages & Tools
 
 | Package/Tool    | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                   |
 | --------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ----------------------- |
@@ -138,18 +161,17 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | shellcheck      | ✗             | ✗           | ✗                | ✗          | ✓      | Shell script linter     |
 | shfmt           | ✗             | ✗           | ✗                | ✗          | ✓      | Shell formatter         |
 
-## Cloud CLIs
+## 10. Cloud CLIs
 
-| Package/Tool     | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                     |
-| ---------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------- |
-| AWS CLI          | ✗             | ✗           | ✗                | ✗          | ✓      | AWS command line          |
-| AWS CDK          | ✗             | ✗           | ✗                | ✗          | ✓      | AWS Cloud Development Kit |
-| GCP CLI (gcloud) | ✗             | ✗           | ✗                | ✗          | ✓      | Google Cloud CLI          |
-| Firebase CLI     | ✗             | ✗           | ✗                | ✗          | ✓      | Firebase tools            |
-| Terraform        | ✗             | ✗           | ✗                | ✗          | ✓      | Infrastructure as code    |
-| Ansible          | ✗             | ✗           | ✗                | ✗          | ✓      | Configuration management  |
+| Package/Tool     | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                    |
+| ---------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------ |
+| AWS CLI          | ✗             | ✗           | ✗                | ✗          | ✓      | AWS command line         |
+| GCP CLI (gcloud) | ✗             | ✗           | ✗                | ✗          | ✓      | Google Cloud CLI         |
+| Firebase CLI     | ✗             | ✗           | ✗                | ✗          | ✓      | Firebase tools           |
+| Terraform        | ✗             | ✗           | ✗                | ✗          | ✓      | Infrastructure as code   |
+| Ansible          | ✗             | ✗           | ✗                | ✗          | ✓      | Configuration management |
 
-## Development Tools
+## 11. Development Tools
 
 | Package/Tool    | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                 |
 | --------------- | ------------- | ----------- | ---------------- | ---------- | ------ | --------------------- |
@@ -157,7 +179,7 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | Yazi            | ✗             | ✗           | ✗                | ✗          | ✓      | Terminal file manager |
 | Playwright      | ✗             | ✗           | ✗                | ✗          | ✓      | Browser automation    |
 
-## Desktop Environment (Ubuntu)
+## 12. Desktop Environment (Ubuntu)
 
 | Package/Tool                | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                    |
 | --------------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------ |
@@ -214,12 +236,13 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | Nerd Fonts                  | ✗             | ✗           | ✗                | ✗          | ✓      | Icon fonts               |
 | fonts-noto                  | ✗             | ✗           | ✗                | ✗          | ✓      | Noto fonts               |
 
-## Desktop Applications
+## 13. Desktop Applications
 
 | Package/Tool     | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                |
 | ---------------- | ------------- | ----------- | ---------------- | ---------- | ------ | -------------------- |
+| Starship         | ✗             | ✗           | ✗                | ✗          | ✓      | Prompt               |
+| Alacritty        | ✗             | ✗           | ✗                | ✗          | ✓      | Terminal emulator    |
 | 1Password (app)  | ✗             | ✗           | ✗                | ✗          | ✓      | Password manager GUI |
-| 1Password CLI    | ✓             | ✓           | ✓                | ✓          | ✓      | Password manager CLI |
 | Zed              | ✗             | ✗           | ✗                | ✗          | ✓      | Code editor          |
 | Cursor           | ✗             | ✗           | ✗                | ✗          | ✓      | AI code editor       |
 | Claude Code      | ✗             | ✗           | ✗                | ✗          | ✓      | AI code assistant    |
@@ -228,196 +251,23 @@ This document maps all packages, tools, and configurations to the 5 machine type
 | Discord          | ✗             | ✗           | ✗                | ✗          | ✓      | Communication        |
 | Zotero           | ✗             | ✗           | ✗                | ✗          | ✓      | Reference manager    |
 | Spotify (client) | ✗             | ✗           | ✗                | ✗          | ✓      | Music streaming      |
-| spotify-player   | ✗             | ✗           | ✗                | ✗          | ✓      | CLI music player     |
 | Remmina          | ✗             | ✗           | ✗                | ✗          | ✓      | Remote desktop       |
 
-## Service-Specific Packages
-
-| Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                                     |
-| ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | ----------------------------------------- |
-| postgresql   | ✗             | ✗           | ✗                | ✓          | ✗      | PostgreSQL database (optional, add later) |
-| redis        | ✗             | ✗           | ✗                | ✓          | ✗      | Redis (optional, add later)               |
-
-## GPU & ML Tools
+## 14. GPU & ML Tools
 
 | Package/Tool   | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                            |
 | -------------- | ------------- | ----------- | ---------------- | ---------- | ------ | -------------------------------- |
-| ROCm           | ○             | ✗           | ✗                | ✗          | ○      | AMD GPU support (if GPU present) |
-| amdgpu-dkms    | ○             | ✗           | ✗                | ✗          | ○      | AMD GPU kernel driver            |
-| NVIDIA drivers | ○             | ✗           | ✗                | ✗          | ○      | NVIDIA GPU (if GPU present)      |
-| Ollama         | ○             | ✗           | ✗                | ✗          | ○      | LLM runtime (GPU optional)       |
+| ROCm           | ○             | ✗           | ✗                | ✗          | ✗      | AMD GPU support (if GPU present) |
+| amdgpu-dkms    | ○             | ✗           | ✗                | ✗          | ✗      | AMD GPU kernel driver            |
+| NVIDIA drivers | ○             | ✗           | ✗                | ✗          | ✗      | NVIDIA GPU (if GPU present)      |
 
-## Configuration & Dotfiles
-
-| Package/Tool         | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                                 |
-| -------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------------------- |
-| Dotfiles (all)       | ✓             | ✓           | ✓                | ✓          | ✓      | All dotfiles (per user preference)    |
-| SSH config           | ✓             | ✓           | ✓                | ✓          | ✓      | SSH configuration                     |
-| Git config           | ✓             | ✓           | ✓                | ✓          | ✓      | Git configuration                     |
-| Zsh config           | ✓             | ✓           | ✓                | ✓          | ✓      | Zsh configuration                     |
-| Tmux config          | ✓             | ✓           | ✓                | ✓          | ✓      | Tmux configuration                    |
-| Vim config           | ✓             | ✓           | ✓                | ✓          | ✓      | Vim configuration                     |
-| Alacritty config     | ✗             | ✗           | ✗                | ✗          | ✓      | Terminal config                       |
-| Starship config      | ✗             | ✗           | ✗                | ✗          | ✓      | Prompt config (if Starship installed) |
-| Sway config          | ✗             | ✗           | ✗                | ✗          | ✓      | Window manager config                 |
-| Mako config          | ✗             | ✗           | ✗                | ✗          | ✓      | Notification config                   |
-| i3status-rust config | ✗             | ✗           | ✗                | ✗          | ✓      | Status bar config                     |
-| Ruff config          | ✗             | ✗           | ✗                | ✗          | ✓      | Python linter config                  |
-| Zed config           | ✗             | ✗           | ✗                | ✗          | ✓      | Editor config                         |
-| Cursor config        | ✗             | ✗           | ✗                | ✗          | ✓      | Editor config                         |
-| AWS config           | ✗             | ✗           | ✗                | ✗          | ✓      | AWS configuration                     |
-| GCP configs          | ✗             | ✗           | ✗                | ✗          | ✓      | GCP configurations                    |
-
-## System Configuration
-
-| Package/Tool           | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes                          |
-| ---------------------- | ------------- | ----------- | ---------------- | ---------- | ------ | ------------------------------ |
-| Timezone setup         | ✓             | ✓           | ✓                | ✓          | ✓      | Set to Asia/Tokyo              |
-| Credentials (SSH keys) | ✓             | ✓           | ✓                | ✓          | ✓      | From 1Password                 |
-| WireGuard config       | ✗             | ✗           | ✗                | ✗          | ✓      | VPN configuration              |
-| Snap removal           | ✓             | ✓           | ✓                | ✓          | ✓      | Remove snap (all environments) |
-
-## macOS-Specific (dt-dev only)
+## 15. macOS-Specifics (dt-dev only)
 
 | Package/Tool | bm-hypervisor | vm-k8s-node | vm-dev-container | vm-service | dt-dev | Notes           |
 | ------------ | ------------- | ----------- | ---------------- | ---------- | ------ | --------------- |
 | Homebrew     | ✗             | ✗           | ✗                | ✗          | ✓      | Package manager |
 
-## Summary by Machine Type
+## 16. Cleanup packages (common)
 
-### bm-hypervisor
-
-**Purpose**: Physical servers running KVM for hosting VMs
-
-**Includes**:
-
-- Core utilities (vim, tmux, git, htop)
-- KVM and libvirt
-- Storage tools (ZFS, mdadm, nvme-cli)
-- NFS server
-- Basic networking
-- Hardware monitoring (lm-sensors)
-- 1Password CLI, SSH, dotfiles
-- Zsh and Oh-My-Zsh
-- Snap removal
-
-**Excludes** (per requirements):
-
-- Development tools (Rust, Python via uv, linters)
-- Starship prompt
-- Cloud CLIs (AWS, GCP, Firebase, Terraform)
-- Containers (Docker)
-- Desktop applications
-- Desktop environment
-
-### vm-k8s-node
-
-**Purpose**: Virtual machines configured as Kubernetes nodes (k3s)
-
-**Includes**:
-
-- Core utilities and monitoring tools
-- File/text utilities (jq, ripgrep, fd-find)
-- System info tools (lshw, lsof, man-db)
-- Network tools (infiniband-diags, ipmitool)
-- Python base (python3, pip, venv)
-- containerd (k3s default runtime)
-- k3s (⚠ to be added)
-- 1Password CLI, SSH, dotfiles
-- Zsh and Oh-My-Zsh
-- Snap removal
-
-**Excludes** (per requirements):
-
-- Full dev stacks (Rust, Python via uv, Node.js, Java)
-- Starship prompt
-- Docker (use containerd via k3s)
-- Cloud CLIs
-- Desktop applications
-
-### vm-dev-container
-
-**Purpose**: VMs dedicated to running Dev Containers
-
-**Includes**:
-
-- Core utilities and monitoring tools
-- File/text utilities (jq, ripgrep, fd-find)
-- Python base (python3, pip, venv)
-- Docker
-- Dev Container CLI (⚠ to be added)
-- 1Password CLI, SSH, dotfiles
-- Zsh and Oh-My-Zsh
-- Snap removal
-
-**Excludes** (per requirements):
-
-- Kubernetes (k3s, kubeadm)
-- Heavy services (databases - run in containers)
-- Full dev stacks (Rust, Python via uv, Node.js, Java)
-- Starship prompt
-- Cloud CLIs
-- Desktop applications
-
-### vm-service
-
-**Purpose**: Clean VMs for standalone services (NFS, databases, etc.)
-
-**Includes**:
-
-- Core utilities (minimal)
-- Service-specific packages (nfs-kernel-server, etc. - add postgresql/mongodb later if needed)
-- Basic monitoring (htop)
-- NFS client (if needed)
-- 1Password CLI, SSH, dotfiles
-- Zsh and Oh-My-Zsh
-- Snap removal
-
-**Excludes** (per requirements):
-
-- Docker
-- Kubernetes
-- Development tools
-- Starship prompt
-- Cloud CLIs
-- Desktop applications
-- Most monitoring/development utilities
-
-### dt-dev
-
-**Purpose**: Physical desktops for interactive development work
-
-**Includes**:
-
-- **Everything** from other types (where applicable)
-- Full development stacks (Rust, Python via uv, Node.js, Java)
-- All cloud CLIs (AWS, GCP, Firebase, Terraform)
-- Starship prompt
-- Docker
-- Desktop environment (Sway on Ubuntu, native macOS)
-- All desktop applications
-- KVM (on Ubuntu, Homebrew on macOS)
-- All development tools and linters (Rust, Python, Node.js, Java, Kotlin, Golang)
-- Ansible
-- Hardware monitoring (lm-sensors)
-- All configuration files
-- Snap removal
-
-**Excludes**:
-
-- Service-specific packages (unless needed)
-- k3s/Kubernetes (unless using minikube locally)
-
-## Notes
-
-1. **Dotfiles**: Per user preference in TODO.md, all dotfiles go into all configurations. Ensure dotfiles don't fail by referencing packages that don't exist on some configurations.
-
-2. **k3s Installation**: Currently not in scripts - needs to be added for vm-k8s-node.
-
-3. **Dev Container CLI**: Currently not in scripts - needs to be added for vm-dev-container.
-
-4. **GPU Support**: ROCm/NVIDIA drivers are conditional based on hardware presence.
-
-5. **macOS**: dt-dev on macOS uses Homebrew instead of apt. KVM is not available on macOS (use Docker/containers instead).
-
-6. **Service-Specific VMs**: The vm-service type is intentionally minimal - only install what's needed for the specific service.
+| Snap removal | ✓ | ✓ | ✓ | ✓ | ✓ | Remove snap |
+| Cleanup packages | ✓ | ✓ | ✓ | ✓ | ✓ | Cleanup packages |

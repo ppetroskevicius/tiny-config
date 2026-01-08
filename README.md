@@ -1,7 +1,5 @@
 # tiny-config
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 ## Introduction
 
 **tiny-config** is a comprehensive automation toolkit for bootstrapping development environments on Linux (primarily Ubuntu) and macOS. Designed with minimalism and efficiency in mind, this repository provides setup scripts and configuration files that transform a fresh machine into a fully-configured development workstation in minutes.
@@ -14,15 +12,6 @@
 - **Productivity-Focused**: Pre-configured editors, terminals, version control, and cloud tools
 - **Flexible Deployment**: Support for desktop, server (host), and container (guest) environments
 - **Security-Conscious**: Integrated credential management with 1Password, SSH key handling, and WireGuard VPN
-
-### Target Users
-
-This repository is ideal for:
-
-- Developers setting up new development machines
-- Teams requiring consistent development environments
-- Users seeking minimalistic, efficient setups
-- Developers working with cloud services (AWS, GCP), containers, and GPU computing
 
 ## Features
 
@@ -39,8 +28,7 @@ This repository is ideal for:
 - **Vim**: Lightweight editor with optimized keybindings and plugins
 - **Zed**: Modern, high-performance editor with Rust backend
 - **Cursor**: AI-powered editor with MCP (Model Context Protocol) integration
-- **Windsurf**: AI coding assistant with custom rules and MCP configuration
-- **VS Code Compatibility**: Shared settings via `.vscode/settings.json` for Cursor and Windsurf
+- **VS Code Compatibility**: Shared settings via `.vscode/settings.json` for Cursor
 
 ### Version Control
 
@@ -55,7 +43,6 @@ This repository is ideal for:
 - **Firebase**: CLI tools for web and mobile development
 - **Terraform**: Infrastructure as Code tooling
 - **Docker**: Container runtime and management
-- **Podman**: Alternative container runtime (installed on host and desktop, not in containers)
 
 ### Security & Networking
 
@@ -125,61 +112,107 @@ cd tiny-config
 
 ### Ubuntu Installation
 
-The Ubuntu setup script (`setup_ubuntu.sh`) supports three deployment modes:
+The Ubuntu setup script (`setup_ubuntu.sh`) supports five machine types as defined in [INVENTORY.md](docs/INVENTORY.md):
 
-#### Desktop Setup (Recommended for Development)
+#### Development Desktop (`dt-dev`)
 
 Full desktop environment with Sway Wayland, all development tools, and desktop applications:
 
 ```bash
 chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh desktop
+./setup_ubuntu.sh dt-dev
 ```
 
 **What it installs:**
 
 - Full desktop environment (Sway Wayland, i3status-rust, Mako, Kickoff)
-- All development tools (Node.js, Python, Rust, Java)
+- All development tools (Node.js, Python via uv, Rust, Java)
 - Cloud CLIs (AWS, GCP, Firebase, Terraform)
-- Desktop applications (Chrome, Discord, Zotero, Spotify, 1Password, editors)
+- Desktop applications (Chrome, Firefox, Discord, Zotero, Spotify, 1Password, editors)
 - Network configuration (systemd-networkd, WireGuard)
 - Power management (TLP)
 - Japanese input (Fcitx5)
 - Bluetooth and audio setup
-
-#### Host Setup (Minimal Server)
-
-Minimal setup for headless servers or machines running containers:
-
-```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh host
-```
-
-**What it installs:**
-
-- Core dependencies and utilities
-- Docker and Podman
-- Basic development tools
-- SSH and credential management
-
-#### Guest Setup (Container Environment)
-
-Development environment for containers or minimal guest systems:
-
-```bash
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh guest
-```
-
-**What it installs:**
-
-- Rust toolchain
-- Python with uv
-- Linters and formatters (Ruff, Pylint)
+- Docker, Dev Container CLI
 - Starship prompt
-- Yazi file manager
-- Development utilities
+- Kotlin and Golang development tools
+
+#### Bare Metal Hypervisor (`bm-hypervisor`)
+
+Physical servers dedicated to running KVM for hosting VMs:
+
+```bash
+chmod +x setup_ubuntu.sh
+./setup_ubuntu.sh bm-hypervisor
+```
+
+**What it installs:**
+
+- KVM and libvirt (qemu-kvm, libvirt, bridge-utils)
+- Storage tools (ZFS, mdadm, fio, nvme-cli, pciutils)
+- NFS server (nfs-kernel-server, nfs-common)
+- Hardware monitoring (lm-sensors)
+- Core utilities and SSH management
+- **Excludes**: Docker, development tools, Starship, cloud CLIs
+
+#### Kubernetes VM Node (`vm-k8s-node`)
+
+Virtual machines configured as Kubernetes nodes (k3s):
+
+```bash
+chmod +x setup_ubuntu.sh
+./setup_ubuntu.sh vm-k8s-node
+```
+
+**What it installs:**
+
+- k3s (lightweight Kubernetes)
+- containerd (container runtime via k3s)
+- Monitoring tools (btop, nvtop, inxi)
+- File/text utilities (jq, ripgrep, fd-find, csvtool)
+- System info tools (lshw, lsof, man-db, parallel)
+- Network tools (infiniband-diags, ipmitool, rclone, rdma-core)
+- Python base (python3, pip, venv)
+- Core utilities and SSH management
+- **Excludes**: Docker, Rust, Python via uv, Starship, cloud CLIs, desktop apps
+
+#### Development Container VM (`vm-dev-container`)
+
+VMs dedicated to running Dev Containers for isolated development:
+
+```bash
+chmod +x setup_ubuntu.sh
+./setup_ubuntu.sh vm-dev-container
+```
+
+**What it installs:**
+
+- Docker (container runtime)
+- Dev Container CLI
+- Monitoring tools (btop, nvtop, inxi)
+- File/text utilities (jq, ripgrep, fd-find, csvtool)
+- System info tools (lshw, lsof, man-db, parallel)
+- Python base (python3, pip, venv)
+- Core utilities and SSH management
+- **Excludes**: Kubernetes, Rust, Python via uv, Starship, cloud CLIs, network tools (infiniband, ipmitool, rdma)
+
+#### Service VM (`vm-service`)
+
+Clean VMs for standalone services (NFS, databases, etc.):
+
+```bash
+chmod +x setup_ubuntu.sh
+./setup_ubuntu.sh vm-service
+```
+
+**What it installs:**
+
+- Minimal core utilities
+- Basic file tools (file, rsync, jq, man-db)
+- NFS client (nfs-common)
+- Service-specific packages (install separately as needed)
+- Core utilities and SSH management
+- **Excludes**: Docker, Kubernetes, development tools, monitoring tools, Starship, cloud CLIs
 
 #### Post-Installation
 
@@ -202,9 +235,9 @@ chmod +x setup_mac.sh
 
 - Homebrew package manager
 - Core utilities (git, vim, tmux, htop, jq)
-- Development tools (Node.js, Python, Rust, Java)
+- Development tools (Node.js, Python, Rust, Java, Kotlin, Golang)
 - Cloud CLIs (AWS, GCP, Firebase, Terraform)
-- Desktop applications (1Password, Chrome, Firefox, Zed, Cursor, Windsurf, Discord, Zotero, Spotify)
+- Desktop applications (1Password, Chrome, Firefox, Zed, Cursor, Discord, Zotero, Spotify)
 - Nerd Fonts
 - macOS preferences optimization (Finder, Dock, keyboard)
 
@@ -226,17 +259,6 @@ chmod +x install_rocm_part2.sh
 ```
 
 **Note**: Part 1 installs kernel headers, adds user to render/video groups, and installs AMD GPU drivers. Part 2 completes the ROCm installation.
-
-#### Python Dependencies
-
-Install Python-specific tools independently:
-
-```bash
-chmod +x install_python_dependencies.sh
-./install_python_dependencies.sh
-```
-
-Installs: uv (Python package manager), Ruff, Pylint, and Python development tools.
 
 #### GCP Configuration
 
@@ -383,17 +405,15 @@ All configuration files are symlinked from the repository to your home directory
 
 ### Editor Configurations
 
-| File/Directory            | Purpose                          | Location                                                                                                           |
-| ------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `.vscode/settings.json`   | VS Code/Cursor/Windsurf settings | `~/.config/Cursor/User/settings.json` (Linux) or `~/Library/Application Support/Cursor/User/settings.json` (macOS) |
-| `.vscode/extensions.json` | Recommended extensions           | Repository only                                                                                                    |
-| `zed/keymap.json`         | Zed keybindings                  | `~/.config/zed/keymap.json`                                                                                        |
-| `zed/settings.json`       | Zed settings                     | `~/.config/zed/settings.json`                                                                                      |
-| `.cursor_mcp.json`        | Cursor MCP configuration         | `~/.cursor/mcp.json`                                                                                               |
-| `.cursorrules`            | Cursor AI rules                  | Repository only                                                                                                    |
-| `.cursorignore`           | Cursor ignore patterns           | Repository only                                                                                                    |
-| `.windsurfrules`          | Windsurf AI rules                | Repository only                                                                                                    |
-| `.mcp_config.json`        | MCP tool configuration           | `~/.codeium/windsurf/mcp_config.json`                                                                              |
+| File/Directory            | Purpose                  | Location                                                                                                           |
+| ------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `.vscode/settings.json`   | VS Code/Cursor settings  | `~/.config/Cursor/User/settings.json` (Linux) or `~/Library/Application Support/Cursor/User/settings.json` (macOS) |
+| `.vscode/extensions.json` | Recommended extensions   | Repository only                                                                                                    |
+| `zed/keymap.json`         | Zed keybindings          | `~/.config/zed/keymap.json`                                                                                        |
+| `zed/settings.json`       | Zed settings             | `~/.config/zed/settings.json`                                                                                      |
+| `.cursor_mcp.json`        | Cursor MCP configuration | `~/.cursor/mcp.json`                                                                                               |
+| `.cursorrules`            | Cursor AI rules          | Repository only                                                                                                    |
+| `.cursorignore`           | Cursor ignore patterns   | Repository only                                                                                                    |
 
 ### Cloud & DevOps
 
@@ -433,19 +453,26 @@ All configuration files can be customized after installation:
 
 #### `setup_ubuntu.sh`
 
-Primary Ubuntu setup script with three modes: `host`, `guest`, and `desktop`.
+Primary Ubuntu setup script with five machine types: `bm-hypervisor`, `vm-k8s-node`, `vm-dev-container`, `vm-service`, and `dt-dev`.
 
 **Dependencies:**
 
 - Sources `install_common_dependencies.sh`
-- Sources `install_python_dependencies.sh`
 - Sources `install_ubuntu_dependencies.sh`
 
 **Usage:**
 
 ```bash
-./setup_ubuntu.sh [host|guest|desktop]
+./setup_ubuntu.sh [bm-hypervisor|vm-k8s-node|vm-dev-container|vm-service|dt-dev]
 ```
+
+**Machine Types:**
+
+- `bm-hypervisor`: Bare metal hypervisor hosts (KVM, storage tools)
+- `vm-k8s-node`: Kubernetes VM nodes (k3s, containerd)
+- `vm-dev-container`: Development container VM hosts (Docker, Dev Container CLI)
+- `vm-service`: Service-specific VMs (minimal, service packages)
+- `dt-dev`: Development desktops (full-featured, all tools)
 
 **Outputs:**
 
@@ -461,7 +488,7 @@ Primary macOS setup script.
 **Dependencies:**
 
 - Sources `install_common_dependencies.sh`
-- Sources `install_python_dependencies.sh`
+- Sources `install_mac_dependencies.sh`
 
 **Usage:**
 
@@ -492,8 +519,10 @@ Shared functions for both Ubuntu and macOS:
 - Firebase CLI
 - Terraform CLI
 - Rust toolchain
+- Kotlin (via SDKMAN)
+- Golang (official installer)
 - Starship prompt
-- Docker and Podman
+- Docker
 - Alacritty
 - Claude Code app
 - Yazi file manager
@@ -513,16 +542,16 @@ Ubuntu-specific installations:
 
 **When to use independently**: Only if you need to add Ubuntu-specific components after initial setup.
 
-#### `install_python_dependencies.sh`
+#### `install_mac_dependencies.sh`
 
-Python development tools:
+macOS-specific installation functions:
 
-- uv (Python package manager)
-- Ruff (linter/formatter)
-- Pylint
-- Python development dependencies
+- Homebrew installation and setup
+- Homebrew packages (git, gh, vim, tmux, etc.)
+- Homebrew applications (1Password, Chrome, Firefox, etc.)
+- macOS system preferences configuration
 
-**When to use independently**: If you need Python tools on a system that already has the base setup.
+**When to use independently**: Only if you need to add macOS-specific components after initial setup.
 
 ### Specialized Scripts
 
@@ -596,284 +625,3 @@ Synchronizes Cursor extensions with `.vscode/extensions.json`.
 - Installs missing recommended extensions
 
 **When to use**: To maintain consistency across machines or after updating `extensions.json`.
-
-## Additional Guides
-
-### CLAUDE.md
-
-Guidance for Claude Code (claude.ai/code) when working with this repository. Includes:
-
-- Repository purpose and structure
-- Shell script commands (shellcheck, shfmt)
-- Code style guidelines (Google Shell Style Guide)
-- Testing and formatting instructions
-
-**When to consult**: When contributing shell scripts or modifying existing ones.
-
-### GCP.md
-
-Complete guide for Google Cloud Platform setup. Covers:
-
-- GCP CLI installation (via main setup)
-- Authentication process (`gcloud auth login`)
-- Multi-environment configuration (`install_gcp_configs.sh`)
-- Verification steps
-- Switching between environments
-
-**When to consult**: When setting up GCP access or configuring multiple projects.
-
-### SSH.md
-
-SSH multi-account setup for GitHub. Explains:
-
-- Adding SSH keys to ssh-agent
-- Multi-account configuration (personal and work)
-- Cloning repositories with different accounts
-- Changing remote URLs for existing repositories
-
-**When to consult**: When setting up multiple GitHub accounts or troubleshooting SSH access.
-
-## Troubleshooting
-
-### Common Issues
-
-#### Script Execution Errors
-
-**Problem**: Script fails with "command not found" or permission errors.
-
-**Solution**:
-
-```bash
-# Ensure scripts are executable
-chmod +x *.sh
-
-# Verify shebang line
-head -1 script.sh  # Should show #!/usr/bin/env bash
-
-# Run with debug output
-bash -x script.sh
-```
-
-#### Package Installation Failures
-
-**Problem**: `apt` or `brew` commands fail.
-
-**Solution**:
-
-```bash
-# Ubuntu: Update and fix broken packages
-sudo apt update
-sudo apt --fix-broken install
-sudo apt upgrade
-
-# macOS: Update Homebrew
-brew update
-brew doctor
-```
-
-#### Dotfile Symlink Issues
-
-**Problem**: Configuration files not working or symlinks broken.
-
-**Solution**:
-
-```bash
-# Check symlink status
-ls -la ~ | grep tiny-config
-
-# Re-run dotfile installation
-cd ~/fun/tiny-config
-source install_common_dependencies.sh
-install_dotfiles
-```
-
-#### Wayland/Sway Issues
-
-**Problem**: Applications not displaying or Wayland session not starting.
-
-**Solution**:
-
-```bash
-# Check if running on Wayland
-echo $XDG_SESSION_TYPE  # Should output "wayland"
-
-# Check Sway configuration
-swaymsg -t get_version
-
-# Review Sway logs
-journalctl --user -u sway
-
-# Verify XWayland is installed
-which Xwayland
-```
-
-#### ROCm GPU Issues
-
-**Problem**: ROCm not detecting GPU or permission errors.
-
-**Solution**:
-
-```bash
-# Verify GPU detection
-rocminfo
-
-# Check user groups
-groups  # Should include "render" and "video"
-
-# Add user to groups if missing
-sudo usermod -a -G render,video $USER
-# Log out and back in
-
-# Check kernel modules
-lsmod | grep amdgpu
-```
-
-#### 1Password CLI Authentication
-
-**Problem**: Cannot retrieve credentials from 1Password.
-
-**Solution**:
-
-```bash
-# Re-authenticate
-op signin --account my
-
-# Verify access to specific item
-op read op://build/my-ssh-key/id_ed25519
-
-# Check 1Password CLI version
-op --version
-```
-
-#### Network Configuration (Ubuntu)
-
-**Problem**: WiFi or Ethernet not working after setup.
-
-**Solution**:
-
-```bash
-# Check networkd status
-systemctl status systemd-networkd
-
-# Review network configuration
-cat /etc/netplan/*.yaml
-
-# Test networkd configuration
-sudo netplan try
-
-# Check interface status
-ip addr show
-```
-
-### Platform-Specific Issues
-
-#### Ubuntu: Snap Package Conflicts
-
-If Snap removal causes issues:
-
-```bash
-# Reinstall Snap if needed
-sudo apt install snapd
-
-# Or keep Snap but disable automatic updates
-sudo systemctl disable snapd.refresh.timer
-```
-
-#### macOS: Homebrew Permission Issues
-
-```bash
-# Fix Homebrew permissions
-sudo chown -R $(whoami) /opt/homebrew  # Apple Silicon
-sudo chown -R $(whoami) /usr/local     # Intel
-
-# Reinstall Homebrew if needed
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-### Getting Help
-
-1. **Check script output**: All scripts use `set -x` for verbose output
-2. **Review logs**: Use `journalctl` (Ubuntu) or `Console.app` (macOS)
-3. **Verify prerequisites**: Ensure all prerequisites are met
-4. **Test incrementally**: Run individual script functions if possible
-5. **Check GitHub Issues**: Search for similar problems in the repository
-
-## Contributing
-
-Contributions are welcome! This project benefits from community input and improvements.
-
-### How to Contribute
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
-3. **Make your changes**: Follow the code style guidelines (see `CLAUDE.md`)
-4. **Test your changes**: Run scripts on a test machine or VM
-5. **Commit with clear messages**: Use descriptive commit messages
-6. **Push to your fork**: `git push origin feature/your-feature-name`
-7. **Open a Pull Request**: Provide a clear description of changes
-
-### Contribution Guidelines
-
-#### Code Style
-
-- **Shell Scripts**: Follow Google Shell Style Guide (see `CLAUDE.md`)
-  - Use 2-space indentation
-  - Include `set -euo pipefail` at script start
-  - Quote all variables
-  - Use meaningful function and variable names
-- **Python**: Follow PEP 8 (if adding Python scripts)
-- **Documentation**: Update README.md and relevant guide files
-
-#### Testing
-
-- Test scripts on fresh Ubuntu Server 24.04+ or macOS installations
-- Verify idempotency (scripts should be safe to run multiple times)
-- Check error handling for edge cases
-- Test on both platforms if changes affect common dependencies
-
-#### Adding New Features
-
-- **New platforms**: Create `setup_<platform>.sh` following existing patterns
-- **New tools**: Add installation functions to appropriate dependency script
-- **New configs**: Add dotfiles and symlink logic in `install_dotfiles()`
-- **Documentation**: Update README.md, add guides if needed
-
-#### Reporting Issues
-
-When reporting issues, include:
-
-- Operating system and version
-- Setup type (host/guest/desktop)
-- Full error messages and logs
-- Steps to reproduce
-- Expected vs. actual behavior
-
-## License
-
-This project is licensed under the MIT License. See the repository for the full license text.
-
-## Acknowledgments
-
-### Tools & Technologies
-
-- **Sway**: Wayland compositor (https://swaywm.org)
-- **Oh-My-Zsh**: Zsh framework (https://ohmyz.sh)
-- **Starship**: Cross-shell prompt (https://starship.rs)
-- **Alacritty**: Terminal emulator (https://alacritty.org)
-- **1Password**: Credential management (https://1password.com)
-- **Homebrew**: macOS package manager (https://brew.sh)
-- **ROCm**: AMD GPU computing platform (https://rocm.docs.amd.com)
-
-### Inspiration
-
-This repository is inspired by the dotfiles and setup automation practices of the developer community, emphasizing:
-
-- Minimalism and resource efficiency
-- Automation and reproducibility
-- Cross-platform consistency
-- Security and best practices
-
----
-
-**Happy coding!** 🚀
