@@ -18,7 +18,6 @@ install_dotfiles_core() {
 	clone_dotfiles_repo
 	cd "$TARGET_DIR" || exit 1
 	mkdir -p "$HOME/.config"
-	rm -f "$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.zprofile" "$HOME/.zshrc"
 
 	ln -sf "$TARGET_DIR/dotfiles/.sshconfig" "$HOME/.ssh/config"
 	ln -sf "$TARGET_DIR/dotfiles/.bash_profile" "$HOME"
