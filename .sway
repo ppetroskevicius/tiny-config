@@ -333,11 +333,11 @@ exec swaymsg 'workspace 1; \
 # workspace 2: Cursor + Chrome
 exec swaymsg 'workspace 2; \
   exec cursor --no-sandbox /home/fastctl/fun/tiny-config; \
-  exec firefox'
+  exec firefox;'
 
 # workspace 3: Windsurf + Chrome
 exec swaymsg 'workspace 3; \
-  exec firefox'
+  exec firefox;'
 
 
 # Default will run google-chrome in wayland mode, but the Japanese input with fcitx5 will not work,
