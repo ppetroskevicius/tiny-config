@@ -6,7 +6,23 @@ set -x
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODULES_DIR="$SCRIPT_DIR/scripts"
 
-# 2. Source Modules (Order matters for dependencies)
+# 2. Define Global Variables (before sourcing modules)
+# These are used across multiple modules and must be defined first
+OS=$(uname -s)
+SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
+TARGET_DIR="$HOME/fun/tiny-config"
+CHEZMOI_REPO="https://github.com/ppetroskevicius/dotfiles.git"
+OP_ACCOUNT="my"
+OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
+OP_WG_CONFIG_NAME="op://network/wireguard/conf"
+NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
+OP_WIFI_SSID="op://network/wifi/ssid"
+OP_WIFI_PASS="op://network/wifi/pass"
+
+# Temp dir for downloads (will be set up in 01_update.sh, but declare here for visibility)
+tempdir=""
+
+# 3. Source Modules (Order matters for dependencies)
 source "$MODULES_DIR/01_update.sh"
 source "$MODULES_DIR/02_credentials.sh"
 source "$MODULES_DIR/03_shell.sh"
@@ -23,7 +39,7 @@ source "$MODULES_DIR/13_gpus_ml.sh"
 source "$MODULES_DIR/14_cleanup.sh"
 source "$MODULES_DIR/15_profiles.sh"
 
-# 3. Main Controller Logic
+# 4. Main Controller Logic
 if [ $# -eq 0 ]; then
 	echo "Error: No machine type specified."
 	echo "Usage: $0 {bm-hypervisor|vm-k8s-node|vm-dev-container|vm-service|dt-dev}"

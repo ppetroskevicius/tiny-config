@@ -27,41 +27,20 @@ setup_1password_cli() {
 }
 
 setup_ssh_credentials() {
-	echo ">>> Setting up SSH keys..."
-	if ! [ -f "$HOME/.ssh/id_ed25519" ]; then
-		mkdir -p ~/.ssh && chmod 700 ~/.ssh
-		op read -f --out-file ~/.ssh/id_ed25519 "$OP_SSH_KEY_NAME"
-		chmod 600 ~/.ssh/id_ed25519
-		ssh-keygen -y -f ~/.ssh/id_ed25519 >~/.ssh/id_ed25519.pub
-		cat ~/.ssh/id_ed25519.pub >>~/.ssh/authorized_keys
-		chmod 600 ~/.ssh/authorized_keys
-		ssh-keyscan github.com >>~/.ssh/known_hosts 2>/dev/null
-		# Start agent
-		if [ "$OS" != "Darwin" ]; then
-			systemctl --user enable --now ssh-agent.service 2>/dev/null || true
-		fi
-		eval "$(ssh-agent -s)" >/dev/null
-		ssh-add ~/.ssh/id_ed25519
-	fi
+	echo ">>> SSH keys are managed by chezmoi (encrypted templates)"
+	echo ">>> They will be set up when chezmoi applies dotfiles"
+	# Ensure SSH directory exists with correct permissions
+	mkdir -p ~/.ssh && chmod 700 ~/.ssh
+	# SSH keys and setup will be handled by chezmoi run_after scripts
 }
 
 setup_wireguard_client() {
-	# Wireguard logic (Linux only for CLI config)
-	echo ">>> Setting up Wireguard Client..."
+	echo ">>> Wireguard config is managed by chezmoi (encrypted templates)"
+	echo ">>> It will be set up when chezmoi applies dotfiles"
+	# Wireguard installation and config will be handled by chezmoi
 	if [ "$OS" != "Darwin" ]; then
 		if ! dpkg -l wireguard >/dev/null 2>&1; then
 			sudo apt install -y wireguard
 		fi
-
-		if ! [ -f "/etc/wireguard/gw0.conf" ]; then
-			sudo mkdir -p /etc/wireguard
-			op read -f --out-file /tmp/gw0.conf "$OP_WG_CONFIG_NAME"
-			sudo mv /tmp/gw0.conf /etc/wireguard/
-			sudo chmod 600 /etc/wireguard/gw0.conf
-			sudo chown root: /etc/wireguard/gw0.conf
-			echo "Wireguard config placed. Enable with: sudo wg-quick up gw0"
-		fi
-	else
-		echo "Skipping CLI Wireguard setup on macOS (use App Store client)."
 	fi
 }

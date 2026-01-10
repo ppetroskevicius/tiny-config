@@ -2,20 +2,14 @@
 set -euo pipefail
 set -x
 
-OS=$(uname -s)
-SOURCE_REPO="https://github.com/ppetroskevicius/tiny-config.git"
-TARGET_DIR="$HOME/fun/tiny-config"
-OP_ACCOUNT="my"
-OP_SSH_KEY_NAME="op://build/my-ssh-key/id_ed25519"
-OP_WG_CONFIG_NAME="op://network/wireguard/conf"
+# Global variables are defined in setup.sh before this module is sourced
+# This ensures all modules have access to them regardless of source order
 
-NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
-OP_WIFI_SSID="op://network/wifi/ssid"
-OP_WIFI_PASS="op://network/wifi/pass"
-
-# Temp dir for downloads
-tempdir=$(mktemp -d)
-trap 'rm -rf "$tempdir"' EXIT
+# Temp dir for downloads (initialize if not already set)
+if [ -z "${tempdir:-}" ]; then
+	tempdir=$(mktemp -d)
+	trap 'rm -rf "$tempdir"' EXIT
+fi
 
 # ==========================================
 # 1. Update packages
@@ -38,6 +32,31 @@ install_homebrew() {
 	fi
 }
 
+install_chezmoi() {
+	echo ">>> Installing chezmoi..."
+	if ! command -v chezmoi >/dev/null; then
+		if [ "$OS" = "Darwin" ]; then
+			install_homebrew
+			brew install chezmoi
+		else
+			# Install chezmoi on Linux
+			chezmoi_bin="$HOME/.local/bin/chezmoi"
+			if [ ! -f "$chezmoi_bin" ]; then
+				mkdir -p "$HOME/.local/bin"
+				sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b "$HOME/.local/bin"
+				# Add to PATH if not already there
+				if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+					export PATH="$HOME/.local/bin:$PATH"
+				fi
+			fi
+		fi
+	fi
+	# Ensure chezmoi is in PATH
+	if [ "$OS" != "Darwin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+		export PATH="$HOME/.local/bin:$PATH"
+	fi
+}
+
 update_packages() {
 	echo ">>> Updating system packages..."
 	if [ "$OS" = "Darwin" ]; then
@@ -46,6 +65,7 @@ update_packages() {
 	else
 		sudo apt update && sudo apt upgrade -y
 	fi
+	install_chezmoi
 }
 
 setup_timezone() {
@@ -79,5 +99,3 @@ setup_macos_preferences() {
 		done
 	fi
 }
-
-
